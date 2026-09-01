@@ -3,22 +3,19 @@ services:
     build:
       context: .
       dockerfile: .docker/Dockerfile
-    container_name: job_tracker_app
+    container_name: job_application_tracker_app
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
-      - "443:443/udp" # HTTP/3 / QUIC support via FrankenPHP
+      - "443:443/udp"
     environment:
-      # FrankenPHP / Caddy Server Instelling
       SERVER_NAME: ":80, localhost"
 
-      # Symfony Environment Variables
       APP_ENV: dev
-      APP_SECRET: 33df8298ba5c41498e983cf4b12aa09e
+      APP_SECRET: ${APP_SECRET}
 
-      # Database connection (gekoppeld aan de 'db' service)
-      DATABASE_URL: "mysql://symfony:symfony_pass@db:3306/job_tracker?serverVersion=mariadb-12.3.3&charset=utf8mb4"
+      DATABASE_URL: "mysql://symfony:${MYSQL_PASSWORD}@db:3306/job_application_tracker?serverVersion=mariadb-12.3.3&charset=utf8mb4"
     volumes:
       - .:/app
       - caddy_data:/data
@@ -29,13 +26,13 @@ services:
 
   db:
     image: mariadb:12.3.3
-    container_name: job_tracker_db
+    container_name: job_application_tracker_db
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: root_secret_pass
-      MYSQL_DATABASE: job_tracker
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: job_application_tracker
       MYSQL_USER: symfony
-      MYSQL_PASSWORD: symfony_pass
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
