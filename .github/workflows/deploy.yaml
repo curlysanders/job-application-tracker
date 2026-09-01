@@ -1,0 +1,14 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Placeholder
+        run: echo "Deployment placeholder - Synology deployment will be added later"
