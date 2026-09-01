@@ -83,6 +83,7 @@ It helps job seekers track vacancies, record application audit histories, manage
 Documentation has been structured under the `docs/` folder:
 
 - **[`docs/architecture.md`](./docs/architecture.md)** — Architectural blueprint, pragmatic hexagonal patterns, and CQRS Lite guidelines.
+- **[`docs/workflow.md`](./docs/workflow.md)** — GitHub workflow and CI/CD foundation.
 - **[`docs/development/roadmap.md`](./docs/development/roadmap.md)** — High-level phase vision and long-term features preview.
 - **[`docs/development/phase_1/epics.md`](./docs/development/phase_1/epics.md)** — Phase 1 domain data model, aggregate entities, and epic definitions.
 - **[`docs/development/phase_1/tickets.md`](./docs/development/phase_1/tickets.md)** — Sprints 1–4 developer execution plan with actionable tickets and acceptance criteria.
