@@ -16,6 +16,8 @@ services:
       APP_SECRET: ${APP_SECRET}
 
       DATABASE_URL: "mysql://symfony:${MYSQL_PASSWORD}@db:3306/job_application_tracker?serverVersion=mariadb-12.3.3&charset=utf8mb4"
+    cap_add:
+      - NET_BIND_SERVICE
     volumes:
       - .:/app
       - caddy_data:/data
@@ -36,7 +38,7 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - db_data:/var/lib/mysql
+      - database_data:/var/lib/mysql:rw
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 5s
@@ -46,4 +48,4 @@ services:
 volumes:
   caddy_data:
   caddy_config:
-  db_data:
+  database_data:
