@@ -1,0 +1,52 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: .docker/Dockerfile
+    container_name: job_tracker_app
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp" # HTTP/3 / QUIC support via FrankenPHP
+    environment:
+      # FrankenPHP / Caddy Server Instelling
+      SERVER_NAME: ":80, localhost"
+
+      # Symfony Environment Variables
+      APP_ENV: dev
+      APP_SECRET: REDACTED_APP_SECRET
+
+      # Database connection (gekoppeld aan de 'db' service)
+      DATABASE_URL: "mysql://symfony:REDACTED_DATABASE_PASSWORD@db:3306/job_tracker?serverVersion=mariadb-12.3.3&charset=utf8mb4"
+    volumes:
+      - .:/app
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mariadb:12.3.3
+    container_name: job_tracker_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: REDACTED_ROOT_PASSWORD
+      MYSQL_DATABASE: job_tracker
+      MYSQL_USER: symfony
+      MYSQL_PASSWORD: REDACTED_DATABASE_PASSWORD
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  caddy_data:
+  caddy_config:
+  db_data:
