@@ -15,8 +15,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install Composer from official image
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-WORKDIR /app
+RUN mkdir -p /home/appuser/.cache/composer \
+    && chown -R 1000:1000 /home/appuser
 
-ENV COMPOSER_ALLOW_SUPERUSER=1
+ENV HOME=/home/appuser
+USER 1000:1000
+
+WORKDIR /app
 
 EXPOSE 80 443 443/udp
