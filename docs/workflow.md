@@ -70,7 +70,7 @@ main
 feature/foo
  │
  │ development
- │
+ │ signed commits
  │ git push
  ▼
 GitHub PR
@@ -132,7 +132,43 @@ Therefore, CI should be added before making the CI check mandatory.
 
 ---
 
-## 4. GitHub Production Environment
+## 4. Commit Signing
+
+All branches except `main` require verified signed commits.
+
+This is enforced through a GitHub ruleset targeting all branches except `main`.
+
+The purpose is to establish commit provenance during development: commits on feature and other short-lived branches can be cryptographically verified as having been created by the holder of the corresponding signing key.
+
+`main` does not require signed commits.
+
+This is intentional. Pull requests, CI, branch protection, and the merge process provide the relevant controls for changes entering `main`. When a PR is squash-merged, GitHub creates a new squash commit, so requiring that resulting commit to be individually signed provides limited additional value for this workflow.
+
+The expected workflow is therefore:
+
+```text
+feature/foo
+    │
+    ├── signed commit
+    ├── signed commit
+    └── signed commit
+            │
+            ▼
+           PR
+            │
+            ├── CI
+            ├── review
+            └── conversations resolved
+            │
+            ▼
+       Squash & merge
+            │
+            ▼
+           main
+```
+---
+
+## 5. GitHub Production Environment
 
 Production is represented as a **GitHub Environment**:
 
@@ -170,7 +206,7 @@ There is currently no staging environment because there is no staging target.
 
 ---
 
-## 5. Future CI
+## 6. Future CI
 
 CI will be introduced once the relevant project components exist.
 
@@ -203,7 +239,7 @@ The CI foundation should initially only establish that GitHub Actions is working
 
 ---
 
-## 6. Future CD
+## 7. Future CD
 
 Deployment will eventually follow this general architecture:
 
@@ -245,7 +281,7 @@ This decision can be made when the first usable version exists.
 
 ---
 
-## 7. Final Architecture
+## 8. Final Architecture
 
 The intended overall architecture is:
 
@@ -256,6 +292,8 @@ The intended overall architecture is:
                     │      chore/*       │
                     │     refactor/*     │
                     │       docs/*       │
+                    │                    │
+                    │ signed commits ✓   │
                     └─────────┬──────────┘
                               │
                               │ PR
@@ -263,6 +301,8 @@ The intended overall architecture is:
                     ┌────────────────────┐
                     │        main        │
                     │      protected     │
+                    |                    |
+                    │ signed commits: no │
                     └─────────┬──────────┘
                               │
                      ┌────────┴────────┐
@@ -291,12 +331,13 @@ There is no `production` branch.
 
 ---
 
-## 8. Rules of Thumb
+## 9. Rules of Thumb
 
 ### Do
 
 - Keep `main` always releasable.
 - Create short-lived branches from `main`.
+- Sign commits on development branches.
 - Use pull requests for all changes.
 - Keep PRs focused on one logical change.
 - Squash merge PRs.
@@ -315,7 +356,7 @@ There is no `production` branch.
 
 ---
 
-## 9. Current State vs. Future State
+## 10. Current State vs. Future State
 
 ### Now
 
@@ -365,7 +406,7 @@ GitHub
 
 ---
 
-## 10. Target End State
+## 11. Target End State
 
 The desired end state is intentionally simple:
 
