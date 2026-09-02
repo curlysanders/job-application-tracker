@@ -1,10 +1,16 @@
 {
+    "name": "curlysanders/job-application-tracker",
+    "description": "A self-hosted application for tracking job applications.",
     "type": "project",
-    "license": "proprietary",
+    "license": "AGPL-3.0",
+    "homepage": "https://github.com/curlysanders/job-application-tracker",
+    "support": {
+        "issues": "https://github.com/curlysanders/job-application-tracker/issues"
+    },
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {
-        "php": ">=8.4",
+        "php": ">=8.5",
         "ext-ctype": "*",
         "ext-iconv": "*",
         "symfony/console": "8.1.*",
