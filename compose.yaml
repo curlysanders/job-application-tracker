@@ -2,7 +2,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: .docker/Dockerfile
+      dockerfile: .docker/php/Dockerfile
     container_name: job_application_tracker_app
     restart: unless-stopped
     ports:
@@ -11,11 +11,6 @@ services:
       - "443:443/udp"
     environment:
       SERVER_NAME: ":80, localhost"
-
-      APP_ENV: dev
-      APP_SECRET: ${APP_SECRET}
-
-      DATABASE_URL: "mysql://symfony:${MYSQL_PASSWORD}@db:3306/job_application_tracker?serverVersion=mariadb-12.3.3&charset=utf8mb4"
     cap_add:
       - NET_BIND_SERVICE
     volumes:
@@ -27,14 +22,14 @@ services:
         condition: service_healthy
 
   db:
-    image: mariadb:12.3.3
+    image: mariadb:12.3
     container_name: job_application_tracker_db
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: job_application_tracker
-      MYSQL_USER: symfony
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_USER: job_application_tracker
+      MYSQL_PASSWORD: password
     ports:
       - "3306:3306"
     volumes:
