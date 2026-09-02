@@ -1,5 +1,5 @@
 # FrankenPHP base image met PHP 8.5
-FROM dunglas/frankenphp:1.12.7-builder-php8.5
+FROM dunglas/frankenphp:php8.5
 
 # Install system dependencies & PHP extensions required for Symfony & MariaDB
 # 1. Alles in één RUN-stap om lagen te beperken
