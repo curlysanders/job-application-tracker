@@ -1,45 +1,61 @@
 {
     "name": "curlysanders/job-application-tracker",
     "description": "A self-hosted application for tracking job applications.",
-    "type": "project",
     "license": "AGPL-3.0",
+    "type": "project",
     "homepage": "https://github.com/curlysanders/job-application-tracker",
     "support": {
         "issues": "https://github.com/curlysanders/job-application-tracker/issues"
     },
-    "minimum-stability": "stable",
-    "prefer-stable": true,
     "require": {
         "php": ">=8.5",
         "ext-ctype": "*",
         "ext-iconv": "*",
-        "symfony/console": "8.1.*",
-        "symfony/dotenv": "8.1.*",
+        "doctrine/doctrine-bundle": "^3.3",
+        "doctrine/doctrine-migrations-bundle": "^4.0",
+        "doctrine/orm": "^3.6",
+        "league/flysystem-bundle": "^3.7",
+        "symfony/asset": "~8.1.0",
+        "symfony/asset-mapper": "~8.1.0",
+        "symfony/console": "~8.1.0",
+        "symfony/dotenv": "~8.1.0",
         "symfony/flex": "^2",
-        "symfony/framework-bundle": "8.1.*",
-        "symfony/runtime": "8.1.*",
-        "symfony/yaml": "8.1.*"
+        "symfony/framework-bundle": "~8.1.0",
+        "symfony/messenger": "~8.1.0",
+        "symfony/monolog-bundle": "^4.0",
+        "symfony/runtime": "~8.1.0",
+        "symfony/security-bundle": "~8.1.0",
+        "symfony/stimulus-bundle": "^3.4",
+        "symfony/twig-bundle": "~8.1.0",
+        "symfony/uid": "~8.1.0",
+        "symfony/ux-twig-component": "^3.4",
+        "symfony/validator": "~8.1.0",
+        "symfony/workflow": "~8.1.0",
+        "symfony/yaml": "~8.1.0"
     },
     "require-dev": {
-    },
-    "config": {
-        "allow-plugins": {
-            "php-http/discovery": true,
-            "symfony/flex": true,
-            "symfony/runtime": true
-        },
-        "bump-after-update": true,
-        "sort-packages": true
-    },
-    "autoload": {
-        "psr-4": {
-            "App\\": "src/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "App\\Tests\\": "tests/"
-        }
+        "brianium/paratest": "^7.24",
+        "dama/doctrine-test-bundle": "^8.6",
+        "deptrac/deptrac": "^4.7",
+        "ergebnis/composer-normalize": "^2.52",
+        "friendsofphp/php-cs-fixer": "^3.95",
+        "phpstan/extension-installer": "^1.4",
+        "phpstan/phpstan": "^2.2",
+        "phpstan/phpstan-deprecation-rules": "^2.0",
+        "phpstan/phpstan-doctrine": "^2.0",
+        "phpstan/phpstan-phpunit": "^2.0",
+        "phpstan/phpstan-strict-rules": "^2.0",
+        "phpstan/phpstan-symfony": "^2.0",
+        "phpunit/phpunit": "^13.3",
+        "rector/rector": "^2.6",
+        "spaze/phpstan-disallowed-calls": "^4.14",
+        "symfony/browser-kit": "~8.1.0",
+        "symfony/css-selector": "~8.1.0",
+        "symfony/debug-bundle": "~8.1.0",
+        "symfony/maker-bundle": "^1.67",
+        "symfony/stopwatch": "~8.1.0",
+        "symfony/web-profiler-bundle": "~8.1.0",
+        "symplify/config-transformer": "^12.5"
     },
     "replace": {
         "symfony/polyfill-ctype": "*",
@@ -53,25 +69,62 @@
         "symfony/polyfill-php83": "*",
         "symfony/polyfill-php84": "*"
     },
-    "scripts": {
-        "auto-scripts": {
-            "cache:clear": "symfony-cmd",
-            "assets:install %PUBLIC_DIR%": "symfony-cmd"
-        },
-        "post-install-cmd": [
-            "@auto-scripts"
-        ],
-        "post-update-cmd": [
-            "@auto-scripts"
-        ]
-    },
     "conflict": {
         "symfony/symfony": "*"
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "App\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "ergebnis/composer-normalize": true,
+            "php-http/discovery": true,
+            "phpstan/extension-installer": true,
+            "symfony/flex": true,
+            "symfony/runtime": true
+        },
+        "bump-after-update": true,
+        "sort-packages": true
     },
     "extra": {
         "symfony": {
             "allow-contrib": false,
             "require": "8.1.*"
+        }
+    },
+    "scripts": {
+        "tests": [
+            "@php vendor/bin/paratest"
+        ],
+        "fix": [
+            "@php vendor/bin/rector process",
+            "@php vendor/bin/php-cs-fixer fix"
+        ],
+        "analyse": [
+            "@php vendor/bin/phpstan analyse",
+            "@php vendor/bin/deptrac analyse"
+        ],
+        "post-install-cmd": [
+            "@php scripts/composer/patch-paratest.php",
+            "@auto-scripts"
+        ],
+        "post-update-cmd": [
+            "@php scripts/composer/patch-paratest.php",
+            "@auto-scripts"
+        ],
+        "auto-scripts": {
+            "cache:clear": "symfony-cmd",
+            "assets:install %PUBLIC_DIR%": "symfony-cmd",
+            "importmap:install": "symfony-cmd"
         }
     }
 }
