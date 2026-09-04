@@ -50,10 +50,26 @@ jobs:
         with:
           php-version: '8.5'
           extensions: intl, pdo_mysql, zip
-          coverage: none
+          coverage: xdebug
 
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
 
       - name: PHPUnit
+        if: ${{ hashFiles('tests/**/*Test.php') == '' }}
         run: composer ci:phpunit
+
+      - name: PHPUnit with coverage
+        if: ${{ hashFiles('tests/**/*Test.php') != '' }}
+        run: composer ci:coverage
+        env:
+          XDEBUG_MODE: coverage
+
+      - name: Upload coverage to Codecov
+        if: ${{ hashFiles('tests/**/*Test.php') != '' }}
+        uses: codecov/codecov-action@v5
+        with:
+          files: var/coverage/cobertura.xml
+          flags: tests
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
