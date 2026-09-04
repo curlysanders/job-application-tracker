@@ -113,6 +113,18 @@
             "@php vendor/bin/phpstan analyse",
             "@php vendor/bin/deptrac analyse"
         ],
+        "ci:php-cs-fixer": [
+            "@php vendor/bin/php-cs-fixer fix --dry-run --diff"
+        ],
+        "ci:phpstan": [
+            "@php vendor/bin/phpstan analyse"
+        ],
+        "ci:deptrac": [
+            "@php vendor/bin/deptrac analyse"
+        ],
+        "ci:phpunit": [
+            "@php vendor/bin/paratest"
+        ],
         "post-install-cmd": [
             "@php scripts/composer/patch-paratest.php",
             "@auto-scripts"

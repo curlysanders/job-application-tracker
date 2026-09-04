@@ -10,13 +10,50 @@ on:
       - main
 
 jobs:
-  ci:
-    name: CI
+  code-quality:
+    name: Code quality
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Placeholder
-        run: echo "CI placeholder - real checks will be added later"
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: intl, pdo_mysql, zip
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: PHP CS Fixer
+        run: composer ci:php-cs-fixer
+
+      - name: PHPStan
+        run: composer ci:phpstan
+
+      - name: Deptrac
+        run: composer ci:deptrac
+
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: intl, pdo_mysql, zip
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: PHPUnit
+        run: composer ci:phpunit
