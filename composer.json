@@ -125,6 +125,9 @@
         "ci:phpunit": [
             "@php vendor/bin/paratest"
         ],
+        "ci:coverage": [
+            "@php vendor/bin/paratest --coverage-cobertura=var/coverage/cobertura.xml --coverage-text"
+        ],
         "post-install-cmd": [
             "@php scripts/composer/patch-paratest.php",
             "@auto-scripts"

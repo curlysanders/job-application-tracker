@@ -11,6 +11,9 @@ services:
       - "443:443/udp"
     environment:
       SERVER_NAME: ":80, localhost"
+      PHP_IDE_CONFIG: serverName=job-application-tracker
+    extra_hosts:
+      - host.docker.internal:host-gateway
     cap_add:
       - NET_BIND_SERVICE
     volumes:
