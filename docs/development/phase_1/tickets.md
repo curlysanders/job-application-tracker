@@ -8,9 +8,10 @@
     - Configure Symfony UX 3.4, AssetMapper, and Flowbite (Tailwind CSS) styling framework.
     - Create base Twig layout (`base.html.twig`) with responsive navigation header, sidebar container, and flash notification messages.
 - **Acceptance Criteria**:
-    - [ ] App renders cleanly via FrankenPHP worker mode with zero build-step overhead (AssetMapper).
-    - [ ] Flowbite CSS and JS components (modals, dropdowns, navigation) function correctly.
-    - [ ] Page load execution time logged and verified under 30ms locally.
+    - [x] App renders cleanly via FrankenPHP worker mode with zero build-step overhead (AssetMapper).
+    - [x] Flowbite CSS and JS components (modals, dropdowns, navigation) function correctly.
+    - [x] Page load execution time logged and verified under 30ms locally (warm server p95; debug and Xdebug disabled).
+- **Validation**: [Results and reproduction steps](tick-101-validation.md). Existing local database credentials require reconciliation; fresh-volume bootstrap and Doctrine connectivity passed.
 
 ---
 

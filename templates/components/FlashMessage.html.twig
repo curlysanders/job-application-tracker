@@ -1,0 +1,6 @@
+{% props type = 'info', message, id %}
+{% set variant = type in ['success', 'error', 'warning', 'info'] ? type : 'info' %}
+<div id="{{ id }}" class="flash flash-{{ variant }}" role="{{ variant in ['error', 'warning'] ? 'alert' : 'status' }}">
+    <span><strong>{{ variant|capitalize }}:</strong> {{ message }}</span>
+    <button type="button" class="flash-dismiss" data-dismiss-target="#{{ id }}" aria-label="Dismiss {{ variant }} notification">&times;</button>
+</div>

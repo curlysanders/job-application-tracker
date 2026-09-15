@@ -8,6 +8,17 @@ return static function (ContainerConfigurator $containerConfigurator): void {
     $containerConfigurator->extension('monolog', [
         'channels' => [
             'deprecation',
+            'performance',
+        ],
+        'handlers' => [
+            'performance' => [
+                'type' => 'stream',
+                'path' => '%kernel.logs_dir%/performance.log',
+                'level' => 'info',
+                'channels' => ['performance'],
+                'bubble' => false,
+                'formatter' => 'monolog.formatter.json',
+            ],
         ],
     ]);
     if ('dev' === $containerConfigurator->env()) {
