@@ -10,7 +10,12 @@ services:
       - "443:443"
       - "443:443/udp"
     environment:
-      SERVER_NAME: ":80, localhost"
+      SERVER_NAME: ${SERVER_NAME:-:80}
+      FRANKENPHP_CONFIG: "worker /app/public/index.php 2"
+      APP_ENV: ${APP_ENV:-dev}
+      APP_DEBUG: ${APP_DEBUG:-1}
+      XDEBUG_MODE: ${XDEBUG_MODE:-debug}
+      APP_REQUEST_TIMING: ${APP_REQUEST_TIMING:-0}
       PHP_IDE_CONFIG: serverName=job-application-tracker
     extra_hosts:
       - host.docker.internal:host-gateway

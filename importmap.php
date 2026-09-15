@@ -26,4 +26,7 @@ return [
     'app' => ['path' => './assets/app.js', 'entrypoint' => true],
     '@hotwired/stimulus' => ['version' => '3.2.2'],
     '@symfony/stimulus-bundle' => ['path' => './vendor/symfony/stimulus-bundle/assets/dist/loader.js'],
+    'flowbite' => ['version' => '3.1.2'],
+    '@popperjs/core' => ['version' => '2.11.8'],
+    'flowbite-datepicker' => ['version' => '1.3.2'],
 ];

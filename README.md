@@ -51,30 +51,47 @@ It helps job seekers track vacancies, record application audit histories, manage
 
 ## ⚡️ Quick Start / Local Development
 
-1. **Clone the repository**:
+1. **Clone and configure**:
    ```bash
-   git clone https://github.com/your-username/job-application-tracker.git
+   git clone https://github.com/curlysanders/job-application-tracker.git
    cd job-application-tracker
+   cp .env.local.example .env.local
    ```
+   Set a unique `APP_SECRET` in `.env.local`. The checked-in database credentials
+   are local-development defaults; an existing database volume needs its original
+   credentials. MariaDB initialization variables apply only to a fresh volume.
 
-2. **Start Docker Containers**:
+2. **Build and install dependencies before starting workers**:
    ```bash
-   docker compose up -d --build
+   docker compose build app
+   docker compose run --rm --no-deps app composer install
+   docker compose up -d
    ```
+   Composer also restores the pinned importmap dependencies. No Node.js or CSS
+   compiler is required.
 
-3. **Install PHP Dependencies**:
+3. **Validate the runtime and database**:
    ```bash
-   docker compose exec app composer install
+   docker compose exec app php bin/console about
+   docker compose exec app php bin/console dbal:run-sql 'SELECT VERSION(), 1'
    ```
+   There are no application migrations or fixtures to run yet.
 
-4. **Run Database Migrations & Database Seeding**:
-   ```bash
-   docker compose exec app php bin/console doctrine:migrations:migrate --no-interaction
-   docker compose exec app php bin/console doctrine:fixtures:load --no-interaction
-   ```
+4. **Open the application** at `http://localhost/`. The component preview at
+   `http://localhost/_components` is available only in `dev` and `test`.
 
-5. **Access the Application**:
-   Open your browser and navigate to `http://localhost:8080` (or your configured Docker port).
+Workers retain PHP code and configuration in memory. After changing PHP,
+configuration, dependencies, or adding Stimulus controllers, run `docker compose restart app`. For Compose
+settings, use `docker compose up -d --no-deps app`. Local development defaults to
+HTTP; set `SERVER_NAME` explicitly for a deployment hostname and TLS.
+
+For production, publish assets with `APP_ENV=prod APP_DEBUG=0 php bin/console
+asset-map:compile` inside the deployment container after installing dependencies.
+This copies/version-tags assets; it does not compile JavaScript or Tailwind CSS.
+Do not retain `public/assets/` from a production build when working on development
+assets, as published assets take precedence.
+
+See [TICK-101 validation and benchmark instructions](docs/development/phase_1/tick-101-validation.md).
 
 ---
 

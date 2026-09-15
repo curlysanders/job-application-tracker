@@ -1,0 +1,6 @@
+{% for type, messages in app.flashes %}
+    {% set group = loop.index %}
+    {% for message in messages %}
+        <twig:FlashMessage :type="type" :message="message" id="flash-{{ group }}-{{ loop.index }}" />
+    {% endfor %}
+{% endfor %}
