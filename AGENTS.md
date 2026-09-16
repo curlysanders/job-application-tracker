@@ -99,6 +99,9 @@ working on development assets, because published assets take precedence.
   strings. Use ISO 4217 currency codes and the documented work/transport enums.
 - Store the active resume through Flysystem; do not couple domain logic to a
   local filesystem path.
+- Inject controller dependencies through promoted constructor properties. Keep
+  controller action parameters for request, route, and other runtime values;
+  do not use action-method injection for services.
 - Prefer Twig Components and Stimulus controllers for UI behavior. AssetMapper
   manages frontend assets; do not add a Node/Tailwind compilation workflow.
 

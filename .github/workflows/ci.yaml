@@ -40,6 +40,23 @@ jobs:
   tests:
     name: Tests
     runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:12.3
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: job_application_tracker
+          MYSQL_USER: job_application_tracker
+          MYSQL_PASSWORD: password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=5
+    env:
+      DATABASE_URL: mysql://root:root@127.0.0.1:3306/job_application_tracker?serverVersion=12.3.3-MariaDB&charset=utf8mb4
 
     steps:
       - name: Checkout
@@ -54,6 +71,15 @@ jobs:
 
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Prepare test database
+        run: |
+          php bin/console doctrine:database:create --if-not-exists --env=test
+          php bin/console doctrine:migrations:migrate --no-interaction --env=test
+          for token in $(seq 1 "$(nproc)"); do
+            TEST_TOKEN=$token php bin/console doctrine:database:create --if-not-exists --env=test
+            TEST_TOKEN=$token php bin/console doctrine:migrations:migrate --no-interaction --env=test
+          done
 
       - name: PHPUnit
         if: ${{ hashFiles('tests/**/*Test.php') == '' }}

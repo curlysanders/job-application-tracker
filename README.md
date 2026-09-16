@@ -82,10 +82,11 @@ It helps job seekers track vacancies, record application audit histories, manage
 4. **Open the application** at `http://localhost/`. The component preview at
    `http://localhost/_components` is available only in `dev` and `test`.
 
-Workers retain PHP code and configuration in memory. After changing PHP,
-configuration, dependencies, or adding Stimulus controllers, run `docker compose restart app`. For Compose
-settings, use `docker compose up -d --no-deps app`. Local development defaults to
-HTTP; set `SERVER_NAME` explicitly for a deployment hostname and TLS.
+The development Compose override automatically restarts workers after changes to
+application code, configuration, templates, and frontend assets. After changing
+dependencies or Compose settings, run `docker compose up -d --no-deps app`.
+Local development defaults to HTTP; set `SERVER_NAME` explicitly for a deployment
+hostname and TLS.
 
 For production, publish assets with `APP_ENV=prod APP_DEBUG=0 php bin/console
 asset-map:compile` inside the deployment container after installing dependencies.
