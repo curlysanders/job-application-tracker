@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Form;
+namespace CurlySanders\JobApplicationTracker\UI\Form;
 
-use App\Entity\User;
+use CurlySanders\JobApplicationTracker\UI\Form\Model\RegistrationData;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -15,7 +15,7 @@ use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Regex;
 
-/** @extends AbstractType<User> */
+/** @extends AbstractType<RegistrationData> */
 final class RegistrationType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -28,7 +28,6 @@ final class RegistrationType extends AbstractType
             ->add('plainPassword', RepeatedType::class, [
                 'type' => PasswordType::class,
                 'invalid_message' => 'The password fields must match.',
-                'mapped' => false,
                 'first_options' => [
                     'attr' => ['autocomplete' => 'new-password'],
                     'label' => 'Password',
@@ -51,7 +50,7 @@ final class RegistrationType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => User::class,
+            'data_class' => RegistrationData::class,
         ]);
     }
 }

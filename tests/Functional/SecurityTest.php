@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Functional;
+namespace CurlySanders\JobApplicationTracker\Tests\Functional;
 
-use App\Entity\User;
+use CurlySanders\JobApplicationTracker\Domain\User\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;

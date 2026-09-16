@@ -40,6 +40,15 @@ Phase 1 establishes a rock-solid foundation, focused on manual data entry, respo
     - Full Event Sourcing is explicitly rejected as unnecessary complexity.
     - State tracking uses a dedicated relational table (`vacancy_status_history`) populated automatically by Symfony Workflow listeners whenever a state transition occurs.
 
+### Application Layout & Messaging Boundaries
+
+- `src/Domain` contains domain models and business rules. Doctrine attributes on internal CRUD entities are permitted; domain code does not depend on application, UI, or infrastructure code.
+- `src/Application` contains commands, command handlers, events, and application ports. Writes are dispatched through `command.bus`; reads will use `query.bus` when read models are introduced.
+- `src/Infrastructure` contains adapters for framework and external services. Messenger adapters bridge the application command and event ports to Symfony Messenger.
+- `src/UI` contains HTTP controllers, forms, and presentation models. Controllers map HTTP input to commands and render responses; they do not persist entities or implement business workflows. Favor constructor-injected framework dependencies over `AbstractController`; extend it only when a specific helper provides a clear benefit.
+- `src/Infrastructure` contains framework and external adapters, including HTTP-kernel subscribers and Messenger, persistence, and security adapters.
+- `event.bus` publishes zero-or-more application events synchronously today. TICK-401 will route applicable events to the Doctrine outbox without changing application callers.
+
 ---
 
 ## 4. Domain Data Model & Key Entities

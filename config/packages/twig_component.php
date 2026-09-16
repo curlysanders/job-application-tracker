@@ -8,7 +8,7 @@ return static function (ContainerConfigurator $containerConfigurator): void {
     $containerConfigurator->extension('twig_component', [
         'anonymous_template_directory' => 'components/',
         'defaults' => [
-            'App\Twig\Components\\' => 'components/',
+            'CurlySanders\JobApplicationTracker\Twig\Components\\' => 'components/',
         ],
     ]);
 };

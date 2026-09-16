@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Entity\User;
+use CurlySanders\JobApplicationTracker\Domain\User\User;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 

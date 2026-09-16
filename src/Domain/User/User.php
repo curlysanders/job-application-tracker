@@ -2,17 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Entity;
+namespace CurlySanders\JobApplicationTracker\Domain\User;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'users')]
-#[UniqueEntity(fields: ['email'], message: 'An account already exists for this email address.')]
 final class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -52,9 +50,14 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setEmail(#[\SensitiveParameter] string $email): self
     {
-        $this->email = mb_strtolower(trim($email));
+        $this->email = self::normalizeEmail($email);
 
         return $this;
+    }
+
+    public static function normalizeEmail(#[\SensitiveParameter] string $email): string
+    {
+        return mb_strtolower(trim($email));
     }
 
     public function getUserIdentifier(): string

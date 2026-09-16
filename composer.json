@@ -78,12 +78,12 @@
     "prefer-stable": true,
     "autoload": {
         "psr-4": {
-            "App\\": "src/"
+            "CurlySanders\\JobApplicationTracker\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "App\\Tests\\": "tests/"
+            "CurlySanders\\JobApplicationTracker\\Tests\\": "tests/"
         }
     },
     "config": {

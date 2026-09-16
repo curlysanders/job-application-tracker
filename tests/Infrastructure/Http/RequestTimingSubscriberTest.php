@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\EventSubscriber;
+namespace CurlySanders\JobApplicationTracker\Tests\Infrastructure\Http;
 
-use App\EventSubscriber\RequestTimingSubscriber;
+use CurlySanders\JobApplicationTracker\Infrastructure\Http\RequestTimingSubscriber;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;

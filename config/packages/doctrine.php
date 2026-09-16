@@ -19,12 +19,12 @@ return static function (ContainerConfigurator $containerConfigurator): void {
             ],
             'auto_mapping' => true,
             'mappings' => [
-                'App' => [
+                'JobApplicationTracker' => [
                     'type' => 'attribute',
                     'is_bundle' => false,
-                    'dir' => '%kernel.project_dir%/src/Entity',
-                    'prefix' => 'App\Entity',
-                    'alias' => 'App',
+                    'dir' => '%kernel.project_dir%/src/Domain',
+                    'prefix' => 'CurlySanders\JobApplicationTracker\Domain',
+                    'alias' => 'JobApplicationTracker',
                 ],
             ],
         ],
