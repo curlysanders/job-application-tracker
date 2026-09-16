@@ -1,5 +1,7 @@
 # Job Application Tracker
 
+[![codecov](https://codecov.io/github/curlysanders/job-application-tracker/graph/badge.svg?token=Z76SXCMIDK)](https://codecov.io/github/curlysanders/job-application-tracker)
+
 **Job Application Tracker** is a self-hosted, privacy-first job application and vacancy management platform. Built using Symfony 8.1, PHP 8.5, and FrankenPHP in worker mode, it is optimized to run with a low memory footprint on home servers (such as a Synology NAS via Docker) or VPS instances.
 
 It helps job seekers track vacancies, record application audit histories, manage contact networks, prep for interviews with scratchpad notes, and visually track their job hunt pipeline.

@@ -15,6 +15,20 @@ Current core stack:
 - Doctrine ORM, Symfony Messenger, Symfony Workflow, and Flysystem
 - Twig Components, Stimulus, Flowbite, and AssetMapper (no Node.js build step)
 
+## Dependency and configuration conventions
+
+- When working with package versions newer than the agent's training-data
+  cutoff, use the Context7 MCP to verify current documentation and follow the
+  latest applicable standards.
+- This project uses PHP configuration files in `config/`, rather than Symfony's
+  default YAML configuration. Preserve that choice: add and update
+  configuration as PHP files, and keep all configuration consistent with this
+  convention.
+
+## Tooling
+
+- Prefer PhpStorm MCP tools when available over internal tools whenever the PhpStorm tools can complete the task.
+
 ## Local development
 
 Use Docker Compose for the application runtime. First-time setup is:
