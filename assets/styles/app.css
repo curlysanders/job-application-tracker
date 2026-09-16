@@ -7,6 +7,8 @@ a:focus-visible, button:focus-visible { outline: 3px solid #2563eb; outline-offs
 .skip-link:focus { top: 1rem; }
 .app-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 1.5rem; background: white; border-bottom: 1px solid #e2e8f0; }
 .app-brand { color: #172033; font-weight: 700; text-decoration: none; }
+.header-actions { display: flex; align-items: center; gap: .5rem; }
+.header-actions form { margin: 0; }
 .app-shell { min-height: calc(100vh - 5rem); }
 .app-sidebar { padding: 1.5rem; background: white; border-bottom: 1px solid #e2e8f0; }
 .nav-link { display: block; padding: .75rem 1rem; border-radius: .5rem; text-decoration: none; color: #475569; }
@@ -16,6 +18,14 @@ a:focus-visible, button:focus-visible { outline: 3px solid #2563eb; outline-offs
 h2 { font-size: 1.125rem; font-weight: 650; margin: 0 0 .75rem; }
 p { color: #475569; line-height: 1.65; margin: .75rem 0; }
 .panel, .modal-panel { padding: 1.5rem; background: white; border: 1px solid #e2e8f0; border-radius: .75rem; }
+.form-panel { max-width: 32rem; }
+.form-panel form { display: grid; gap: 1rem; margin-top: 1rem; }
+.form-panel label { color: #334155; font-weight: 600; }
+.form-panel input { width: 100%; padding: .65rem .75rem; border: 1px solid #94a3b8; border-radius: .5rem; background: white; }
+.form-panel input:focus { border-color: #2563eb; outline: 3px solid #bfdbfe; outline-offset: 1px; }
+.form-panel ul { padding-left: 1.25rem; color: #991b1b; list-style: disc; }
+.form-help { margin: 0; font-size: .875rem; }
+.form-error { color: #991b1b; font-weight: 600; }
 .button { display: inline-flex; justify-content: center; align-items: center; padding: .65rem 1rem; border-radius: .5rem; border: 1px solid transparent; background: #1d4ed8; color: white; font-weight: 600; }
 .button:hover { background: #1e40af; }
 .button-secondary { color: #334155; background: white; border-color: #cbd5e1; }

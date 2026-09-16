@@ -1,0 +1,14 @@
+# Development-only worker reloads. Docker Compose loads this file automatically.
+services:
+  app:
+    environment:
+      FRANKENPHP_CONFIG: |
+        worker {
+          file /app/public/index.php
+          num 2
+          watch /app/src
+          watch /app/config
+          watch /app/templates
+          watch /app/assets
+          watch /app/public
+        }

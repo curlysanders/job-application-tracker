@@ -5,26 +5,36 @@ deptrac:
         - '#.*test.*#'
     layers:
         -
-            name: Controller
+            name: UI
             collectors:
                 -
-                    type: classLike
-                    value: .*Controller.*
+                    type: directory
+                    value: src/UI
         -
-            name: Repository
+            name: Application
             collectors:
                 -
-                    type: classLike
-                    value: .*Repository.*
+                    type: directory
+                    value: src/Application
         -
-            name: Service
+            name: Domain
             collectors:
                 -
-                    type: classLike
-                    value: .*Service.*
+                    type: directory
+                    value: src/Domain
+        -
+            name: Infrastructure
+            collectors:
+                -
+                    type: directory
+                    value: src/Infrastructure
     ruleset:
-        Controller:
-            - Service
-        Service:
-            - Repository
-        Repository:
+        UI:
+            - Application
+            - Domain
+        Application:
+            - Domain
+        Domain: ~
+        Infrastructure:
+            - Application
+            - Domain
