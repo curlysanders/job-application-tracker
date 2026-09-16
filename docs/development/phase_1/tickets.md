@@ -23,9 +23,10 @@
     - Configure Symfony Security bundle with login form, password hasher, and logout handlers.
     - Build registration page and protected application route guards (`/app/*`).
 - **Acceptance Criteria**:
-    - [ ] User can register with email and password.
-    - [ ] Password hashes use modern password strength defaults.
-    - [ ] Unauthenticated users are redirected to login when accessing dashboard routes.
+    - [x] User can register with email and password.
+    - [x] Password hashes use modern password strength defaults.
+    - [x] Unauthenticated users are redirected to login when accessing dashboard routes.
+- **Validation**: [Results and reproduction steps](tick-102-validation.md).
 
 ---
 
