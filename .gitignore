@@ -1,4 +1,5 @@
 .idea
+.ai/
 
 ###> symfony/framework-bundle ###
 /.env.local
