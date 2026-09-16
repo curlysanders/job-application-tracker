@@ -8,8 +8,7 @@ return static function (ContainerConfigurator $containerConfigurator): void {
     $containerConfigurator->extension('flysystem', [
         'storages' => [
             'default.storage' => [
-                'adapter' => 'local',
-                'options' => [
+                'local' => [
                     'directory' => '%kernel.project_dir%/var/storage/default',
                 ],
             ],
