@@ -11,50 +11,50 @@
         "php": ">=8.5",
         "ext-ctype": "*",
         "ext-iconv": "*",
-        "doctrine/doctrine-bundle": "^3.3",
+        "doctrine/doctrine-bundle": "^3.3.2",
         "doctrine/doctrine-migrations-bundle": "^4.0",
-        "doctrine/orm": "^3.6",
+        "doctrine/orm": "^3.7.1",
         "league/flysystem-bundle": "^3.7",
         "symfony/asset": "~8.1.0",
-        "symfony/asset-mapper": "~8.1.0",
-        "symfony/console": "~8.1.0",
+        "symfony/asset-mapper": "~8.1.7",
+        "symfony/console": "~8.1.7",
         "symfony/dotenv": "~8.1.0",
         "symfony/flex": "^2",
-        "symfony/framework-bundle": "~8.1.0",
-        "symfony/messenger": "~8.1.0",
-        "symfony/monolog-bundle": "^4.0",
+        "symfony/framework-bundle": "~8.1.7",
+        "symfony/messenger": "~8.1.7",
+        "symfony/monolog-bundle": "^4.1",
         "symfony/runtime": "~8.1.0",
-        "symfony/security-bundle": "~8.1.0",
+        "symfony/security-bundle": "~8.1.7",
         "symfony/stimulus-bundle": "^3.4",
-        "symfony/twig-bundle": "~8.1.0",
+        "symfony/twig-bundle": "~8.1.7",
         "symfony/uid": "~8.1.0",
         "symfony/ux-twig-component": "^3.4",
-        "symfony/validator": "~8.1.0",
+        "symfony/validator": "~8.1.7",
         "symfony/workflow": "~8.1.0",
         "symfony/yaml": "~8.1.0"
     },
     "require-dev": {
         "brianium/paratest": "^7.24",
         "dama/doctrine-test-bundle": "^8.6",
-        "deptrac/deptrac": "^4.7",
-        "ergebnis/composer-normalize": "^2.52",
-        "friendsofphp/php-cs-fixer": "^3.95",
+        "deptrac/deptrac": "^4.7.2",
+        "ergebnis/composer-normalize": "^2.53",
+        "friendsofphp/php-cs-fixer": "^3.95.25",
         "phpstan/extension-installer": "^1.4",
-        "phpstan/phpstan": "^2.2",
+        "phpstan/phpstan": "^2.2.14",
         "phpstan/phpstan-deprecation-rules": "^2.0",
         "phpstan/phpstan-doctrine": "^2.0",
         "phpstan/phpstan-phpunit": "^2.0",
         "phpstan/phpstan-strict-rules": "^2.0",
         "phpstan/phpstan-symfony": "^2.0",
-        "phpunit/phpunit": "^13.3",
-        "rector/rector": "^2.6",
+        "phpunit/phpunit": "^13.3.4",
+        "rector/rector": "^2.6.7",
         "spaze/phpstan-disallowed-calls": "^4.14",
         "symfony/browser-kit": "~8.1.0",
         "symfony/css-selector": "~8.1.0",
         "symfony/debug-bundle": "~8.1.0",
-        "symfony/maker-bundle": "^1.67",
+        "symfony/maker-bundle": "^1.68",
         "symfony/stopwatch": "~8.1.0",
-        "symfony/web-profiler-bundle": "~8.1.0",
+        "symfony/web-profiler-bundle": "~8.1.7",
         "symplify/config-transformer": "^12.5"
     },
     "replace": {
@@ -102,32 +102,6 @@
         }
     },
     "scripts": {
-        "tests": [
-            "@php vendor/bin/paratest"
-        ],
-        "fix": [
-            "@php vendor/bin/rector process",
-            "@php vendor/bin/php-cs-fixer fix"
-        ],
-        "analyse": [
-            "@php vendor/bin/phpstan analyse",
-            "@php vendor/bin/deptrac analyse"
-        ],
-        "ci:php-cs-fixer": [
-            "@php vendor/bin/php-cs-fixer fix --dry-run --diff"
-        ],
-        "ci:phpstan": [
-            "@php vendor/bin/phpstan analyse"
-        ],
-        "ci:deptrac": [
-            "@php vendor/bin/deptrac analyse"
-        ],
-        "ci:phpunit": [
-            "@php vendor/bin/paratest"
-        ],
-        "ci:coverage": [
-            "@php vendor/bin/paratest --coverage-cobertura=var/coverage/cobertura.xml --coverage-text"
-        ],
         "post-install-cmd": [
             "@php scripts/composer/patch-paratest.php",
             "@auto-scripts"
@@ -136,10 +110,36 @@
             "@php scripts/composer/patch-paratest.php",
             "@auto-scripts"
         ],
+        "analyse": [
+            "@php vendor/bin/phpstan analyse",
+            "@php vendor/bin/deptrac analyse"
+        ],
         "auto-scripts": {
             "cache:clear": "symfony-cmd",
             "assets:install %PUBLIC_DIR%": "symfony-cmd",
             "importmap:install": "symfony-cmd"
-        }
+        },
+        "ci:coverage": [
+            "@php vendor/bin/paratest --coverage-cobertura=var/coverage/cobertura.xml --coverage-text"
+        ],
+        "ci:deptrac": [
+            "@php vendor/bin/deptrac analyse"
+        ],
+        "ci:php-cs-fixer": [
+            "@php vendor/bin/php-cs-fixer fix --dry-run --diff"
+        ],
+        "ci:phpstan": [
+            "@php vendor/bin/phpstan analyse"
+        ],
+        "ci:phpunit": [
+            "@php vendor/bin/paratest"
+        ],
+        "fix": [
+            "@php vendor/bin/rector process",
+            "@php vendor/bin/php-cs-fixer fix"
+        ],
+        "tests": [
+            "@php vendor/bin/paratest"
+        ]
     }
 }
