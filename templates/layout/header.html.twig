@@ -3,6 +3,7 @@
     <div class="header-actions">
         {% if app.user %}
             <a class="button button-secondary" href="{{ path('app_dashboard') }}">Dashboard</a>
+            <a class="button button-secondary" href="{{ path('app_profile') }}">Profile</a>
             <form action="{{ path('app_logout') }}" method="post">
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}">
                 <button type="submit" class="button button-secondary">Sign out</button>

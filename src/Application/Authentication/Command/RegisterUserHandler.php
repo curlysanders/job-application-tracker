@@ -8,10 +8,11 @@ use CurlySanders\JobApplicationTracker\Application\Authentication\Event\UserRegi
 use CurlySanders\JobApplicationTracker\Application\Authentication\Exception\UserAlreadyExists;
 use CurlySanders\JobApplicationTracker\Application\Authentication\PasswordHasher;
 use CurlySanders\JobApplicationTracker\Application\Authentication\UserRepository;
+use CurlySanders\JobApplicationTracker\Application\Shared\Bus\CommandHandler;
 use CurlySanders\JobApplicationTracker\Application\Shared\Bus\EventBus;
 use CurlySanders\JobApplicationTracker\Domain\User\User;
 
-final readonly class RegisterUserHandler
+final readonly class RegisterUserHandler implements CommandHandler
 {
     public function __construct(
         private UserRepository $userRepository,

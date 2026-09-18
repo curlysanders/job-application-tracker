@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use CurlySanders\JobApplicationTracker\Application\Authentication\Command\RegisterUserHandler;
+use CurlySanders\JobApplicationTracker\Application\Shared\Bus\CommandHandler;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
 return static function (ContainerConfigurator $containerConfigurator): void {
@@ -12,8 +12,8 @@ return static function (ContainerConfigurator $containerConfigurator): void {
         ->autowire()
         ->autoconfigure();
 
-    $services->load('CurlySanders\\JobApplicationTracker\\', __DIR__.'/../src/');
-
-    $services->set(RegisterUserHandler::class)
+    $services->instanceof(CommandHandler::class)
         ->tag('messenger.message_handler', ['bus' => 'command.bus']);
+
+    $services->load('CurlySanders\\JobApplicationTracker\\', __DIR__.'/../src/');
 };

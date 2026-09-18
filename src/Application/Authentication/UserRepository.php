@@ -8,6 +8,8 @@ use CurlySanders\JobApplicationTracker\Domain\User\User;
 
 interface UserRepository
 {
+    public function find(int $id): ?User;
+
     public function findByEmail(#[\SensitiveParameter] string $email): ?User;
 
     public function save(User $user): void;

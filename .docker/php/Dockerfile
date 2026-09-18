@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     unzip \
     libzip-dev \
     libicu-dev \
-    && docker-php-ext-install -j$(nproc) pdo_mysql intl zip \
+    && docker-php-ext-install -j$(nproc) bcmath pdo_mysql intl zip \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN pecl install xdebug \

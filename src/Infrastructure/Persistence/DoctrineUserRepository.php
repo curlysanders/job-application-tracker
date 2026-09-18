@@ -21,6 +21,11 @@ final readonly class DoctrineUserRepository implements UserRepository
         return $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
     }
 
+    public function find(int $id): ?User
+    {
+        return $this->entityManager->find(User::class, $id);
+    }
+
     public function save(User $user): void
     {
         $this->entityManager->persist($user);
