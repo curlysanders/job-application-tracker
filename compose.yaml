@@ -11,7 +11,8 @@ services:
       - "443:443"
       - "443:443/udp"
     environment:
-      SERVER_NAME: ${SERVER_NAME:-:80}
+      # A hostname enables Caddy's automatic HTTPS; use FRANKENPHP_SERVER_NAME=:80 for HTTP only.
+      SERVER_NAME: ${FRANKENPHP_SERVER_NAME:-${SERVER_NAME:-localhost}}
       FRANKENPHP_CONFIG: "worker /app/public/index.php 2"
       APP_ENV: ${APP_ENV:-dev}
       APP_DEBUG: ${APP_DEBUG:-1}
