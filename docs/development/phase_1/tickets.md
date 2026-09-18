@@ -38,8 +38,9 @@
     - Create Profile Settings form under `/app/profile`.
     - Add domain logic method `User::evaluatesSalary(float $grossSalary): SalaryFitStatus` returning `MEETS_TARGET`, `BELOW_TARGET`.
 - **Acceptance Criteria**:
-    - [ ] User can update salary preference, commute budget, and transport mode in profile settings.
-    - [ ] Form validates positive numeric inputs for monetary amounts and commute times.
+    - [x] User can update salary preference, commute budget, and transport mode in profile settings.
+    - [x] Form validates positive numeric inputs for monetary amounts and commute times.
+- **Validation**: [Results and reproduction steps](tick-103-validation.md).
 
 ---
 
