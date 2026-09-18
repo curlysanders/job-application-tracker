@@ -79,14 +79,91 @@ It helps job seekers track vacancies, record application audit histories, manage
    ```
    There are no application migrations or fixtures to run yet.
 
-4. **Open the application** at `http://localhost/`. The component preview at
-   `http://localhost/_components` is available only in `dev` and `test`.
+4. **Open the application** at `https://localhost/`. The component preview at
+   `https://localhost/_components` is available only in `dev` and `test`.
 
 The development Compose override automatically restarts workers after changes to
 application code, configuration, templates, and frontend assets. After changing
 dependencies or Compose settings, run `docker compose up -d --no-deps app`.
-Local development defaults to HTTP; set `SERVER_NAME` explicitly for a deployment
-hostname and TLS.
+Local development defaults to HTTPS. FrankenPHP/Caddy automatically redirects
+`http://localhost/` to HTTPS after the local CA is trusted.
+
+### Local HTTPS and certificate trust
+
+The development stack serves `https://localhost/` by default. FrankenPHP's
+bundled Caddy instance creates a local certificate authority (CA) and an
+automatically renewed certificate for `localhost`; it does not use a public CA,
+DNS, or externally reachable ports.
+
+1. Fresh installs receive this setting from `.env.local.example`. Existing
+   checkouts should set Symfony's URI in the untracked `.env.local` to:
+   ```dotenv
+   DEFAULT_URI=https://localhost
+   ```
+2. Start the development stack normally:
+   ```bash
+   docker compose up -d
+   ```
+3. After the app is running, copy Caddy's root certificate from the container
+   and add it to the trust store of the Docker host. Use the command for the
+   host operating system:
+
+   Linux (Debian/Ubuntu and other distributions using `update-ca-certificates`):
+   ```bash
+   docker compose cp app:/data/caddy/pki/authorities/local/root.crt /tmp/job-application-tracker-caddy-root.crt
+   sudo install -m 0644 /tmp/job-application-tracker-caddy-root.crt /usr/local/share/ca-certificates/job-application-tracker-caddy-root.crt
+   sudo update-ca-certificates
+   ```
+
+   macOS:
+   ```bash
+   docker compose cp app:/data/caddy/pki/authorities/local/root.crt /tmp/job-application-tracker-caddy-root.crt
+   sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain /tmp/job-application-tracker-caddy-root.crt
+   ```
+
+   Windows (PowerShell):
+   ```powershell
+   docker compose cp app:/data/caddy/pki/authorities/local/root.crt "$env:TEMP\job-application-tracker-caddy-root.crt"
+   certutil -addstore -f "ROOT" "$env:TEMP\job-application-tracker-caddy-root.crt"
+   ```
+
+   Chrome normally uses the operating-system trust store; fully restart it after
+   updating that store. If Chrome still shows a warning, open
+   `chrome://settings/certificates`, select the **Authorities** tab, choose
+   **Import**, select `/tmp/job-application-tracker-caddy-root.crt`, and enable
+   **Trust this certificate for identifying websites**. Restart Chrome after the
+   import. Firefox configurations that do not use the operating-system trust
+   store similarly require importing that same `root.crt` under the browser's
+   certificate-authority settings.
+
+4. Open `https://localhost/` and confirm that the browser does not display a
+   certificate warning. `curl -I https://localhost/` should also succeed after
+   the root CA is trusted.
+
+The root CA is retained in the `caddy_data` Docker volume. If that volume is
+removed, Caddy creates a new CA on the next HTTPS startup and the trust step
+must be repeated. Each additional device accessing the application also needs
+this root CA installed; it is intentionally trusted only on devices you
+administer.
+
+### HTTP-only development
+
+HTTPS is the default because it better matches production and lets browser
+features that require a secure context work locally. To deliberately run plain
+HTTP, set the project-facing FrankenPHP override before creating the app
+container:
+
+```bash
+export FRANKENPHP_SERVER_NAME=:80
+docker compose up -d --no-deps app
+```
+
+If Symfony needs to generate absolute URLs in that mode, also set
+`DEFAULT_URI=http://localhost` in `.env.local`. To return to the HTTPS default,
+unset `FRANKENPHP_SERVER_NAME`, restore the HTTPS URI, and recreate the app.
+The older `SERVER_NAME` environment variable remains supported for existing
+deployment setups, but `FRANKENPHP_SERVER_NAME` is preferred for new local
+configuration.
 
 For production, publish assets with `APP_ENV=prod APP_DEBUG=0 php bin/console
 asset-map:compile` inside the deployment container after installing dependencies.
