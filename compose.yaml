@@ -1,5 +1,6 @@
 services:
   app:
+    image: job-application-tracker-app
     build:
       context: .
       dockerfile: .docker/php/Dockerfile
@@ -28,6 +29,17 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      caddy-volume-init:
+        condition: service_completed_successfully
+
+  caddy-volume-init:
+    image: job-application-tracker-app
+    user: "0:0"
+    restart: "no"
+    command: ["sh", "-c", "chown -R 1000:1000 /data /config"]
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
 
   db:
     image: mariadb:12.3
