@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Profile settings · Job Application Tracker{% endblock %}
+{% block page_heading %}Profile settings{% endblock %}
+
+{% block content %}
+    <section class="panel form-panel" aria-labelledby="profile-settings-heading">
+        <h2 id="profile-settings-heading">Salary and commute preferences</h2>
+        <p class="form-help">Salary is gross per month in EUR. Commute time is one way.</p>
+        {{ form_start(profileForm) }}
+            {{ form_row(profileForm.minimumPreferredSalary) }}
+            {{ form_row(profileForm.maximumCommuteMinutes) }}
+            {{ form_row(profileForm.preferredTransportMode) }}
+            <button class="button" type="submit">Save settings</button>
+        {{ form_end(profileForm) }}
+    </section>
+{% endblock %}
