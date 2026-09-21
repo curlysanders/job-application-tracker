@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CurlySanders\JobApplicationTracker\Application\Authentication\Command;
 
 use CurlySanders\JobApplicationTracker\Application\Authentication\Event\UserRegistered;
+use CurlySanders\JobApplicationTracker\Application\Authentication\Exception\DuplicateUserEmail;
 use CurlySanders\JobApplicationTracker\Application\Authentication\Exception\UserAlreadyExists;
 use CurlySanders\JobApplicationTracker\Application\Authentication\PasswordHasher;
 use CurlySanders\JobApplicationTracker\Application\Authentication\UserRepository;
@@ -32,7 +33,11 @@ final readonly class RegisterUserHandler implements CommandHandler
         $user = new User();
         $user->setEmail($email);
         $user->setPassword($this->passwordHasher->hash($user, $command->plainPassword));
-        $this->userRepository->save($user);
+        try {
+            $this->userRepository->save($user);
+        } catch (DuplicateUserEmail) {
+            throw new UserAlreadyExists();
+        }
 
         $userId = $user->getId();
         if (null === $userId) {

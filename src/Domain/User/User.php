@@ -39,7 +39,7 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(name: 'max_commute_minutes', nullable: true)]
     private ?int $maximumCommuteMinutes = null;
 
-    #[ORM\Column(nullable: true, enumType: PreferredTransportMode::class)]
+    #[ORM\Column(length: 20, nullable: true, enumType: PreferredTransportMode::class)]
     private ?PreferredTransportMode $preferredTransportMode = null;
 
     #[ORM\Column(length: 255, nullable: true)]

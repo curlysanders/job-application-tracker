@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace CurlySanders\JobApplicationTracker\Infrastructure\Persistence;
 
+use CurlySanders\JobApplicationTracker\Application\Authentication\Exception\DuplicateUserEmail;
 use CurlySanders\JobApplicationTracker\Application\Authentication\UserRepository;
 use CurlySanders\JobApplicationTracker\Domain\User\User;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\AsAlias;
 
@@ -28,7 +30,11 @@ final readonly class DoctrineUserRepository implements UserRepository
 
     public function save(User $user): void
     {
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
+        try {
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
+        } catch (UniqueConstraintViolationException $exception) {
+            throw new DuplicateUserEmail(previous: $exception);
+        }
     }
 }
