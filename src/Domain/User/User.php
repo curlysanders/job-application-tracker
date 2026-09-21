@@ -42,6 +42,18 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(nullable: true, enumType: PreferredTransportMode::class)]
     private ?PreferredTransportMode $preferredTransportMode = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $resumeStoragePath = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $resumeOriginalFilename = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $resumeMimeType = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $resumeUploadedAt = null;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
@@ -150,5 +162,37 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $grossSalary->isAtLeast($this->minimumPreferredSalary)
             ? SalaryFitStatus::MeetsTarget
             : SalaryFitStatus::BelowTarget;
+    }
+
+    public function replaceResume(
+        string $storagePath,
+        string $originalFilename,
+        string $mimeType,
+        \DateTimeImmutable $uploadedAt,
+    ): void {
+        $this->resumeStoragePath = $storagePath;
+        $this->resumeOriginalFilename = $originalFilename;
+        $this->resumeMimeType = $mimeType;
+        $this->resumeUploadedAt = $uploadedAt;
+    }
+
+    public function getResumeStoragePath(): ?string
+    {
+        return $this->resumeStoragePath;
+    }
+
+    public function getResumeOriginalFilename(): ?string
+    {
+        return $this->resumeOriginalFilename;
+    }
+
+    public function getResumeMimeType(): ?string
+    {
+        return $this->resumeMimeType;
+    }
+
+    public function getResumeUploadedAt(): ?\DateTimeImmutable
+    {
+        return $this->resumeUploadedAt;
     }
 }

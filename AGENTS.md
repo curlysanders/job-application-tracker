@@ -102,6 +102,9 @@ working on development assets, because published assets take precedence.
 - Inject controller dependencies through promoted constructor properties. Keep
   controller action parameters for request, route, and other runtime values;
   do not use action-method injection for services.
+- Use invokable, single-action controllers: create one controller per HTTP
+  endpoint or use case and expose `__invoke()` as its only public action.
+  Private helper methods remain allowed.
 - Favor direct constructor injection over extending `AbstractController`.
   Controllers may extend it only when a specific helper provides a clear
   benefit; inject Twig, forms, routing, security, sessions, and other framework
