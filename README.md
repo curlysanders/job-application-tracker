@@ -77,7 +77,10 @@ It helps job seekers track vacancies, record application audit histories, manage
    docker compose exec app php bin/console about
    docker compose exec app php bin/console dbal:run-sql 'SELECT VERSION(), 1'
    ```
-   There are no application migrations or fixtures to run yet.
+   Apply the committed application migrations before using a fresh database:
+   ```bash
+   docker compose exec app php bin/console doctrine:migrations:migrate --no-interaction
+   ```
 
 4. **Open the application** at `https://localhost/`. The component preview at
    `https://localhost/_components` is available only in `dev` and `test`.
