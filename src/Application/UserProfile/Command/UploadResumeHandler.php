@@ -7,12 +7,14 @@ namespace CurlySanders\JobApplicationTracker\Application\UserProfile\Command;
 use CurlySanders\JobApplicationTracker\Application\Authentication\UserRepository;
 use CurlySanders\JobApplicationTracker\Application\Shared\Bus\CommandHandler;
 use CurlySanders\JobApplicationTracker\Application\UserProfile\ResumeUploaderService;
+use Psr\Log\LoggerInterface;
 
 final readonly class UploadResumeHandler implements CommandHandler
 {
     public function __construct(
         private UserRepository $userRepository,
         private ResumeUploaderService $resumeUploader,
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -32,8 +34,11 @@ final readonly class UploadResumeHandler implements CommandHandler
         } catch (\Throwable $exception) {
             try {
                 $this->resumeUploader->deleteResume($resume->storagePath);
-            } catch (\Throwable) {
-                // The database has not changed, so preserving the original exception takes priority.
+            } catch (\Throwable $cleanupException) {
+                $this->logger->warning('Could not remove the unreferenced resume after a failed update.', [
+                    'storage_path' => $resume->storagePath,
+                    'exception' => $cleanupException,
+                ]);
             }
 
             throw $exception;
@@ -42,8 +47,11 @@ final readonly class UploadResumeHandler implements CommandHandler
         if (null !== $previousPath) {
             try {
                 $this->resumeUploader->deleteResume($previousPath);
-            } catch (\Throwable) {
-                // The active database reference is already safe; an orphan can be cleaned up later.
+            } catch (\Throwable $cleanupException) {
+                $this->logger->warning('Could not remove the replaced resume.', [
+                    'storage_path' => $previousPath,
+                    'exception' => $cleanupException,
+                ]);
             }
         }
     }
