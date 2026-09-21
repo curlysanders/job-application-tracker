@@ -37,15 +37,9 @@ final readonly class ProfileController
     #[Route('/app/profile', name: 'app_profile', methods: ['GET', 'POST'])]
     public function __invoke(Request $request): Response
     {
-        $user = $this->security->getUser();
-        if (!$user instanceof User || null === $user->getId()) {
-            throw new \LogicException('Profile settings require an authenticated user.');
-        }
-
-        $profile = new ProfileSettingsData();
-        $profile->minimumPreferredSalary = $user->getMinimumPreferredSalary()?->toDecimal();
-        $profile->maximumCommuteMinutes = $user->getMaximumCommuteMinutes();
-        $profile->preferredTransportMode = $user->getPreferredTransportMode();
+        $user = $this->requireAuthenticatedUser();
+        $userId = $this->authenticatedUserId($user);
+        $profile = $this->profileSettingsFor($user);
 
         $form = $this->formFactory->create(ProfileSettingsType::class, $profile);
         $form->handleRequest($request);
@@ -56,19 +50,13 @@ final readonly class ProfileController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->commandBus->dispatch(new UpdateUserPreferences(
-                $user->getId(),
+                $userId,
                 $profile->minimumPreferredSalary,
                 $profile->maximumCommuteMinutes,
                 $profile->preferredTransportMode,
             ));
 
-            $session = $request->getSession();
-            if (!$session instanceof FlashBagAwareSessionInterface) {
-                throw new \LogicException('Profile updates require a flash-aware session.');
-            }
-            $session->getFlashBag()->add('success', 'Your profile settings have been updated.');
-
-            return new RedirectResponse($this->urlGenerator->generate('app_profile'));
+            return $this->redirectWithSuccessMessage($request, 'Your profile settings have been updated.');
         }
 
         if ($resumeForm->isSubmitted() && $resumeForm->isValid()) {
@@ -82,7 +70,7 @@ final readonly class ProfileController
             }
 
             try {
-                $this->commandBus->dispatch(new UploadResume($user->getId(), new ResumeUpload(
+                $this->commandBus->dispatch(new UploadResume($userId, new ResumeUpload(
                     $stream,
                     $resumeUpload->resume->getClientOriginalName(),
                     $resumeUpload->resume->getMimeType() ?? '',
@@ -92,13 +80,7 @@ final readonly class ProfileController
                 fclose($stream);
             }
 
-            $session = $request->getSession();
-            if (!$session instanceof FlashBagAwareSessionInterface) {
-                throw new \LogicException('Resume uploads require a flash-aware session.');
-            }
-            $session->getFlashBag()->add('success', 'Your active resume has been uploaded.');
-
-            return new RedirectResponse($this->urlGenerator->generate('app_profile'));
+            return $this->redirectWithSuccessMessage($request, 'Your active resume has been uploaded.');
         }
 
         return new Response($this->twig->render('profile/settings.html.twig', [
@@ -106,5 +88,46 @@ final readonly class ProfileController
             'resumeForm' => $resumeForm->createView(),
             'user' => $user,
         ]), $form->isSubmitted() || $resumeForm->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK);
+    }
+
+    private function requireAuthenticatedUser(): User
+    {
+        $user = $this->security->getUser();
+        if (!$user instanceof User || null === $user->getId()) {
+            throw new \LogicException('Profile settings require an authenticated user.');
+        }
+
+        return $user;
+    }
+
+    private function profileSettingsFor(User $user): ProfileSettingsData
+    {
+        $profile = new ProfileSettingsData();
+        $profile->minimumPreferredSalary = $user->getMinimumPreferredSalary()?->toDecimal();
+        $profile->maximumCommuteMinutes = $user->getMaximumCommuteMinutes();
+        $profile->preferredTransportMode = $user->getPreferredTransportMode();
+
+        return $profile;
+    }
+
+    private function authenticatedUserId(User $user): int
+    {
+        $userId = $user->getId();
+        if (null === $userId) {
+            throw new \LogicException('Profile settings require a persisted user.');
+        }
+
+        return $userId;
+    }
+
+    private function redirectWithSuccessMessage(Request $request, string $message): RedirectResponse
+    {
+        $session = $request->getSession();
+        if (!$session instanceof FlashBagAwareSessionInterface) {
+            throw new \LogicException('Profile updates require a flash-aware session.');
+        }
+        $session->getFlashBag()->add('success', $message);
+
+        return new RedirectResponse($this->urlGenerator->generate('app_profile'));
     }
 }
