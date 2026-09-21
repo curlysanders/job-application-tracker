@@ -7,6 +7,7 @@ namespace CurlySanders\JobApplicationTracker\UI\Controller;
 use CurlySanders\JobApplicationTracker\Application\Shared\Bus\CommandBus;
 use CurlySanders\JobApplicationTracker\Application\UserProfile\Command\UpdateUserPreferences;
 use CurlySanders\JobApplicationTracker\Application\UserProfile\Command\UploadResume;
+use CurlySanders\JobApplicationTracker\Application\UserProfile\ResumeUpload;
 use CurlySanders\JobApplicationTracker\Domain\User\User;
 use CurlySanders\JobApplicationTracker\UI\Form\Model\ProfileSettingsData;
 use CurlySanders\JobApplicationTracker\UI\Form\Model\ResumeUploadData;
@@ -75,7 +76,21 @@ final readonly class ProfileController
                 throw new \LogicException('A valid resume upload must contain a file.');
             }
 
-            $this->commandBus->dispatch(new UploadResume($user->getId(), $resumeUpload->resume));
+            $stream = fopen($resumeUpload->resume->getPathname(), 'rb');
+            if (false === $stream) {
+                throw new \RuntimeException('The uploaded resume could not be read.');
+            }
+
+            try {
+                $this->commandBus->dispatch(new UploadResume($user->getId(), new ResumeUpload(
+                    $stream,
+                    $resumeUpload->resume->getClientOriginalName(),
+                    $resumeUpload->resume->getMimeType() ?? '',
+                    false === $resumeUpload->resume->getSize() ? 0 : $resumeUpload->resume->getSize(),
+                )));
+            } finally {
+                fclose($stream);
+            }
 
             $session = $request->getSession();
             if (!$session instanceof FlashBagAwareSessionInterface) {

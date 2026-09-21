@@ -24,7 +24,7 @@ final readonly class UploadResumeHandler implements CommandHandler
         }
 
         $previousPath = $user->getResumeStoragePath();
-        $resume = $this->resumeUploader->uploadResume($user, $command->file);
+        $resume = $this->resumeUploader->uploadResume($user, $command->upload);
 
         try {
             $user->replaceResume($resume->storagePath, $resume->originalFilename, $resume->mimeType, $resume->uploadedAt);
