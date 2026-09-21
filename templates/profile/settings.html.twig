@@ -14,4 +14,21 @@
             <button class="button" type="submit">Save settings</button>
         {{ form_end(profileForm) }}
     </section>
+
+    <section class="panel form-panel" aria-labelledby="resume-upload-heading">
+        <h2 id="resume-upload-heading">Active resume</h2>
+        {% if user.resumeOriginalFilename %}
+            <p class="form-help">
+                Active file: <a href="{{ path('app_profile_resume') }}">{{ user.resumeOriginalFilename }}</a>
+                {% if user.resumeUploadedAt %} (uploaded {{ user.resumeUploadedAt|date('j M Y, H:i') }}){% endif %}
+            </p>
+            <p class="form-help">Uploading a new resume replaces this active file.</p>
+        {% else %}
+            <p class="form-help">No active resume has been uploaded.</p>
+        {% endif %}
+        {{ form_start(resumeForm) }}
+            {{ form_row(resumeForm.resume) }}
+            <button class="button" type="submit">Upload resume</button>
+        {{ form_end(resumeForm) }}
+    </section>
 {% endblock %}

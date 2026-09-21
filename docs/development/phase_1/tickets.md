@@ -53,9 +53,10 @@
     - Implement PDF and DOCX mime-type and size validation (max 5MB).
     - Add resume upload/view section on User Profile page.
 - **Acceptance Criteria**:
-    - [ ] User can upload a single active resume (PDF or DOCX).
-    - [ ] Uploading a new resume safely overwrites/replaces the previous file reference.
-    - [ ] Files are stored outside the public document root via Flysystem abstraction.
+    - [x] User can upload a single active resume (PDF or DOCX).
+    - [x] Uploading a new resume safely overwrites/replaces the previous file reference.
+    - [x] Files are stored outside the public document root via Flysystem abstraction.
+- **Validation**: [Results and reproduction steps](tick-104-validation.md).
 
 ---
 

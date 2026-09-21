@@ -41,4 +41,18 @@ final class UserPreferencesTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         new User()->updatePreferences(null, 0, null);
     }
+
+    public function testResumeMetadataCanBeReplaced(): void
+    {
+        $user = new User();
+        $uploadedAt = new \DateTimeImmutable('2026-09-21T12:00:00+00:00');
+
+        $user->replaceResume('resumes/1/first.pdf', 'first.pdf', 'application/pdf', $uploadedAt);
+        $user->replaceResume('resumes/1/second.docx', 'second.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', $uploadedAt);
+
+        self::assertSame('resumes/1/second.docx', $user->getResumeStoragePath());
+        self::assertSame('second.docx', $user->getResumeOriginalFilename());
+        self::assertSame('application/vnd.openxmlformats-officedocument.wordprocessingml.document', $user->getResumeMimeType());
+        self::assertSame($uploadedAt, $user->getResumeUploadedAt());
+    }
 }

@@ -6,9 +6,12 @@ namespace CurlySanders\JobApplicationTracker\UI\Controller;
 
 use CurlySanders\JobApplicationTracker\Application\Shared\Bus\CommandBus;
 use CurlySanders\JobApplicationTracker\Application\UserProfile\Command\UpdateUserPreferences;
+use CurlySanders\JobApplicationTracker\Application\UserProfile\Command\UploadResume;
 use CurlySanders\JobApplicationTracker\Domain\User\User;
 use CurlySanders\JobApplicationTracker\UI\Form\Model\ProfileSettingsData;
+use CurlySanders\JobApplicationTracker\UI\Form\Model\ResumeUploadData;
 use CurlySanders\JobApplicationTracker\UI\Form\ProfileSettingsType;
+use CurlySanders\JobApplicationTracker\UI\Form\ResumeUploadType;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -46,6 +49,10 @@ final readonly class ProfileController
         $form = $this->formFactory->create(ProfileSettingsType::class, $profile);
         $form->handleRequest($request);
 
+        $resumeUpload = new ResumeUploadData();
+        $resumeForm = $this->formFactory->createNamed('resume_upload', ResumeUploadType::class, $resumeUpload);
+        $resumeForm->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
             $this->commandBus->dispatch(new UpdateUserPreferences(
                 $user->getId(),
@@ -63,8 +70,26 @@ final readonly class ProfileController
             return new RedirectResponse($this->urlGenerator->generate('app_profile'));
         }
 
+        if ($resumeForm->isSubmitted() && $resumeForm->isValid()) {
+            if (null === $resumeUpload->resume) {
+                throw new \LogicException('A valid resume upload must contain a file.');
+            }
+
+            $this->commandBus->dispatch(new UploadResume($user->getId(), $resumeUpload->resume));
+
+            $session = $request->getSession();
+            if (!$session instanceof FlashBagAwareSessionInterface) {
+                throw new \LogicException('Resume uploads require a flash-aware session.');
+            }
+            $session->getFlashBag()->add('success', 'Your active resume has been uploaded.');
+
+            return new RedirectResponse($this->urlGenerator->generate('app_profile'));
+        }
+
         return new Response($this->twig->render('profile/settings.html.twig', [
             'profileForm' => $form->createView(),
-        ]), $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK);
+            'resumeForm' => $resumeForm->createView(),
+            'user' => $user,
+        ]), $form->isSubmitted() || $resumeForm->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK);
     }
 }
