@@ -91,6 +91,11 @@ jobs:
         env:
           XDEBUG_MODE: coverage
 
+      - name: Enforce 90% line coverage
+        if: ${{ hashFiles('tests/**/*Test.php') != '' }}
+        run: |
+          php -r '$codecov = file_get_contents("codecov.yml"); if (false === $codecov || 1 !== preg_match("/^\\s*target:\\s*([0-9]+(?:\\.[0-9]+)?)%\\s*$/m", $codecov, $matches)) { fwrite(STDERR, "Could not read the Codecov project coverage target.\n"); exit(1); } $coverage = simplexml_load_file("var/coverage/cobertura.xml"); if (false === $coverage) { fwrite(STDERR, "Could not read the Cobertura coverage report.\n"); exit(1); } $target = (float) $matches[1]; $lineCoverage = (float) $coverage["line-rate"] * 100; printf("Overall line coverage: %.2f%% (target: %.2f%%)\n", $lineCoverage, $target); exit($lineCoverage < $target ? 1 : 0);'
+
       - name: Upload coverage to Codecov
         if: ${{ hashFiles('tests/**/*Test.php') != '' }}
         uses: codecov/codecov-action@v5

@@ -97,6 +97,16 @@ final class SecurityTest extends WebTestCase
         self::assertResponseRedirects('/');
     }
 
+    public function testAuthenticatedUserIsRedirectedAwayFromLogin(): void
+    {
+        $client = self::createClient();
+        $client->loginUser($this->createUser('already-authenticated@example.com'));
+
+        $client->request('GET', '/login');
+
+        self::assertResponseRedirects('/app');
+    }
+
     private function createUser(string $email): User
     {
         $user = new User()->setEmail($email);
