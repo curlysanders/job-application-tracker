@@ -17,7 +17,11 @@
                 <aside id="app-sidebar" class="app-sidebar hidden md:block" aria-label="Sidebar">
                     {% block sidebar %}
                         <nav aria-label="Main navigation">
-                            <a href="{{ path('app_home') }}" class="nav-link"{% if app.request.attributes.get('_route') == 'app_home' %} aria-current="page"{% endif %}>Home</a>
+                                <a href="{{ path('app_home') }}" class="nav-link"{% if app.request.attributes.get('_route') == 'app_home' %} aria-current="page"{% endif %}>Home</a>
+                                {% if app.user %}
+                                    <a href="{{ path('app_company_list') }}" class="nav-link"{% if app.request.attributes.get('_route') starts with 'app_company_' %} aria-current="page"{% endif %}>Companies</a>
+                                    <a href="{{ path('app_recruiter_list') }}" class="nav-link"{% if app.request.attributes.get('_route') starts with 'app_recruiter_' %} aria-current="page"{% endif %}>Recruiters</a>
+                                {% endif %}
                             {% if app.environment in ['dev', 'test'] %}
                                 <a href="{{ path('app_component_preview') }}" class="nav-link"{% if app.request.attributes.get('_route') == 'app_component_preview' %} aria-current="page"{% endif %}>Component preview</a>
                             {% endif %}
