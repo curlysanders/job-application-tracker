@@ -2,6 +2,8 @@
 services:
   app:
     environment:
+      # Keep debugger support and PhpStorm coverage available during local development.
+      XDEBUG_MODE: ${XDEBUG_MODE:-debug,coverage}
       FRANKENPHP_CONFIG: |
         worker {
           file /app/public/index.php

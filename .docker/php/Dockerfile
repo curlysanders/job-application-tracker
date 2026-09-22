@@ -20,8 +20,8 @@ COPY .docker/php/config/xdebug.ini /usr/local/etc/php/conf.d/99-xdebug.ini
 # Install Composer from official image
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-RUN mkdir -p /home/appuser/.cache/composer \
-    && chown -R 1000:1000 /home/appuser
+RUN mkdir -p /home/appuser/.cache/composer /opt/phpstorm-coverage \
+    && chown -R 1000:1000 /home/appuser /opt/phpstorm-coverage
 
 ENV HOME=/home/appuser
 USER 1000:1000
