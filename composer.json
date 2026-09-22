@@ -116,7 +116,7 @@
         ],
         "analyse": [
             "@php vendor/bin/phpstan analyse",
-            "@php vendor/bin/deptrac analyse"
+            "@php vendor/bin/deptrac analyse --fail-on-uncovered"
         ],
         "auto-scripts": {
             "cache:clear": "symfony-cmd",
@@ -127,7 +127,7 @@
             "@php vendor/bin/paratest --coverage-cobertura=var/coverage/cobertura.xml --coverage-text"
         ],
         "ci:deptrac": [
-            "@php vendor/bin/deptrac analyse"
+            "@php vendor/bin/deptrac analyse --fail-on-uncovered"
         ],
         "ci:php-cs-fixer": [
             "@php vendor/bin/php-cs-fixer fix --dry-run --diff"
