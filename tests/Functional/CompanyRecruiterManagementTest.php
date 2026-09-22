@@ -74,6 +74,52 @@ final class CompanyRecruiterManagementTest extends WebTestCase
         self::assertSelectorTextContains('.management-results', 'Talent Partners');
     }
 
+    public function testUserCanEditARecruiterAndReplaceItsContacts(): void
+    {
+        $client = self::createClient();
+        $client->loginUser($this->createUser('recruiter-edit@example.com'));
+
+        $recruiter = new Recruiter('Talent Partners', 'https://talent.example');
+        $recruiter->replaceDirectContacts(new \CurlySanders\JobApplicationTracker\Domain\Contact\DirectContact('Lin Recruiter', 'lin@talent.example', null, null));
+        $this->entityManager()->persist($recruiter);
+        $this->entityManager()->flush();
+
+        $crawler = $client->request('GET', sprintf('/app/recruiters/%d/edit', $recruiter->getId()));
+        self::assertResponseIsSuccessful();
+        self::assertSame('Talent Partners', $crawler->filter('input[name="recruiter[agencyName]"]')->attr('value'));
+        self::assertSame('Lin Recruiter', $crawler->filter('input[name="recruiter[directContacts][0][name]"]')->attr('value'));
+
+        $client->request('POST', sprintf('/app/recruiters/%d/edit', $recruiter->getId()), ['recruiter' => [
+            '_token' => $this->csrfToken($crawler),
+            'agencyName' => 'Talent Europe',
+            'website' => 'https://talent-europe.example',
+            'directContacts' => [
+                ['name' => 'Ada Recruiter', 'email' => 'ada@talent.example', 'phone' => '+31 6 12345678', 'linkedinUrl' => 'https://www.linkedin.com/in/ada'],
+            ],
+        ]]);
+
+        self::assertResponseRedirects('/app/recruiters');
+        $this->entityManager()->clear();
+        $savedRecruiter = $this->entityManager()->find(Recruiter::class, $recruiter->getId());
+        self::assertInstanceOf(Recruiter::class, $savedRecruiter);
+        self::assertSame('Talent Europe', $savedRecruiter->getAgencyName());
+        self::assertSame('https://talent-europe.example', $savedRecruiter->getWebsite());
+        self::assertCount(1, $savedRecruiter->getDirectContacts());
+        $contact = $savedRecruiter->getDirectContacts()->first();
+        self::assertInstanceOf(\CurlySanders\JobApplicationTracker\Domain\Contact\DirectContact::class, $contact);
+        self::assertSame('Ada Recruiter', $contact->getName());
+    }
+
+    public function testEditingAnUnknownRecruiterReturnsNotFound(): void
+    {
+        $client = self::createClient();
+        $client->loginUser($this->createUser('recruiter-not-found@example.com'));
+
+        $client->request('GET', '/app/recruiters/999999/edit');
+
+        self::assertResponseStatusCodeSame(404);
+    }
+
     private function csrfToken(\Symfony\Component\DomCrawler\Crawler $crawler): string
     {
         $token = $crawler->filter('input[name$="[_token]"]')->attr('value');
