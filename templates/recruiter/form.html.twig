@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ pageTitle }} · Job Application Tracker{% endblock %}
+{% block page_heading %}{{ pageTitle }}{% endblock %}
+
+{% block content %}
+    <section class="panel form-panel management-form"><form method="post" data-controller="contact-collection">
+        {{ form_row(form.agencyName) }}{{ form_row(form.website) }}
+        <fieldset><legend>Direct contacts</legend><div data-contact-collection-target="list">
+            {% for contact in form.directContacts %}<div class="contact-row" data-contact-collection-row>{{ form_row(contact.name) }}{{ form_row(contact.email) }}{{ form_row(contact.phone) }}{{ form_row(contact.linkedinUrl) }}<button class="button button-secondary" data-action="contact-collection#remove" type="button">Remove contact</button></div>{% endfor %}
+        </div><template data-contact-collection-target="template"><div class="contact-row" data-contact-collection-row>{{ form_row(form.directContacts.vars.prototype.name) }}{{ form_row(form.directContacts.vars.prototype.email) }}{{ form_row(form.directContacts.vars.prototype.phone) }}{{ form_row(form.directContacts.vars.prototype.linkedinUrl) }}<button class="button button-secondary" data-action="contact-collection#remove" type="button">Remove contact</button></div></template><button class="button button-secondary" data-action="contact-collection#add" type="button">Add contact</button></fieldset>
+        {{ form_rest(form) }}<button class="button" type="submit">{{ submitLabel }}</button>
+    </form></section>
+{% endblock %}

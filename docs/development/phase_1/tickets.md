@@ -70,8 +70,9 @@
     - Create `Recruiter` entity (`agency_name`, `website`, `direct_contacts` array/embeddable: name, email, phone, linkedin).
     - Create CRUD controllers and forms for standalone Company and Recruiter management.
 - **Acceptance Criteria**:
-    - [ ] User can create, edit, and search standalone Companies and Recruiters.
-    - [ ] Contact details support multiple contact entries per company/agency.
+    - [x] User can create, edit, and search standalone Companies and Recruiters.
+    - [x] Contact details support multiple contact entries per company/agency.
+- **Validation**: [Results and reproduction steps](tick-201-validation.md).
 
 ---
 

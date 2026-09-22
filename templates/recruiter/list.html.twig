@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Recruiters · Job Application Tracker{% endblock %}
+{% block page_heading %}Recruiters{% endblock %}
+
+{% block content %}
+    <section class="panel management-list">
+        <div class="management-actions">
+            <form method="get" role="search">
+                <label for="recruiter-search">Search recruiters</label>
+                <input id="recruiter-search" name="q" value="{{ query }}" placeholder="Agency or contact">
+                <button class="button" type="submit">Search</button>
+            </form>
+            <a class="button" href="{{ path('app_recruiter_create') }}">Add recruiter</a>
+        </div>
+        {% if recruiters is empty %}<p>No recruiters found.</p>{% else %}
+            <ul class="management-results">
+                {% for recruiter in recruiters %}
+                    <li><div><strong>{{ recruiter.agencyName }}</strong>{% if recruiter.directContacts is not empty %}<span>{{ recruiter.directContacts|length }} contact{{ recruiter.directContacts|length == 1 ? '' : 's' }}</span>{% endif %}</div><a class="button button-secondary" href="{{ path('app_recruiter_edit', {id: recruiter.id}) }}">Edit</a></li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </section>
+{% endblock %}

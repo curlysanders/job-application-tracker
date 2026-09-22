@@ -23,6 +23,16 @@ p { color: #475569; line-height: 1.65; margin: .75rem 0; }
 .form-panel label { color: #334155; font-weight: 600; }
 .form-panel input { width: 100%; padding: .65rem .75rem; border: 1px solid #94a3b8; border-radius: .5rem; background: white; }
 .form-panel input:focus { border-color: #2563eb; outline: 3px solid #bfdbfe; outline-offset: 1px; }
+.form-panel fieldset { display: grid; gap: 1rem; padding: 1rem; border: 1px solid #cbd5e1; border-radius: .5rem; }
+.form-panel legend { padding: 0 .25rem; color: #334155; font-weight: 600; }
+.contact-row { display: grid; gap: .75rem; padding: 1rem; border: 1px solid #e2e8f0; border-radius: .5rem; }
+.management-actions { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 1rem; }
+.management-actions form { display: flex; flex-wrap: wrap; align-items: end; gap: .5rem; }
+.management-actions label { font-weight: 600; }
+.management-actions input { padding: .65rem .75rem; border: 1px solid #94a3b8; border-radius: .5rem; }
+.management-results { display: grid; gap: .75rem; padding: 0; list-style: none; }
+.management-results li { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 1rem; border: 1px solid #e2e8f0; border-radius: .5rem; }
+.management-results span { display: block; margin-top: .25rem; color: #64748b; font-size: .875rem; }
 .form-panel ul { padding-left: 1.25rem; color: #991b1b; list-style: disc; }
 .form-help { margin: 0; font-size: .875rem; }
 .form-error { color: #991b1b; font-weight: 600; }
