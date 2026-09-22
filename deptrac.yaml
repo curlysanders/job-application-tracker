@@ -28,13 +28,70 @@ deptrac:
                 -
                     type: directory
                     value: src/Infrastructure
+        -
+            name: Symfony
+            collectors:
+                -
+                    type: classNameRegex
+                    value: '#^Symfony\\#'
+        -
+            name: Doctrine
+            collectors:
+                -
+                    type: classNameRegex
+                    value: '#^Doctrine\\#'
+        -
+            name: Twig
+            collectors:
+                -
+                    type: classNameRegex
+                    value: '#^Twig\\#'
+        -
+            name: Psr
+            collectors:
+                -
+                    type: classNameRegex
+                    value: '#^Psr\\#'
+        -
+            name: League
+            collectors:
+                -
+                    type: classNameRegex
+                    value: '#^League\\#'
+        -
+            name: Brick
+            collectors:
+                -
+                    type: classNameRegex
+                    value: '#^Brick\\#'
+        -
+            name: PHP
+            collectors:
+                -
+                    type: php_internal
+                    value: '.*'
     ruleset:
         UI:
             - Application
             - Domain
+            - Symfony
+            - Twig
+            - League
+            - PHP
         Application:
             - Domain
-        Domain: ~
+            - Psr
+            - PHP
+        Domain:
+            - Symfony
+            - Doctrine
+            - Brick
+            - PHP
         Infrastructure:
             - Application
             - Domain
+            - Symfony
+            - Doctrine
+            - Psr
+            - League
+            - PHP
