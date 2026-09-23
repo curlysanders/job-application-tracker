@@ -16,6 +16,17 @@
             <button data-modal-target="preview-modal" data-modal-toggle="preview-modal" class="button button-secondary" type="button">Open modal</button>
         </div>
     </section>
+    <section class="panel form-panel" aria-labelledby="tech-stack-heading">
+        <h2 id="tech-stack-heading">Technology tags</h2>
+        <p>Select known technologies or add a new technology with its required category.</p>
+        <form data-controller="tech-stack-collection">
+            {{ form_row(techStackForm.existingTags) }}
+            <fieldset><legend>New technologies</legend><div data-tech-stack-collection-target="list">
+                {% for tag in techStackForm.newTags %}<div class="tech-stack-row" data-tech-stack-collection-row>{{ form_row(tag.name) }}{{ form_row(tag.category) }}<button class="button button-secondary" data-action="tech-stack-collection#remove" type="button">Remove technology</button></div>{% endfor %}
+            </div><template data-tech-stack-collection-target="template"><div class="tech-stack-row" data-tech-stack-collection-row>{{ form_row(techStackForm.newTags.vars.prototype.name) }}{{ form_row(techStackForm.newTags.vars.prototype.category) }}<button class="button button-secondary" data-action="tech-stack-collection#remove" type="button">Remove technology</button></div></template><button class="button button-secondary" data-action="tech-stack-collection#add" type="button">Add technology</button></fieldset>
+            {{ form_rest(techStackForm) }}
+        </form>
+    </section>
     <div data-controller="modal-focus" id="preview-modal" tabindex="-1" aria-hidden="true" aria-labelledby="preview-modal-title" class="hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full h-full preview-modal">
         <div class="modal-panel">
             <h2 id="preview-modal-title">Modal preview</h2>

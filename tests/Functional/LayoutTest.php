@@ -39,6 +39,15 @@ final class LayoutTest extends WebTestCase
         self::assertSelectorExists('[data-dropdown-toggle="preview-dropdown"]');
         self::assertSelectorExists('[data-modal-toggle="preview-modal"]');
         self::assertSelectorExists('[data-modal-hide="preview-modal"]');
+        self::assertSelectorExists('[data-controller="tech-stack-collection"]');
+        self::assertSelectorExists('input[name="tech_stack_tags[existingTags]"][data-symfony--ux-autocomplete--autocomplete-url-value="/app/tech-stacks/autocomplete"]');
+        $existingTechnologyOptions = $client->getCrawler()->filter('input[name="tech_stack_tags[existingTags]"]')->attr('data-symfony--ux-autocomplete--autocomplete-tom-select-options-value');
+        self::assertIsString($existingTechnologyOptions);
+        self::assertStringContainsString('"maxOptions":null', $existingTechnologyOptions);
+        self::assertSelectorExists('template [data-tech-stack-collection-row] input[name="tech_stack_tags[newTags][__name__][category]"]');
+        $newTechnologyCategoryOptions = $client->getCrawler()->filter('template input[name="tech_stack_tags[newTags][__name__][category]"]')->attr('data-symfony--ux-autocomplete--autocomplete-tom-select-options-value');
+        self::assertIsString($newTechnologyCategoryOptions);
+        self::assertStringContainsString('"maxOptions":null', $newTechnologyCategoryOptions);
 
         $client->request('GET', '/');
         self::assertSelectorNotExists('.flash');

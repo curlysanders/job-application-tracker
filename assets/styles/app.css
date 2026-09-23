@@ -25,7 +25,7 @@ p { color: #475569; line-height: 1.65; margin: .75rem 0; }
 .form-panel input:focus { border-color: #2563eb; outline: 3px solid #bfdbfe; outline-offset: 1px; }
 .form-panel fieldset { display: grid; gap: 1rem; padding: 1rem; border: 1px solid #cbd5e1; border-radius: .5rem; }
 .form-panel legend { padding: 0 .25rem; color: #334155; font-weight: 600; }
-.contact-row { display: grid; gap: .75rem; padding: 1rem; border: 1px solid #e2e8f0; border-radius: .5rem; }
+.contact-row, .tech-stack-row { display: grid; gap: .75rem; padding: 1rem; border: 1px solid #e2e8f0; border-radius: .5rem; }
 .management-actions { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 1rem; }
 .management-actions form { display: flex; flex-wrap: wrap; align-items: end; gap: .5rem; }
 .management-actions label { font-weight: 600; }
