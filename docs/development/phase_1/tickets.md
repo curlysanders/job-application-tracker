@@ -84,8 +84,9 @@
     - Add database seed script for standard technologies (PHP, Symfony, MariaDB, Docker, React, Python, AWS, etc.).
     - Build UX autocomplete select component for attaching multiple tech stack items to entities.
 - **Acceptance Criteria**:
-    - [ ] Pre-seeded tech tags are selectable via standard UI multi-select or autocomplete tags.
-    - [ ] Custom tech tags can be added on the fly during vacancy entry.
+    - [x] Pre-seeded tech tags are selectable via standard UI multi-select or autocomplete tags.
+    - [ ] Custom tech tags can be added on the fly during vacancy entry (delivered by TICK-204 using this component).
+- **Validation**: [Results and reproduction steps](tick-202-validation.md).
 
 ---
 

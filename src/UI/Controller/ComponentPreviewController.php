@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace CurlySanders\JobApplicationTracker\UI\Controller;
 
+use CurlySanders\JobApplicationTracker\UI\Form\Model\TechStack\TechStackTagsData;
+use CurlySanders\JobApplicationTracker\UI\Form\TechStack\TechStackTagsType;
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface;
@@ -15,6 +18,7 @@ final readonly class ComponentPreviewController
     public function __construct(
         private RequestStack $requestStack,
         private Environment $twig,
+        private FormFactoryInterface $forms,
     ) {
     }
 
@@ -30,6 +34,8 @@ final readonly class ComponentPreviewController
             $session->getFlashBag()->add($type, ucfirst($type).' notification example.');
         }
 
-        return new Response($this->twig->render('preview/components.html.twig'));
+        return new Response($this->twig->render('preview/components.html.twig', [
+            'techStackForm' => $this->forms->create(TechStackTagsType::class, new TechStackTagsData())->createView(),
+        ]));
     }
 }
