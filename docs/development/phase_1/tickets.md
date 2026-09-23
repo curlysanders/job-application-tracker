@@ -101,8 +101,9 @@
         - Workflow & Meta: status, archived, excitement (0-5 stars), contract_type, application_source, terminal_reason, scratchpad_notes.
     - Establish relationships: `User` (ManyToOne), `Company` (ManyToOne, nullable), `Recruiter` (ManyToOne, nullable), `TechStack` (ManyToMany).
 - **Acceptance Criteria**:
-    - [ ] Migration executes cleanly without schema errors.
-    - [ ] Foreign keys, indexes (status, user_id, date_added), and constraints are correctly configured.
+    - [x] Migration executes cleanly without schema errors.
+    - [x] Foreign keys, indexes (status, user_id, date_added), and constraints are correctly configured.
+- **Validation**: [Results and reproduction steps](tick-203-validation.md).
 
 ---
 
