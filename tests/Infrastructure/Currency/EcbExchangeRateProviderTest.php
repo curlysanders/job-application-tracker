@@ -32,7 +32,7 @@ final class EcbExchangeRateProviderTest extends TestCase
         $cache = new ArrayAdapter();
         $item = $cache->getItem('exchange_rates.ecb.daily');
         $item->set([
-            'fetchedAt' => (new \DateTimeImmutable('-2 days'))->format(DATE_ATOM),
+            'fetchedAt' => new \DateTimeImmutable('-2 days')->format(DATE_ATOM),
             'ratesPerEuro' => ['EUR' => '1', 'USD' => '1.2'],
         ]);
         $cache->save($item);
