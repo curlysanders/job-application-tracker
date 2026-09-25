@@ -94,4 +94,23 @@
         <button class="button" type="submit">{{ submitLabel }}</button>
         {{ form_end(form, {render_rest: false}) }}
     </section>
+    {% if vacancy is defined %}
+        <section class="panel vacancy-status-panel" aria-labelledby="vacancy-status-heading">
+            <h2 id="vacancy-status-heading">Vacancy status</h2>
+            <p>Current status: <strong>{{ vacancy.status.value|replace({'_': ' '})|title }}</strong></p>
+            {% if enabledStatusTransitions is empty %}
+                <p>This vacancy has reached a final status.</p>
+            {% else %}
+                <div class="vacancy-status-actions">
+                    {% for transition in enabledStatusTransitions %}
+                        <form action="{{ path('app_vacancy_transition_status', {id: vacancy.id}) }}" method="post">
+                            <input type="hidden" name="_token" value="{{ csrf_token('vacancy_status_transition_' ~ vacancy.id) }}">
+                            <input type="hidden" name="transition" value="{{ transition.name }}">
+                            <button class="button button-secondary" type="submit">{{ transition.name|replace({'_': ' '})|title }}</button>
+                        </form>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </section>
+    {% endif %}
 {% endblock %}

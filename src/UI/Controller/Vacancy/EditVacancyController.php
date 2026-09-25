@@ -11,6 +11,7 @@ use CurlySanders\JobApplicationTracker\Domain\User\User;
 use CurlySanders\JobApplicationTracker\UI\Form\VacancyFormDataFactory;
 use CurlySanders\JobApplicationTracker\UI\Form\VacancyType;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,12 +20,23 @@ use Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Workflow\WorkflowInterface;
 use Twig\Environment;
 
 final readonly class EditVacancyController
 {
-    public function __construct(private Security $security, private VacancyRepository $vacancies, private CommandBus $commandBus, private FormFactoryInterface $forms, private VacancyFormDataFactory $dataFactory, private ExchangeRateProvider $exchangeRates, private Environment $twig, private UrlGeneratorInterface $urls)
-    {
+    public function __construct(
+        private Security $security,
+        private VacancyRepository $vacancies,
+        private CommandBus $commandBus,
+        private FormFactoryInterface $forms,
+        private VacancyFormDataFactory $dataFactory,
+        private ExchangeRateProvider $exchangeRates,
+        private Environment $twig,
+        private UrlGeneratorInterface $urls,
+        #[Autowire(service: 'state_machine.vacancy_status')]
+        private WorkflowInterface $workflow,
+    ) {
     }
 
     #[Route('/app/vacancies/{id}/edit', name: 'app_vacancy_edit', requirements: ['id' => '\\d+'], methods: ['GET', 'POST'])]
@@ -46,7 +58,16 @@ final readonly class EditVacancyController
 
         $preferredSalary = $user->getPreferredSalary();
 
-        return new Response($this->twig->render('vacancy/form.html.twig', ['form' => $form->createView(), 'pageTitle' => 'Edit vacancy', 'submitLabel' => 'Save vacancy', 'minimumPreferredSalary' => $preferredSalary->getMinimumDecimal(), 'minimumPreferredSalaryCurrency' => $preferredSalary->getCurrencyCode(), 'exchangeRates' => $rateValues]), $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK);
+        return new Response($this->twig->render('vacancy/form.html.twig', [
+            'form' => $form->createView(),
+            'pageTitle' => 'Edit vacancy',
+            'submitLabel' => 'Save vacancy',
+            'minimumPreferredSalary' => $preferredSalary->getMinimumDecimal(),
+            'minimumPreferredSalaryCurrency' => $preferredSalary->getCurrencyCode(),
+            'exchangeRates' => $rateValues,
+            'vacancy' => $vacancy,
+            'enabledStatusTransitions' => $this->workflow->getEnabledTransitions($vacancy),
+        ]), $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK);
     }
 
     private function authenticatedUser(): User

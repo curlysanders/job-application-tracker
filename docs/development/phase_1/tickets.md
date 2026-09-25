@@ -130,13 +130,14 @@
 - **Epic**: Epic 3 (Pipeline & Workflow Engine)
 - **Dependencies**: TICK-203
 - **Scope**:
-    - Configure `vacancy_status` state machine in `config/packages/workflow.yaml`:
+    - Configure `vacancy_status` state machine in `config/packages/workflow.php`:
         - States: `BOOKMARKED`, `APPLYING`, `APPLIED`, `INTERVIEWING`, `NEGOTIATING`, `ACCEPTED`, `I_WITHDREW`, `NOT_SELECTED`, `NO_RESPONSE`.
         - Allowed transitions: defined logically (e.g., `BOOKMARKED` -> `APPLYING` / `APPLIED` / `I_WITHDREW`).
-    - Implement guard listeners preventing invalid transitions.
+    - Enforce valid transitions through the state machine definition.
 - **Acceptance Criteria**:
-    - [ ] Workflow state machine prevents illegal status jumps (e.g., direct jump from `BOOKMARKED` to `ACCEPTED`).
-    - [ ] State transitions can be triggered programmatically and via UI buttons.
+    - [x] Workflow state machine prevents illegal status jumps (e.g., direct jump from `BOOKMARKED` to `ACCEPTED`).
+    - [x] State transitions can be triggered programmatically and via UI buttons.
+- **Validation**: [Results and reproduction steps](tick-301-validation.md).
 
 ---
 
