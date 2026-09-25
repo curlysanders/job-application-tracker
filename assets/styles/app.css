@@ -20,6 +20,8 @@ p { color: #475569; line-height: 1.65; margin: .75rem 0; }
 .panel, .modal-panel { padding: 1.5rem; background: white; border: 1px solid #e2e8f0; border-radius: .75rem; }
 .form-panel { max-width: 32rem; }
 .vacancy-form-panel { max-width: 66rem; }
+.vacancy-status-panel { max-width: 66rem; margin-top: 1rem; }
+.vacancy-status-actions { display: flex; flex-wrap: wrap; gap: .75rem; }
 .form-panel form, .vacancy-form-panel form { display: grid; gap: 1rem; margin-top: 1rem; }
 .form-panel label, .vacancy-form-panel label { color: #334155; font-weight: 600; }
 .form-panel input, .form-panel select, .form-panel textarea, .vacancy-form-panel input, .vacancy-form-panel select, .vacancy-form-panel textarea { width: 100%; padding: .65rem .75rem; border: 1px solid #94a3b8; border-radius: .5rem; background: white; }

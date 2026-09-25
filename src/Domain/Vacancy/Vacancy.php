@@ -18,6 +18,8 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(name: 'IDX_VACANCIES_STATUS', fields: ['status'])]
 #[ORM\Index(name: 'IDX_VACANCIES_USER', columns: ['user_id'])]
 #[ORM\Index(name: 'IDX_VACANCIES_DATE_ADDED', fields: ['dateAdded'])]
+#[ORM\Index(name: 'IDX_VACANCIES_COMPANY', columns: ['company_id'])]
+#[ORM\Index(name: 'IDX_VACANCIES_RECRUITER', columns: ['recruiter_id'])]
 final class Vacancy
 {
     use NormalizesStrings;
@@ -37,7 +39,11 @@ final class Vacancy
 
     /** @var Collection<int, TechStack> */
     #[ORM\ManyToMany(targetEntity: TechStack::class)]
-    #[ORM\JoinTable(name: 'vacancy_tech_stacks')]
+    #[ORM\JoinTable(
+        name: 'vacancy_tech_stacks',
+        foreignKeyName: 'FK_VACANCY_TECH_STACKS_VACANCY',
+        inverseForeignKeyName: 'FK_VACANCY_TECH_STACKS_TECH_STACK',
+    )]
     private Collection $techStacks;
 
     #[ORM\Column(length: 255)]
