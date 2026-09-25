@@ -1,0 +1,97 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ pageTitle }} · Job Application Tracker{% endblock %}
+{% block page_heading %}{{ pageTitle }}{% endblock %}
+
+{% block content %}
+    <section class="panel vacancy-form-panel">
+        {{ form_start(form, {attr: {'data-controller': 'vacancy-authoring', 'data-vacancy-authoring-minimum-preferred-salary-value': minimumPreferredSalary ?? '', 'data-vacancy-authoring-minimum-preferred-salary-currency-value': minimumPreferredSalaryCurrency ?? 'EUR', 'data-vacancy-authoring-rates-value': exchangeRates|json_encode}}) }}
+        <fieldset>
+            <legend>Role and employer</legend>
+            {{ form_row(form.title) }}
+            {{ form_row(form.companyId) }}
+            {{ form_row(form.recruiterId) }}
+            {{ form_row(form.location) }}
+            {{ form_row(form.applicationSource) }}
+            <div data-controller="source-url-collection">
+                <div data-source-url-collection-target="list">
+                    {% for sourceUrl in form.sourceUrls %}
+                        <div class="source-url-row" data-source-url-collection-row>{{ form_row(sourceUrl) }}
+                            <button class="button button-secondary" data-action="source-url-collection#remove"
+                                    type="button">Remove URL
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+                <template data-source-url-collection-target="template">
+                    <div class="source-url-row"
+                         data-source-url-collection-row>{{ form_row(form.sourceUrls.vars.prototype) }}
+                        <button class="button button-secondary" data-action="source-url-collection#remove"
+                                type="button">Remove URL
+                        </button>
+                    </div>
+                </template>
+                <button class="button button-secondary" data-action="source-url-collection#add" type="button">Add source
+                    URL
+                </button>
+            </div>
+            {% do form.sourceUrls.setRendered() %}
+
+            {{ form_row(form.howToApply) }}
+            {{ form_row(form.contractType) }}
+            <div
+                class="vacancy-date-grid">{{ form_row(form.datePosted) }}{{ form_row(form.deadline) }}{{ form_row(form.dateApplied) }}</div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Summary text</legend>
+            {{ form_row(form.fullText) }}{{ form_row(form.requirements) }}{{ form_row(form.responsibilities) }}
+            {{ form_row(form.preferredQualifications) }}{{ form_row(form.aboutJob) }}{{ form_row(form.aboutCompany) }}{{ form_row(form.compensationBenefits) }}
+        </fieldset>
+
+        <fieldset>
+            <legend>Compensation and work mode</legend>
+            <div
+                class="vacancy-salary-grid">{{ form_row(form.minimumSalary) }}{{ form_row(form.maximumSalary) }}{{ form_row(form.currencyCode) }}</div>
+            <p class="salary-guidance" data-vacancy-authoring-target="salaryGuidance" hidden aria-live="polite"></p>
+            {{ form_row(form.workMode) }}
+            <div data-vacancy-authoring-target="hybridDetailsContainer">{{ form_row(form.hybridDetails) }}</div>
+        </fieldset>
+
+        <fieldset data-controller="tech-stack-collection">
+            <legend>Technology and excitement</legend>
+            {{ form_row(form.techStacks.existingTags) }}
+            <fieldset>
+                <legend>New technologies</legend>
+                <div data-tech-stack-collection-target="list">
+                    {% for tag in form.techStacks.newTags %}
+                        <div class="tech-stack-row"
+                             data-tech-stack-collection-row>{{ form_row(tag.name) }}{{ form_row(tag.category) }}
+                        <button class="button button-secondary" data-action="tech-stack-collection#remove"
+                                type="button">Remove technology
+                        </button></div>{% endfor %}
+                </div>
+                <template data-tech-stack-collection-target="template">
+                    <div class="tech-stack-row"
+                         data-tech-stack-collection-row>{{ form_row(form.techStacks.newTags.vars.prototype.name) }}{{ form_row(form.techStacks.newTags.vars.prototype.category) }}
+                        <button class="button button-secondary" data-action="tech-stack-collection#remove"
+                                type="button">Remove technology
+                        </button>
+                    </div>
+                </template>
+                <button class="button button-secondary" data-action="tech-stack-collection#add" type="button">Add
+                    technology
+                </button>
+            </fieldset>
+            {% do form.techStacks.setRendered() %}
+
+            <fieldset class="star-rating">
+                <legend>{{ form.excitement.vars.label }}</legend>{% for rating in form.excitement %}
+                <span>{{ form_widget(rating) }}{{ form_label(rating, rating.vars.label ~ ' stars') }}</span>{% endfor %}
+            </fieldset>
+        </fieldset>
+        {{ form_rest(form) }}
+        <button class="button" type="submit">{{ submitLabel }}</button>
+        {{ form_end(form, {render_rest: false}) }}
+    </section>
+{% endblock %}

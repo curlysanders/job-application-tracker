@@ -143,6 +143,52 @@ final class Vacancy
         $this->title = self::required($title, 'A vacancy title is required.');
     }
 
+    /** @param list<string> $sourceUrls */
+    public function updateAuthoringDetails(
+        ?Company $company,
+        ?Recruiter $recruiter,
+        ?string $fullText,
+        ?string $requirements,
+        ?string $responsibilities,
+        ?string $preferredQualifications,
+        ?string $aboutJob,
+        ?string $aboutCompany,
+        ?string $compensationBenefits,
+        array $sourceUrls,
+        ?string $howToApply,
+        ?string $location,
+        ?WorkMode $workMode,
+        ?string $hybridDetails,
+        ?\DateTimeImmutable $datePosted,
+        ?\DateTimeImmutable $deadline,
+        ?\DateTimeImmutable $dateApplied,
+        ?ContractType $contractType,
+        ?ApplicationSource $applicationSource,
+    ): void {
+        $this->company = $company;
+        $this->recruiter = $recruiter;
+        $this->fullText = self::optional($fullText);
+        $this->requirements = self::optional($requirements);
+        $this->responsibilities = self::optional($responsibilities);
+        $this->preferredQualifications = self::optional($preferredQualifications);
+        $this->aboutJob = self::optional($aboutJob);
+        $this->aboutCompany = self::optional($aboutCompany);
+        $this->compensationBenefits = self::optional($compensationBenefits);
+        $this->sourceUrls = array_map(
+            static fn (string $url): string => self::required($url, 'A source URL is required.'),
+            $sourceUrls,
+        );
+        $this->howToApply = self::optional($howToApply);
+        $this->location = self::optional($location);
+        $this->workMode = $workMode;
+        $this->hybridDetails = self::optional($hybridDetails);
+        $this->datePosted = $datePosted;
+        $this->deadline = $deadline;
+        $this->dateApplied = $dateApplied;
+        $this->contractType = $contractType;
+        $this->applicationSource = $applicationSource;
+    }
+
     public function replaceSalaryRange(?SalaryRange $salaryRange): void
     {
         if (null === $salaryRange) {
@@ -187,6 +233,102 @@ final class Vacancy
     public function getTitle(): string
     {
         return $this->title;
+    }
+
+    public function getCompany(): ?Company
+    {
+        return $this->company;
+    }
+
+    public function getRecruiter(): ?Recruiter
+    {
+        return $this->recruiter;
+    }
+
+    public function getFullText(): ?string
+    {
+        return $this->fullText;
+    }
+
+    public function getRequirements(): ?string
+    {
+        return $this->requirements;
+    }
+
+    public function getResponsibilities(): ?string
+    {
+        return $this->responsibilities;
+    }
+
+    public function getPreferredQualifications(): ?string
+    {
+        return $this->preferredQualifications;
+    }
+
+    public function getAboutJob(): ?string
+    {
+        return $this->aboutJob;
+    }
+
+    public function getAboutCompany(): ?string
+    {
+        return $this->aboutCompany;
+    }
+
+    public function getCompensationBenefits(): ?string
+    {
+        return $this->compensationBenefits;
+    }
+
+    /** @return list<string> */
+    public function getSourceUrls(): array
+    {
+        return $this->sourceUrls;
+    }
+
+    public function getHowToApply(): ?string
+    {
+        return $this->howToApply;
+    }
+
+    public function getLocation(): ?string
+    {
+        return $this->location;
+    }
+
+    public function getWorkMode(): ?WorkMode
+    {
+        return $this->workMode;
+    }
+
+    public function getHybridDetails(): ?string
+    {
+        return $this->hybridDetails;
+    }
+
+    public function getDatePosted(): ?\DateTimeImmutable
+    {
+        return $this->datePosted;
+    }
+
+    public function getDeadline(): ?\DateTimeImmutable
+    {
+        return $this->deadline;
+    }
+
+    public function getDateApplied(): ?\DateTimeImmutable
+    {
+        return $this->dateApplied;
+    }
+
+    public function getContractType(): ?ContractType
+    {
+        return $this->contractType;
+    }
+
+    public function getApplicationSource(): ?ApplicationSource
+    {
+        return $this->applicationSource;
     }
 
     public function getStatus(): VacancyStatus

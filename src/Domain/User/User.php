@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace CurlySanders\JobApplicationTracker\Domain\User;
 
+use Brick\Money\Money;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -33,8 +34,11 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
-    #[ORM\Column(name: 'min_preferred_salary', type: 'gross_monthly_salary', precision: 10, scale: 2, nullable: true)]
-    private ?GrossMonthlySalary $minimumPreferredSalary = null;
+    #[ORM\Column(name: 'min_preferred_salary', type: 'decimal', precision: 10, scale: 2, nullable: true)]
+    private ?string $minimumPreferredSalary = null;
+
+    #[ORM\Column(name: 'min_preferred_salary_currency', length: 3)]
+    private string $minimumPreferredSalaryCurrency = 'EUR';
 
     #[ORM\Column(name: 'max_commute_minutes', nullable: true)]
     private ?int $maximumCommuteMinutes = null;
@@ -125,7 +129,7 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     public function updatePreferences(
-        ?GrossMonthlySalary $minimumPreferredSalary,
+        PreferredSalary $preferredSalary,
         ?int $maximumCommuteMinutes,
         ?PreferredTransportMode $preferredTransportMode,
     ): void {
@@ -133,14 +137,18 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
             throw new \InvalidArgumentException('The maximum commute time must be positive.');
         }
 
-        $this->minimumPreferredSalary = $minimumPreferredSalary;
+        $this->minimumPreferredSalary = $preferredSalary->getMinimumDecimal();
+        $this->minimumPreferredSalaryCurrency = $preferredSalary->getCurrencyCode();
         $this->maximumCommuteMinutes = $maximumCommuteMinutes;
         $this->preferredTransportMode = $preferredTransportMode;
     }
 
-    public function getMinimumPreferredSalary(): ?GrossMonthlySalary
+    public function getPreferredSalary(): PreferredSalary
     {
-        return $this->minimumPreferredSalary;
+        return PreferredSalary::fromDecimal(
+            $this->minimumPreferredSalary,
+            $this->minimumPreferredSalaryCurrency,
+        );
     }
 
     public function getMaximumCommuteMinutes(): ?int
@@ -153,15 +161,9 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->preferredTransportMode;
     }
 
-    public function evaluatesSalary(GrossMonthlySalary $grossSalary): SalaryFitStatus
+    public function evaluatesSalary(Money $grossSalary, ?CurrencyConversionRate $conversionRate = null): SalaryFitStatus
     {
-        if (null === $this->minimumPreferredSalary) {
-            return SalaryFitStatus::NotConfigured;
-        }
-
-        return $grossSalary->isAtLeast($this->minimumPreferredSalary)
-            ? SalaryFitStatus::MeetsTarget
-            : SalaryFitStatus::BelowTarget;
+        return $this->getPreferredSalary()->evaluate($grossSalary, $conversionRate);
     }
 
     public function replaceResume(
