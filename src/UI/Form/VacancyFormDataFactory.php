@@ -74,7 +74,7 @@ final class VacancyFormDataFactory
     private function existingSlugs(VacancyData $data): array
     {
         return explode(',', $data->techStacks->existingTags ?? '')
-                |> (static fn ($x) => array_map('trim', $x))
+                |> (static fn ($x) => array_map(trim(...), $x))
                 |> (static fn ($x) => array_filter($x, static fn (string $slug): bool => '' !== $slug))
                 |> array_unique(...)
                 |> array_values(...);
