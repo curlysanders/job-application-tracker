@@ -8,6 +8,7 @@ use CurlySanders\JobApplicationTracker\Application\Shared\Bus\CommandBus;
 use CurlySanders\JobApplicationTracker\Application\UserProfile\Command\UpdateUserPreferences;
 use CurlySanders\JobApplicationTracker\Application\UserProfile\Command\UploadResume;
 use CurlySanders\JobApplicationTracker\Application\UserProfile\ResumeUpload;
+use CurlySanders\JobApplicationTracker\Domain\User\PreferredSalary;
 use CurlySanders\JobApplicationTracker\Domain\User\User;
 use CurlySanders\JobApplicationTracker\UI\Form\Model\ProfileSettingsData;
 use CurlySanders\JobApplicationTracker\UI\Form\Model\ResumeUploadData;
@@ -51,7 +52,10 @@ final readonly class ProfileController
         if ($form->isSubmitted() && $form->isValid()) {
             $this->commandBus->dispatch(new UpdateUserPreferences(
                 $userId,
-                $profile->minimumPreferredSalary,
+                PreferredSalary::fromDecimal(
+                    null === $profile->minimumPreferredSalary || '' === trim($profile->minimumPreferredSalary) ? null : $profile->minimumPreferredSalary,
+                    $profile->minimumPreferredSalaryCurrency,
+                ),
                 $profile->maximumCommuteMinutes,
                 $profile->preferredTransportMode,
             ));
@@ -103,7 +107,9 @@ final readonly class ProfileController
     private function profileSettingsFor(User $user): ProfileSettingsData
     {
         $profile = new ProfileSettingsData();
-        $profile->minimumPreferredSalary = $user->getMinimumPreferredSalary()?->toDecimal();
+        $preferredSalary = $user->getPreferredSalary();
+        $profile->minimumPreferredSalary = $preferredSalary->getMinimumDecimal();
+        $profile->minimumPreferredSalaryCurrency = $preferredSalary->getCurrencyCode();
         $profile->maximumCommuteMinutes = $user->getMaximumCommuteMinutes();
         $profile->preferredTransportMode = $user->getPreferredTransportMode();
 

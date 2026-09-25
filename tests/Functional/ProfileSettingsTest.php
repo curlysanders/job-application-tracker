@@ -32,6 +32,7 @@ final class ProfileSettingsTest extends WebTestCase
         $crawler = $client->request('GET', '/app/profile');
         $client->submit($crawler->selectButton('Save settings')->form([
             'profile_settings[minimumPreferredSalary]' => '4500.00',
+            'profile_settings[minimumPreferredSalaryCurrency]' => 'USD',
             'profile_settings[maximumCommuteMinutes]' => 45,
             'profile_settings[preferredTransportMode]' => PreferredTransportMode::PublicTransport->value,
         ]));
@@ -40,7 +41,8 @@ final class ProfileSettingsTest extends WebTestCase
         $this->entityManager()->clear();
         $savedUser = $this->entityManager()->find(User::class, $user->getId());
         self::assertInstanceOf(User::class, $savedUser);
-        self::assertSame('4500.00', $savedUser->getMinimumPreferredSalary()?->toDecimal());
+        self::assertSame('4500.00', $savedUser->getPreferredSalary()->getMinimumDecimal());
+        self::assertSame('USD', $savedUser->getPreferredSalary()->getCurrencyCode());
         self::assertSame(45, $savedUser->getMaximumCommuteMinutes());
         self::assertSame(PreferredTransportMode::PublicTransport, $savedUser->getPreferredTransportMode());
     }

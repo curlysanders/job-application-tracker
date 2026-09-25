@@ -19,13 +19,24 @@ h2 { font-size: 1.125rem; font-weight: 650; margin: 0 0 .75rem; }
 p { color: #475569; line-height: 1.65; margin: .75rem 0; }
 .panel, .modal-panel { padding: 1.5rem; background: white; border: 1px solid #e2e8f0; border-radius: .75rem; }
 .form-panel { max-width: 32rem; }
-.form-panel form { display: grid; gap: 1rem; margin-top: 1rem; }
-.form-panel label { color: #334155; font-weight: 600; }
-.form-panel input { width: 100%; padding: .65rem .75rem; border: 1px solid #94a3b8; border-radius: .5rem; background: white; }
-.form-panel input:focus { border-color: #2563eb; outline: 3px solid #bfdbfe; outline-offset: 1px; }
-.form-panel fieldset { display: grid; gap: 1rem; padding: 1rem; border: 1px solid #cbd5e1; border-radius: .5rem; }
-.form-panel legend { padding: 0 .25rem; color: #334155; font-weight: 600; }
+.vacancy-form-panel { max-width: 66rem; }
+.form-panel form, .vacancy-form-panel form { display: grid; gap: 1rem; margin-top: 1rem; }
+.form-panel label, .vacancy-form-panel label { color: #334155; font-weight: 600; }
+.form-panel input, .form-panel select, .form-panel textarea, .vacancy-form-panel input, .vacancy-form-panel select, .vacancy-form-panel textarea { width: 100%; padding: .65rem .75rem; border: 1px solid #94a3b8; border-radius: .5rem; background: white; }
+.form-panel input:focus, .form-panel select:focus, .form-panel textarea:focus, .vacancy-form-panel input:focus, .vacancy-form-panel select:focus, .vacancy-form-panel textarea:focus { border-color: #2563eb; outline: 3px solid #bfdbfe; outline-offset: 1px; }
+.form-panel fieldset, .vacancy-form-panel fieldset { display: grid; gap: 1rem; padding: 1rem; border: 1px solid #cbd5e1; border-radius: .5rem; }
+.form-panel legend, .vacancy-form-panel legend { padding: 0 .25rem; color: #334155; font-weight: 600; }
 .contact-row, .tech-stack-row { display: grid; gap: .75rem; padding: 1rem; border: 1px solid #e2e8f0; border-radius: .5rem; }
+.source-url-row { display: flex; gap: .75rem; align-items: end; padding: .75rem 0; }
+.source-url-row > div { flex: 1; }
+.vacancy-date-grid, .vacancy-salary-grid { display: grid; gap: 1rem; }
+.salary-guidance { padding: .75rem 1rem; border-radius: .5rem; font-weight: 600; }
+.salary-guidance-warning { color: #92400e; background: #fffbeb; border: 1px solid #fde68a; }
+.salary-guidance-neutral { color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; }
+.star-rating { display: flex !important; flex-wrap: wrap; gap: .5rem; }
+.star-rating legend { width: 100%; }
+.star-rating span { display: inline-flex; align-items: center; }
+.star-rating input { width: auto; }
 .management-actions { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 1rem; }
 .management-actions form { display: flex; flex-wrap: wrap; align-items: end; gap: .5rem; }
 .management-actions label { font-weight: 600; }
@@ -58,4 +69,6 @@ p { color: #475569; line-height: 1.65; margin: .75rem 0; }
     .app-shell { display: grid; grid-template-columns: 15rem minmax(0, 1fr); }
     .app-sidebar { border-bottom: 0; border-right: 1px solid #e2e8f0; }
     .app-content { padding: 2.5rem; }
+    .vacancy-date-grid { grid-template-columns: repeat(3, 1fr); }
+    .vacancy-salary-grid { grid-template-columns: repeat(3, 1fr); }
 }

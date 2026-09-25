@@ -19,6 +19,7 @@
                         <nav aria-label="Main navigation">
                                 <a href="{{ path('app_home') }}" class="nav-link"{% if app.request.attributes.get('_route') == 'app_home' %} aria-current="page"{% endif %}>Home</a>
                                 {% if app.user %}
+                                    <a href="{{ path('app_vacancy_create') }}" class="nav-link"{% if app.request.attributes.get('_route') starts with 'app_vacancy_' %} aria-current="page"{% endif %}>Add vacancy</a>
                                     <a href="{{ path('app_company_list') }}" class="nav-link"{% if app.request.attributes.get('_route') starts with 'app_company_' %} aria-current="page"{% endif %}>Companies</a>
                                     <a href="{{ path('app_recruiter_list') }}" class="nav-link"{% if app.request.attributes.get('_route') starts with 'app_recruiter_' %} aria-current="page"{% endif %}>Recruiters</a>
                                 {% endif %}

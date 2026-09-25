@@ -12,6 +12,8 @@ final class ProfileSettingsData
 {
     public ?string $minimumPreferredSalary = null;
 
+    public string $minimumPreferredSalaryCurrency = 'EUR';
+
     public ?int $maximumCommuteMinutes = null;
 
     public ?PreferredTransportMode $preferredTransportMode = null;

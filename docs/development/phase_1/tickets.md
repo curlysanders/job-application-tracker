@@ -118,8 +118,9 @@
         4. Tech Stack & Excitement Rating (Tag selection, 5-star rating widget).
     - Display dynamic threshold warnings if provided salary is below `User::min_preferred_salary`.
 - **Acceptance Criteria**:
-    - [ ] Form successfully persists complete vacancy details.
-    - [ ] Visual highlight badge alerts the user if vacancy salary falls below their profile threshold.
+    - [x] Form successfully persists complete vacancy details.
+    - [x] Visual highlight badge alerts the user if vacancy salary falls below their profile threshold.
+- **Validation**: [Results and reproduction steps](tick-204-validation.md).
 
 ---
 

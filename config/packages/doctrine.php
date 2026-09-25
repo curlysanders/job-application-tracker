@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use CurlySanders\JobApplicationTracker\Infrastructure\Persistence\Doctrine\GrossMonthlySalaryType;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
@@ -11,9 +10,6 @@ return static function (ContainerConfigurator $containerConfigurator): void {
         'dbal' => [
             'url' => '%env(resolve:DATABASE_URL)%',
             'profiling_collect_backtrace' => '%kernel.debug%',
-            'types' => [
-                GrossMonthlySalaryType::NAME => GrossMonthlySalaryType::class,
-            ],
         ],
         'orm' => [
             'validate_xml_mapping' => true,
