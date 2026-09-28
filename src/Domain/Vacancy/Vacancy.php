@@ -357,6 +357,16 @@ final class Vacancy
         return $this->archived;
     }
 
+    public function archive(): void
+    {
+        $this->archived = true;
+    }
+
+    public function restore(): void
+    {
+        $this->archived = false;
+    }
+
     public function getSalaryRange(): ?SalaryRange
     {
         return SalaryRange::fromDecimals($this->minimumSalary, $this->maximumSalary, $this->currencyCode);
@@ -371,5 +381,15 @@ final class Vacancy
     public function getExcitement(): ?int
     {
         return $this->excitement;
+    }
+
+    public function getNextActionAt(): ?\DateTimeImmutable
+    {
+        return $this->nextActionAt;
+    }
+
+    public function getNextActionTitle(): ?string
+    {
+        return $this->nextActionTitle;
     }
 }

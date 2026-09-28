@@ -11,4 +11,6 @@ interface VacancyRepository
     public function findOwnedBy(int $vacancyId, int $userId): ?Vacancy;
 
     public function save(Vacancy $vacancy): void;
+
+    public function remove(Vacancy $vacancy): void;
 }

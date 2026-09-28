@@ -15,24 +15,23 @@ export default class extends Controller {
 
     filter(event) {
         event.preventDefault();
-        this.replaceResults(event.currentTarget.href, event.params.status);
+        this.replaceResults(event.currentTarget.href);
     }
 
     clear(event) {
         event.preventDefault();
-        this.replaceResults(event.currentTarget.href, null);
+        this.replaceResults(event.currentTarget.href);
     }
 
     onPopState() {
         const url = new URL(window.location.href);
-        this.replaceResults(url.href, url.searchParams.get('status'), false);
+        this.replaceResults(url.href, false);
     }
 
-    async replaceResults(fallbackUrl, status, pushState = true) {
+    async replaceResults(fallbackUrl, pushState = true) {
+        const overviewUrl = new URL(fallbackUrl, window.location.origin);
         const fragmentUrl = new URL(this.urlValue, window.location.origin);
-        if (status) {
-            fragmentUrl.searchParams.set('status', status);
-        }
+        fragmentUrl.search = overviewUrl.search;
 
         try {
             const response = await fetch(fragmentUrl, { headers: { Accept: 'text/html' } });
@@ -41,7 +40,7 @@ export default class extends Controller {
             }
 
             this.resultsTarget.innerHTML = await response.text();
-            this.updateSelectedStatus(status);
+            this.updateSelectedStatus(overviewUrl.searchParams.get('status'));
             if (pushState) {
                 window.history.pushState({}, '', fallbackUrl);
             }

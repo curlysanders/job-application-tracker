@@ -1,23 +1,60 @@
+{% set returnUrl = path('app_dashboard', query|merge({page: overview.page})) %}
 <section class="panel dashboard-vacancy-table-panel" aria-labelledby="dashboard-vacancies-heading">
     <h2 id="dashboard-vacancies-heading">Vacancies</h2>
-    {% if pipeline.vacancies is empty %}
-        <p>No active vacancies match this pipeline view.</p>
+    <form method="get" action="{{ path('app_dashboard') }}" class="dashboard-vacancy-filters">
+        <label for="vacancy-search">Search</label>
+        <input id="vacancy-search" name="q" type="search" value="{{ filter.query ?? '' }}" placeholder="Title, company, or technology">
+        <label for="vacancy-status-filter">Status</label>
+        <select id="vacancy-status-filter" name="status"><option value="">All statuses</option>{% for status in enum('CurlySanders\\JobApplicationTracker\\Domain\\Vacancy\\VacancyStatus').cases %}<option value="{{ status.value }}"{% if filter.status == status %} selected{% endif %}>{{ status.label }}</option>{% endfor %}</select>
+        <label for="vacancy-excitement-filter">Excitement</label>
+        <select id="vacancy-excitement-filter" name="excitement"><option value="">All ratings</option>{% for rating in 0..5 %}<option value="{{ rating }}"{% if filter.excitement is same as(rating) %} selected{% endif %}>{{ rating }} stars</option>{% endfor %}</select>
+        <label for="vacancy-work-mode-filter">Work mode</label>
+        <select id="vacancy-work-mode-filter" name="work_mode"><option value="">All work modes</option>{% for mode in enum('CurlySanders\\JobApplicationTracker\\Domain\\Vacancy\\WorkMode').cases %}<option value="{{ mode.value }}"{% if filter.workMode == mode %} selected{% endif %}>{{ mode.value|lower|capitalize }}</option>{% endfor %}</select>
+        <label for="vacancy-salary-fit-filter">Salary fit</label>
+        <select id="vacancy-salary-fit-filter" name="salary_fit"><option value="">All salary fits</option>{% for fit in enum('CurlySanders\\JobApplicationTracker\\Application\\Vacancy\\Overview\\SalaryFit').cases %}<option value="{{ fit.value }}"{% if filter.salaryFit == fit %} selected{% endif %}>{{ fit.label }}</option>{% endfor %}</select>
+        <label for="vacancy-archive-filter">Records</label>
+        <select id="vacancy-archive-filter" name="archived"><option value=""{% if not filter.archived %} selected{% endif %}>Active</option><option value="1"{% if filter.archived %} selected{% endif %}>Archived</option></select>
+        <button class="button" type="submit">Apply filters</button>
+        <a class="button button-secondary" href="{{ path('app_dashboard') }}">Reset</a>
+    </form>
+
+    {% if overview.vacancies is empty %}
+        <p>No vacancies match these filters.</p>
     {% else %}
         <div class="dashboard-vacancy-table-wrapper">
             <table class="dashboard-vacancy-table">
-                <thead>
-                    <tr><th scope="col">Job title</th><th scope="col">Company / recruiter</th><th scope="col">Status</th></tr>
-                </thead>
+                <thead><tr><th scope="col">Job title</th><th scope="col">Company / recruiter</th><th scope="col">Work mode</th><th scope="col">Tech stack</th><th scope="col">Excitement</th><th scope="col">Salary</th><th scope="col">Next action</th><th scope="col">Status</th><th scope="col">Actions</th></tr></thead>
                 <tbody>
-                    {% for vacancy in pipeline.vacancies %}
+                    {% for vacancy in overview.vacancies %}
                         <tr>
-                            <td>{{ vacancy.title }}</td>
+                            <td><a href="{{ path('app_vacancy_edit', {id: vacancy.id}) }}">{{ vacancy.title }}</a></td>
                             <td>{{ vacancy.companyName ?? vacancy.recruiterName ?? '—' }}</td>
-                            <td>{{ vacancy.status.label }}</td>
+                            <td>{{ vacancy.workMode ? vacancy.workMode.value|lower|capitalize : '—' }}</td>
+                            <td>{{ vacancy.techStackNames is empty ? '—' : vacancy.techStackNames|join(', ') }}</td>
+                            <td aria-label="{{ vacancy.excitement is null ? 'No excitement rating' : vacancy.excitement ~ ' of 5 stars' }}">{% if vacancy.excitement is null %}—{% else %}{% for star in 1..5 %}{{ star <= vacancy.excitement ? '★' : '☆' }}{% endfor %}{% endif %}</td>
+                            <td>{{ vacancy.salary ?? '—' }} <small>({{ vacancy.salaryFit.label }})</small></td>
+                            <td>{% if vacancy.nextActionAt %}{{ vacancy.nextActionTitle ?? 'Next action' }}<br><time datetime="{{ vacancy.nextActionAt|date('c') }}">{{ vacancy.nextActionAt|date('d M Y, H:i') }}</time>{% else %}—{% endif %}</td>
+                            <td><span class="vacancy-status-pill">{{ vacancy.status.label }}</span></td>
+                            <td>
+                                <details class="dashboard-vacancy-actions">
+                                    <summary>Actions</summary>
+                                    <a href="{{ path('app_vacancy_edit', {id: vacancy.id}) }}">View details</a>
+                                    {% for transition in vacancy.enabledTransitions %}
+                                        <form action="{{ path('app_vacancy_transition_status', {id: vacancy.id}) }}" method="post"><input type="hidden" name="_token" value="{{ csrf_token('vacancy_status_transition_' ~ vacancy.id) }}"><input type="hidden" name="transition" value="{{ transition }}"><input type="hidden" name="return" value="{{ returnUrl }}"><button type="submit">{{ transition|replace({'_': ' '})|title }}</button></form>
+                                    {% endfor %}
+                                    <form action="{{ path('app_vacancy_archive', {id: vacancy.id}) }}" method="post"><input type="hidden" name="_token" value="{{ csrf_token('vacancy_archive_' ~ vacancy.id) }}"><input type="hidden" name="return" value="{{ returnUrl }}"><input type="hidden" name="archived" value="{{ vacancy.archived ? '0' : '1' }}"><button type="submit">{{ vacancy.archived ? 'Restore' : 'Archive' }}</button></form>
+                                    <form action="{{ path('app_vacancy_delete', {id: vacancy.id}) }}" method="post" onsubmit="return confirm('Permanently delete this vacancy? This cannot be undone.');"><input type="hidden" name="_token" value="{{ csrf_token('vacancy_delete_' ~ vacancy.id) }}"><input type="hidden" name="return" value="{{ returnUrl }}"><input type="hidden" name="confirm" value="delete"><button type="submit">Delete</button></form>
+                                </details>
+                            </td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+        <nav aria-label="Vacancy pages" class="dashboard-vacancy-pagination">
+            {% if overview.page > 1 %}<a href="{{ path('app_dashboard', query|merge({page: overview.page - 1})) }}">Previous</a>{% endif %}
+            <span>Page {{ overview.page }} of {{ overview.pages }}</span>
+            {% if overview.page < overview.pages %}<a href="{{ path('app_dashboard', query|merge({page: overview.page + 1})) }}">Next</a>{% endif %}
+        </nav>
     {% endif %}
 </section>

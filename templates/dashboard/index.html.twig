@@ -9,9 +9,9 @@
         data-controller="vacancy-pipeline"
         data-vacancy-pipeline-url-value="{{ path('app_dashboard_pipeline_vacancies') }}"
     >
-        <twig:VacancyChevronPipeline :counts="pipeline.counts" :statuses="pipelineStatuses" :selectedStatus="selectedStatus ? selectedStatus.value : null" />
+        <twig:VacancyChevronPipeline :counts="pipeline.counts" :statuses="pipelineStatuses" :selectedStatus="selectedStatus ? selectedStatus.value : null" :query="query" />
         <div class="dashboard-vacancy-results" data-vacancy-pipeline-target="results" aria-live="polite">
-            {% include 'dashboard/_vacancies.html.twig' with { pipeline: pipeline } only %}
+            {% include 'dashboard/_vacancies.html.twig' with { overview: overview, filter: filter, query: query } only %}
         </div>
     </section>
 {% endblock %}
