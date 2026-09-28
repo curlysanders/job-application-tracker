@@ -4,8 +4,14 @@
 {% block page_heading %}Dashboard{% endblock %}
 
 {% block content %}
-    <section class="panel">
-        <h2>Welcome to your job search workspace</h2>
-        <p>Vacancy tracking will appear here as the next phase is completed.</p>
+    <section
+        class="dashboard-pipeline"
+        data-controller="vacancy-pipeline"
+        data-vacancy-pipeline-url-value="{{ path('app_dashboard_pipeline_vacancies') }}"
+    >
+        <twig:VacancyChevronPipeline :counts="pipeline.counts" :statuses="pipelineStatuses" :selectedStatus="selectedStatus ? selectedStatus.value : null" />
+        <div class="dashboard-vacancy-results" data-vacancy-pipeline-target="results" aria-live="polite">
+            {% include 'dashboard/_vacancies.html.twig' with { pipeline: pipeline } only %}
+        </div>
     </section>
 {% endblock %}

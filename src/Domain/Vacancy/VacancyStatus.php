@@ -15,4 +15,9 @@ enum VacancyStatus: string
     case IWithdrew = 'I_WITHDREW';
     case NotSelected = 'NOT_SELECTED';
     case NoResponse = 'NO_RESPONSE';
+
+    public function label(): string
+    {
+        return ucwords(strtolower(str_replace('_', ' ', $this->value)));
+    }
 }

@@ -164,8 +164,9 @@
     - Each chevron step displays the total count of active vacancies in that status.
     - Clicking a chevron step filters the vacancy table below by that selected status.
 - **Acceptance Criteria**:
-    - [ ] Chevron visual matches requested pipeline UI design (active highlighting, clean borders, responsive wrapping).
-    - [ ] Clicking a chevron filters vacancies dynamically via Stimulus / Turbo frame without full page reload.
+    - [x] Chevron visual matches requested pipeline UI design (active highlighting, clean borders, responsive wrapping).
+    - [x] Clicking a chevron filters vacancies dynamically via Stimulus / Turbo frame without full page reload.
+- **Validation**: [Results and reproduction steps](tick-303-validation.md).
 
 ---
 

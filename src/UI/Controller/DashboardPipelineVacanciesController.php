@@ -15,23 +15,20 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Twig\Environment;
 
-final readonly class DashboardController
+final readonly class DashboardPipelineVacanciesController
 {
     public function __construct(private Security $security, private VacancyPipelineRepository $pipeline, private Environment $twig)
     {
     }
 
-    #[Route('/app', name: 'app_dashboard', methods: ['GET'])]
+    #[Route('/app/pipeline/vacancies', name: 'app_dashboard_pipeline_vacancies', methods: ['GET'])]
     public function __invoke(Request $request): Response
     {
         $user = $this->authenticatedUser();
         $userId = $user->getId() ?? throw new \LogicException('The dashboard requires a persisted user.');
-        $selectedStatus = $this->selectedStatus($request);
 
-        return new Response($this->twig->render('dashboard/index.html.twig', [
-            'pipeline' => $this->pipeline->forUser($userId, $selectedStatus),
-            'pipelineStatuses' => PipelineStatuses::all(),
-            'selectedStatus' => $selectedStatus,
+        return new Response($this->twig->render('dashboard/_vacancies.html.twig', [
+            'pipeline' => $this->pipeline->forUser($userId, $this->selectedStatus($request)),
         ]));
     }
 

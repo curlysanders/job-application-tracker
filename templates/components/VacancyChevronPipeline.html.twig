@@ -1,0 +1,23 @@
+{% props counts, statuses, selectedStatus = null %}
+<section class="panel vacancy-chevron-pipeline" aria-labelledby="vacancy-pipeline-heading">
+    <div class="vacancy-chevron-pipeline-heading">
+        <h2 id="vacancy-pipeline-heading">Application pipeline</h2>
+        <a class="vacancy-pipeline-clear" href="{{ path('app_dashboard') }}" data-action="vacancy-pipeline#clear"{% if not selectedStatus %} hidden{% endif %}>Show all</a>
+    </div>
+    <nav class="vacancy-chevron-list" aria-label="Filter vacancies by status">
+        {% for status in statuses %}
+            {% set selected = selectedStatus == status.value %}
+            <a
+                class="vacancy-chevron{{ selected ? ' vacancy-chevron-selected' : '' }}"
+                href="{{ path('app_dashboard', {status: status.value}) }}"
+                data-action="vacancy-pipeline#filter"
+                data-vacancy-pipeline-status-param="{{ status.value }}"
+                {% if selected %}aria-current="true"{% endif %}
+            >
+                <span>{{ status.label }}</span>
+                <strong class="vacancy-chevron-count">{{ counts[status.value] ?? 0 }}</strong>
+            </a>
+        {% endfor %}
+        <span class="vacancy-chevron-end" aria-hidden="true"></span>
+    </nav>
+</section>

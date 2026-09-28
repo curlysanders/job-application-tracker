@@ -3,6 +3,7 @@ import ContactCollectionController from './controllers/contact_collection_contro
 import SourceUrlCollectionController from './controllers/source_url_collection_controller.js';
 import TechStackCollectionController from './controllers/tech_stack_collection_controller.js';
 import VacancyAuthoringController from './controllers/vacancy_authoring_controller.js';
+import VacancyPipelineController from './controllers/vacancy_pipeline_controller.js';
 import VacancyStatusTransitionController from './controllers/vacancy_status_transition_controller.js';
 
 const app = startStimulusApp();
@@ -10,4 +11,5 @@ app.register('contact-collection', ContactCollectionController);
 app.register('source-url-collection', SourceUrlCollectionController);
 app.register('tech-stack-collection', TechStackCollectionController);
 app.register('vacancy-authoring', VacancyAuthoringController);
+app.register('vacancy-pipeline', VacancyPipelineController);
 app.register('vacancy-status-transition', VacancyStatusTransitionController);

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace CurlySanders\JobApplicationTracker\UI\Controller;
 
+use CurlySanders\JobApplicationTracker\Application\Vacancy\Pipeline\PipelineStatuses;
 use CurlySanders\JobApplicationTracker\UI\Form\Model\TechStack\TechStackTagsData;
 use CurlySanders\JobApplicationTracker\UI\Form\TechStack\TechStackTagsType;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -35,6 +36,7 @@ final readonly class ComponentPreviewController
         }
 
         return new Response($this->twig->render('preview/components.html.twig', [
+            'pipelineStatuses' => PipelineStatuses::all(),
             'techStackForm' => $this->forms->create(TechStackTagsType::class, new TechStackTagsData())->createView(),
         ]));
     }
