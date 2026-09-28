@@ -44,7 +44,12 @@ final readonly class TransitionVacancyStatusController
         }
 
         try {
-            $this->commandBus->dispatch(new TransitionVacancyStatus($userId, $id, $request->request->getString('transition')));
+            $this->commandBus->dispatch(new TransitionVacancyStatus(
+                $userId,
+                $id,
+                $request->request->getString('transition'),
+                $request->request->getString('note'),
+            ));
             $this->flash($request, 'success', 'Vacancy status updated.');
         } catch (VacancyStatusTransitionNotAllowed) {
             $this->flash($request, 'warning', 'That status transition is no longer available.');

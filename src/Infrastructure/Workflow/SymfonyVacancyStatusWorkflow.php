@@ -21,10 +21,10 @@ final readonly class SymfonyVacancyStatusWorkflow implements VacancyStatusWorkfl
     ) {
     }
 
-    public function apply(Vacancy $vacancy, string $transition): void
+    public function apply(Vacancy $vacancy, string $transition, ?string $note = null): void
     {
         try {
-            $this->workflow->apply($vacancy, $transition);
+            $this->workflow->apply($vacancy, $transition, ['note' => $note]);
         } catch (NotEnabledTransitionException $exception) {
             throw new VacancyStatusTransitionNotAllowed($transition, $exception);
         }
