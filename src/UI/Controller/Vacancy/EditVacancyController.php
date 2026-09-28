@@ -7,6 +7,7 @@ namespace CurlySanders\JobApplicationTracker\UI\Controller\Vacancy;
 use CurlySanders\JobApplicationTracker\Application\Currency\ExchangeRateProvider;
 use CurlySanders\JobApplicationTracker\Application\Shared\Bus\CommandBus;
 use CurlySanders\JobApplicationTracker\Application\Vacancy\VacancyRepository;
+use CurlySanders\JobApplicationTracker\Application\Vacancy\VacancyStatusHistoryRepository;
 use CurlySanders\JobApplicationTracker\Domain\User\User;
 use CurlySanders\JobApplicationTracker\UI\Form\VacancyFormDataFactory;
 use CurlySanders\JobApplicationTracker\UI\Form\VacancyType;
@@ -28,6 +29,7 @@ final readonly class EditVacancyController
     public function __construct(
         private Security $security,
         private VacancyRepository $vacancies,
+        private VacancyStatusHistoryRepository $statusHistory,
         private CommandBus $commandBus,
         private FormFactoryInterface $forms,
         private VacancyFormDataFactory $dataFactory,
@@ -67,6 +69,7 @@ final readonly class EditVacancyController
             'exchangeRates' => $rateValues,
             'vacancy' => $vacancy,
             'enabledStatusTransitions' => $this->workflow->getEnabledTransitions($vacancy),
+            'statusHistory' => $this->statusHistory->findForVacancy($vacancy),
         ]), $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK);
     }
 

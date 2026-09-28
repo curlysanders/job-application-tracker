@@ -58,7 +58,7 @@ final class TransitionVacancyStatusHandlerTest extends TestCase
     private function workflow(): VacancyStatusWorkflow
     {
         return new class implements VacancyStatusWorkflow {
-            public function apply(Vacancy $vacancy, string $transition): void
+            public function apply(Vacancy $vacancy, string $transition, ?string $note = null): void
             {
                 if ('start_applying' !== $transition || VacancyStatus::Bookmarked !== $vacancy->getStatus()) {
                     throw new VacancyStatusTransitionNotAllowed($transition, new \LogicException());

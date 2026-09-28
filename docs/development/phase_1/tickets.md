@@ -149,8 +149,9 @@
     - Create Symfony Workflow event listener (`workflow.vacancy_status.transition`) capturing transition events and creating audit records.
     - Add optional modal prompt when changing status to capture notes (e.g., "First screening scheduled").
 - **Acceptance Criteria**:
-    - [ ] Every status change writes an audit record with timestamp and target status.
-    - [ ] Transition timeline displays cleanly on the vacancy detail page.
+    - [x] Every status change writes an audit record with timestamp and target status.
+    - [x] Transition timeline displays cleanly on the vacancy edit page.
+- **Validation**: [Results and reproduction steps](tick-302-validation.md).
 
 ---
 

@@ -9,5 +9,5 @@ use CurlySanders\JobApplicationTracker\Domain\Vacancy\Vacancy;
 interface VacancyStatusWorkflow
 {
     /** @throws Exception\VacancyStatusTransitionNotAllowed */
-    public function apply(Vacancy $vacancy, string $transition): void;
+    public function apply(Vacancy $vacancy, string $transition, ?string $note = null): void;
 }

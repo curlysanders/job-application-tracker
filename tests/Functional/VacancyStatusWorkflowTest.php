@@ -7,6 +7,7 @@ namespace CurlySanders\JobApplicationTracker\Tests\Functional;
 use CurlySanders\JobApplicationTracker\Domain\User\User;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\Vacancy;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\VacancyStatus;
+use CurlySanders\JobApplicationTracker\Domain\Vacancy\VacancyStatusHistory;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\DomCrawler\Crawler;
@@ -52,9 +53,12 @@ final class VacancyStatusWorkflowTest extends WebTestCase
         self::assertSelectorTextContains('.vacancy-status-panel', 'Current status: Bookmarked');
         self::assertSelectorExists('input[name="transition"][value="start_applying"]');
         self::assertSelectorNotExists('input[name="transition"][value="accept"]');
+        self::assertSelectorExists('#vacancy-status-note-modal textarea[name="note"]');
+        self::assertSelectorTextContains('.vacancy-status-history-panel', 'No status changes have been recorded yet.');
         $client->request('POST', sprintf('/app/vacancies/%d/status', $vacancy->getId()), [
             '_token' => $this->statusCsrfToken($crawler, 'start_applying'),
             'transition' => 'start_applying',
+            'note' => '  First screening scheduled.  ',
         ]);
         self::assertResponseRedirects(sprintf('/app/vacancies/%d/edit', $vacancy->getId()));
 
@@ -62,6 +66,16 @@ final class VacancyStatusWorkflowTest extends WebTestCase
         $updated = $this->entityManager()->find(Vacancy::class, $vacancy->getId());
         self::assertInstanceOf(Vacancy::class, $updated);
         self::assertSame(VacancyStatus::Applying, $updated->getStatus());
+
+        $history = $this->entityManager()->getRepository(VacancyStatusHistory::class)->findAll();
+        self::assertCount(1, $history);
+        self::assertSame(VacancyStatus::Bookmarked, $history[0]->getFromStatus());
+        self::assertSame(VacancyStatus::Applying, $history[0]->getToStatus());
+        self::assertSame('First screening scheduled.', $history[0]->getNotes());
+
+        $client->request('GET', sprintf('/app/vacancies/%d/edit', $vacancy->getId()));
+        self::assertSelectorTextContains('.vacancy-status-history', 'Bookmarked → Applying');
+        self::assertSelectorTextContains('.vacancy-status-history', 'First screening scheduled.');
     }
 
     public function testStatusTransitionRejectsInvalidCsrfAndAnotherUsersVacancy(): void

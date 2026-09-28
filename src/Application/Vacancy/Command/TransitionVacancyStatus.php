@@ -6,7 +6,11 @@ namespace CurlySanders\JobApplicationTracker\Application\Vacancy\Command;
 
 final readonly class TransitionVacancyStatus
 {
-    public function __construct(public int $userId, public int $vacancyId, public string $transition)
-    {
+    public function __construct(
+        public int $userId,
+        public int $vacancyId,
+        public string $transition,
+        public ?string $note = null,
+    ) {
     }
 }
