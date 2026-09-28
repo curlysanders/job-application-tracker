@@ -22,6 +22,32 @@ p { color: #475569; line-height: 1.65; margin: .75rem 0; }
 .vacancy-form-panel { max-width: 66rem; }
 .vacancy-status-panel { max-width: 66rem; margin-top: 1rem; }
 .vacancy-status-history-panel { max-width: 66rem; margin-top: 1rem; }
+.dashboard-pipeline { display: grid; gap: 1rem; max-width: 66rem; }
+.vacancy-chevron-pipeline-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+.vacancy-pipeline-clear { color: #1d4ed8; font-weight: 600; }
+.vacancy-chevron-list { display: flex; flex-wrap: wrap; gap: 0; }
+.vacancy-chevron { position: relative; z-index: 1; display: inline-flex; align-items: center; justify-content: space-between; gap: .75rem; min-width: 8.5rem; padding: .75rem 1.25rem; color: #334155; background: #f8fafc; border: 1px solid #cbd5e1; clip-path: polygon(0 0, calc(100% - .75rem) 0, 100% 50%, calc(100% - .75rem) 100%, 0 100%, .75rem 50%); font-weight: 600; text-decoration: none; }
+.vacancy-chevron + .vacancy-chevron { margin-left: -.75rem; }
+.vacancy-chevron:first-child::before, .vacancy-chevron + .vacancy-chevron::before, .vacancy-chevron:first-child::after, .vacancy-chevron + .vacancy-chevron::after, .vacancy-chevron-end::before, .vacancy-chevron-end::after { position: absolute; top: 0; bottom: 0; left: 0; width: .75rem; clip-path: polygon(0 0, 100% 50%, 0 100%); content: ''; pointer-events: none; }
+.vacancy-chevron:first-child::before, .vacancy-chevron + .vacancy-chevron::before, .vacancy-chevron-end::before { background: #cbd5e1; }
+.vacancy-chevron:first-child::after, .vacancy-chevron + .vacancy-chevron::after, .vacancy-chevron-end::after { top: 1px; bottom: 1px; left: 1px; width: calc(.75rem - 2px); background: inherit; }
+.vacancy-chevron-end { position: relative; flex: 0 0 .75rem; margin-left: -.75rem; }
+.vacancy-chevron-end::after { background: #f8fafc; }
+.vacancy-chevron:hover + .vacancy-chevron-end::after { background: #eff6ff; }
+.vacancy-chevron:hover, .vacancy-chevron-selected { z-index: 2; }
+.vacancy-chevron:hover { background: #eff6ff; border-color: #93c5fd; }
+.vacancy-chevron-selected { color: white; background: #1d4ed8; border-color: #1d4ed8; }
+.vacancy-chevron-selected::before { background: #bfdbfe; }
+.vacancy-chevron-selected + .vacancy-chevron-end::after { background: #1d4ed8; }
+.vacancy-chevron-selected:hover { background: #1e40af; border-color: #1e40af; }
+.vacancy-chevron-selected:hover + .vacancy-chevron-end::after { background: #1e40af; }
+.vacancy-chevron-count { display: inline-grid; min-width: 1.75rem; min-height: 1.75rem; place-items: center; padding: 0 .35rem; color: #1e3a8a; background: #dbeafe; border-radius: 999px; }
+.vacancy-chevron-selected .vacancy-chevron-count { color: #1e3a8a; background: white; }
+.dashboard-vacancy-table-panel { overflow: hidden; }
+.dashboard-vacancy-table-wrapper { overflow-x: auto; }
+.dashboard-vacancy-table { width: 100%; border-collapse: collapse; }
+.dashboard-vacancy-table th, .dashboard-vacancy-table td { padding: .75rem 1rem; text-align: left; border-bottom: 1px solid #e2e8f0; }
+.dashboard-vacancy-table th { color: #475569; font-size: .875rem; }
 .vacancy-status-actions { display: flex; flex-wrap: wrap; gap: .75rem; }
 .vacancy-status-history { display: grid; gap: .75rem; margin: 0; padding: 0; list-style: none; }
 .vacancy-status-history li { padding: 1rem; border-left: 3px solid #2563eb; background: #f8fafc; }

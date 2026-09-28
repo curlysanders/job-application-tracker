@@ -16,6 +16,7 @@
             <button data-modal-target="preview-modal" data-modal-toggle="preview-modal" class="button button-secondary" type="button">Open modal</button>
         </div>
     </section>
+    <twig:VacancyChevronPipeline :counts="{BOOKMARKED: 2, APPLYING: 1, APPLIED: 3, INTERVIEWING: 1, NEGOTIATING: 0, ACCEPTED: 4}" :statuses="pipelineStatuses" selectedStatus="APPLIED" />
     <section class="panel form-panel" aria-labelledby="tech-stack-heading">
         <h2 id="tech-stack-heading">Technology tags</h2>
         <p>Select known technologies or add a new technology with its required category.</p>

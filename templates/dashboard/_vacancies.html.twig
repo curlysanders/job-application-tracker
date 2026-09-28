@@ -1,0 +1,23 @@
+<section class="panel dashboard-vacancy-table-panel" aria-labelledby="dashboard-vacancies-heading">
+    <h2 id="dashboard-vacancies-heading">Vacancies</h2>
+    {% if pipeline.vacancies is empty %}
+        <p>No active vacancies match this pipeline view.</p>
+    {% else %}
+        <div class="dashboard-vacancy-table-wrapper">
+            <table class="dashboard-vacancy-table">
+                <thead>
+                    <tr><th scope="col">Job title</th><th scope="col">Company / recruiter</th><th scope="col">Status</th></tr>
+                </thead>
+                <tbody>
+                    {% for vacancy in pipeline.vacancies %}
+                        <tr>
+                            <td>{{ vacancy.title }}</td>
+                            <td>{{ vacancy.companyName ?? vacancy.recruiterName ?? '—' }}</td>
+                            <td>{{ vacancy.status.label }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+</section>
