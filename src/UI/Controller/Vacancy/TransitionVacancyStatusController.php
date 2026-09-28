@@ -55,7 +55,7 @@ final readonly class TransitionVacancyStatusController
             $this->flash($request, 'warning', 'That status transition is no longer available.');
         }
 
-        return new RedirectResponse($this->urls->generate('app_vacancy_edit', ['id' => $id]));
+        return new RedirectResponse($this->returnUrl($request, $id));
     }
 
     private function authenticatedUser(): User
@@ -76,5 +76,15 @@ final readonly class TransitionVacancyStatusController
         }
 
         $session->getFlashBag()->add($type, $message);
+    }
+
+    private function returnUrl(Request $request, int $id): string
+    {
+        $return = $request->request->getString('return');
+        if ('/app' === parse_url($return, PHP_URL_PATH)) {
+            return $return;
+        }
+
+        return $this->urls->generate('app_vacancy_edit', ['id' => $id]);
     }
 }

@@ -48,6 +48,18 @@ p { color: #475569; line-height: 1.65; margin: .75rem 0; }
 .dashboard-vacancy-table { width: 100%; border-collapse: collapse; }
 .dashboard-vacancy-table th, .dashboard-vacancy-table td { padding: .75rem 1rem; text-align: left; border-bottom: 1px solid #e2e8f0; }
 .dashboard-vacancy-table th { color: #475569; font-size: .875rem; }
+.dashboard-vacancy-filters { display: flex; flex-wrap: wrap; align-items: end; gap: .75rem; margin-bottom: 1rem; }
+.dashboard-vacancy-filters label { display: grid; gap: .35rem; color: #334155; font-size: .875rem; font-weight: 600; }
+.dashboard-vacancy-filters input, .dashboard-vacancy-filters select { min-height: 2.5rem; padding: .45rem .6rem; border: 1px solid #94a3b8; border-radius: .5rem; background: white; }
+.dashboard-vacancy-filters input:focus, .dashboard-vacancy-filters select:focus { border-color: #2563eb; outline: 3px solid #bfdbfe; outline-offset: 1px; }
+.vacancy-status-pill { display: inline-flex; padding: .25rem .5rem; color: #1e3a8a; background: #dbeafe; border-radius: 999px; font-size: .8125rem; font-weight: 650; white-space: nowrap; }
+.dashboard-vacancy-actions { min-width: 11rem; }
+.dashboard-vacancy-actions summary { color: #1d4ed8; cursor: pointer; font-weight: 600; }
+.dashboard-vacancy-actions form, .dashboard-vacancy-actions a { display: block; margin-top: .5rem; }
+.dashboard-vacancy-actions button { width: 100%; padding: .35rem .5rem; color: #334155; background: white; border: 1px solid #cbd5e1; border-radius: .35rem; text-align: left; }
+.dashboard-vacancy-actions a { color: #1d4ed8; }
+.dashboard-vacancy-pagination { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1rem; }
+.dashboard-vacancy-pagination a { color: #1d4ed8; font-weight: 600; }
 .vacancy-status-actions { display: flex; flex-wrap: wrap; gap: .75rem; }
 .vacancy-status-history { display: grid; gap: .75rem; margin: 0; padding: 0; list-style: none; }
 .vacancy-status-history li { padding: 1rem; border-left: 3px solid #2563eb; background: #f8fafc; }

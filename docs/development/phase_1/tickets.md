@@ -174,13 +174,14 @@
 - **Epic**: Epic 3 (Pipeline & Workflow Engine)
 - **Dependencies**: TICK-303
 - **Scope**:
-    - Build primary Dashboard Overview view (`/app/vacancies`).
+    - Build primary Dashboard Overview view (`/app`).
     - Implement search bar (by Title, Company Name, Tech Stack).
     - Add filter controls: Status, Excitement Rating (0-5 stars), Work Mode, Salary Fit.
     - Table columns: Job Title, Company/Recruiter, Work Mode, Tech Stack Tags, Excitement, Salary, Next Action, Current Status pill.
 - **Acceptance Criteria**:
-    - [ ] Table renders fast with server-side pagination (20 items per page).
-    - [ ] Quick actions menu per row: View details, Change status dropdown, Archive, Delete.
+    - [x] Table renders fast with server-side pagination (20 items per page).
+    - [x] Quick actions menu per row: View details, Change status dropdown, Archive, Delete.
+- **Validation**: [Results and reproduction steps](tick-304-validation.md).
 
 ---
 

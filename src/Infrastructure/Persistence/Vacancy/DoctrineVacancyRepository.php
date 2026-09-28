@@ -26,4 +26,10 @@ final readonly class DoctrineVacancyRepository implements VacancyRepository
         $this->entityManager->persist($vacancy);
         $this->entityManager->flush();
     }
+
+    public function remove(Vacancy $vacancy): void
+    {
+        $this->entityManager->remove($vacancy);
+        $this->entityManager->flush();
+    }
 }

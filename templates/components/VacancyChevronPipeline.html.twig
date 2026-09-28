@@ -1,15 +1,15 @@
-{% props counts, statuses, selectedStatus = null %}
+{% props counts, statuses, selectedStatus = null, query = {} %}
 <section class="panel vacancy-chevron-pipeline" aria-labelledby="vacancy-pipeline-heading">
     <div class="vacancy-chevron-pipeline-heading">
         <h2 id="vacancy-pipeline-heading">Application pipeline</h2>
-        <a class="vacancy-pipeline-clear" href="{{ path('app_dashboard') }}" data-action="vacancy-pipeline#clear"{% if not selectedStatus %} hidden{% endif %}>Show all</a>
+        <a class="vacancy-pipeline-clear" href="{{ path('app_dashboard', query|merge({status: null, page: null})) }}" data-action="vacancy-pipeline#clear"{% if not selectedStatus %} hidden{% endif %}>Show all</a>
     </div>
     <nav class="vacancy-chevron-list" aria-label="Filter vacancies by status">
         {% for status in statuses %}
             {% set selected = selectedStatus == status.value %}
             <a
                 class="vacancy-chevron{{ selected ? ' vacancy-chevron-selected' : '' }}"
-                href="{{ path('app_dashboard', {status: status.value}) }}"
+                href="{{ path('app_dashboard', query|merge({status: status.value, page: null})) }}"
                 data-action="vacancy-pipeline#filter"
                 data-vacancy-pipeline-status-param="{{ status.value }}"
                 {% if selected %}aria-current="true"{% endif %}
