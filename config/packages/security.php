@@ -40,14 +40,22 @@ return static function (ContainerConfigurator $containerConfigurator): void {
                 ],
                 'logout' => [
                     'path' => 'app_logout',
-                    'target' => 'app_home',
+                    'target' => 'app_dashboard',
                     'enable_csrf' => true,
                 ],
             ],
         ],
         'access_control' => [
             [
-                'path' => '^/app',
+                'path' => '^/$',
+                'roles' => 'PUBLIC_ACCESS',
+            ],
+            [
+                'path' => '^/(?:login|register|_components)$',
+                'roles' => 'PUBLIC_ACCESS',
+            ],
+            [
+                'path' => '^/',
                 'roles' => 'ROLE_USER',
             ],
         ],

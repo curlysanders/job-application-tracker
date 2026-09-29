@@ -29,7 +29,7 @@ final readonly class VacancyDetailController
     ) {
     }
 
-    #[Route('/app/vacancies/{id}', name: 'app_vacancy_show', requirements: ['id' => '\\d+'], methods: ['GET'])]
+    #[Route('/vacancies/{id}', name: 'app_vacancy_show', requirements: ['id' => '\\d+'], methods: ['GET'])]
     public function __invoke(int $id): Response
     {
         $user = $this->security->getUser();

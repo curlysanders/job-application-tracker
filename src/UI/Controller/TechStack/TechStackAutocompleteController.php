@@ -19,7 +19,7 @@ final readonly class TechStackAutocompleteController
     ) {
     }
 
-    #[Route('/app/tech-stacks/autocomplete', name: 'app_tech_stack_autocomplete', methods: ['GET'])]
+    #[Route('/tech-stacks/autocomplete', name: 'app_tech_stack_autocomplete', methods: ['GET'])]
     public function __invoke(Request $request): JsonResponse
     {
         return $this->responder->respond(

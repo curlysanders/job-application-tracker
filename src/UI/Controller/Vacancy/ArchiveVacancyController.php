@@ -26,7 +26,7 @@ final readonly class ArchiveVacancyController
     {
     }
 
-    #[Route('/app/vacancies/{id}/archive', name: 'app_vacancy_archive', requirements: ['id' => '\\d+'], methods: ['POST'])]
+    #[Route('/vacancies/{id}/archive', name: 'app_vacancy_archive', requirements: ['id' => '\\d+'], methods: ['POST'])]
     public function __invoke(int $id, Request $request): Response
     {
         $user = $this->security->getUser();
@@ -54,6 +54,6 @@ final readonly class ArchiveVacancyController
     {
         $return = $request->request->getString('return');
 
-        return '/app' === parse_url($return, PHP_URL_PATH) ? $return : $this->urls->generate('app_dashboard');
+        return '/' === parse_url($return, PHP_URL_PATH) ? $return : $this->urls->generate('app_dashboard');
     }
 }

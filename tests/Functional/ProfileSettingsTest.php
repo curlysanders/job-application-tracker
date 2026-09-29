@@ -18,7 +18,7 @@ final class ProfileSettingsTest extends WebTestCase
     public function testAnonymousUsersAreRedirectedToLogin(): void
     {
         $client = self::createClient();
-        $client->request('GET', '/app/profile');
+        $client->request('GET', '/profile');
 
         self::assertResponseRedirects('/login');
     }
@@ -29,7 +29,7 @@ final class ProfileSettingsTest extends WebTestCase
         $user = $this->createUser('sander@example.com');
         $client->loginUser($user);
 
-        $crawler = $client->request('GET', '/app/profile');
+        $crawler = $client->request('GET', '/profile');
         $client->submit($crawler->selectButton('Save settings')->form([
             'profile_settings[minimumPreferredSalary]' => '4500.00',
             'profile_settings[minimumPreferredSalaryCurrency]' => 'USD',
@@ -37,7 +37,7 @@ final class ProfileSettingsTest extends WebTestCase
             'profile_settings[preferredTransportMode]' => PreferredTransportMode::PublicTransport->value,
         ]));
 
-        self::assertResponseRedirects('/app/profile');
+        self::assertResponseRedirects('/profile');
         $this->entityManager()->clear();
         $savedUser = $this->entityManager()->find(User::class, $user->getId());
         self::assertInstanceOf(User::class, $savedUser);
@@ -51,7 +51,7 @@ final class ProfileSettingsTest extends WebTestCase
     {
         $client = self::createClient();
         $client->loginUser($this->createUser('sander@example.com'));
-        $crawler = $client->request('GET', '/app/profile');
+        $crawler = $client->request('GET', '/profile');
         $client->submit($crawler->selectButton('Save settings')->form([
             'profile_settings[minimumPreferredSalary]' => '0.00',
             'profile_settings[maximumCommuteMinutes]' => 0,
@@ -69,12 +69,12 @@ final class ProfileSettingsTest extends WebTestCase
         $client->loginUser($user);
 
         $firstFile = $this->createPdf('First resume');
-        $crawler = $client->request('GET', '/app/profile');
+        $crawler = $client->request('GET', '/profile');
         $form = $crawler->selectButton('Upload resume')->form();
         $this->attachResume($form, $firstFile);
         $client->submit($form);
 
-        self::assertResponseRedirects('/app/profile');
+        self::assertResponseRedirects('/profile');
         $this->entityManager()->clear();
         $savedUser = $this->entityManager()->find(User::class, $user->getId());
         self::assertInstanceOf(User::class, $savedUser);
@@ -84,12 +84,12 @@ final class ProfileSettingsTest extends WebTestCase
         self::assertTrue($this->storage()->fileExists($firstPath));
 
         $secondFile = $this->createDocx('Second resume');
-        $crawler = $client->request('GET', '/app/profile');
+        $crawler = $client->request('GET', '/profile');
         $form = $crawler->selectButton('Upload resume')->form();
         $this->attachResume($form, $secondFile);
         $client->submit($form);
 
-        self::assertResponseRedirects('/app/profile');
+        self::assertResponseRedirects('/profile');
         $this->entityManager()->clear();
         $savedUser = $this->entityManager()->find(User::class, $user->getId());
         self::assertInstanceOf(User::class, $savedUser);
@@ -98,7 +98,7 @@ final class ProfileSettingsTest extends WebTestCase
         self::assertNotSame($firstPath, $savedUser->getResumeStoragePath());
         self::assertFalse($this->storage()->fileExists($firstPath));
 
-        $client->request('GET', '/app/profile/resume');
+        $client->request('GET', '/profile/resume');
         self::assertResponseIsSuccessful();
         self::assertResponseHeaderSame('content-type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
         $contentDisposition = $client->getResponse()->headers->get('content-disposition');
@@ -118,7 +118,7 @@ final class ProfileSettingsTest extends WebTestCase
         self::assertNotFalse($invalidFile);
         file_put_contents($invalidFile, 'not a resume');
         $client->loginUser($user);
-        $crawler = $client->request('GET', '/app/profile');
+        $crawler = $client->request('GET', '/profile');
         $form = $crawler->selectButton('Upload resume')->form();
         $this->attachResume($form, $invalidFile);
         $client->submit($form);
@@ -134,7 +134,7 @@ final class ProfileSettingsTest extends WebTestCase
     public function testAnonymousUsersCannotDownloadAResume(): void
     {
         $client = self::createClient();
-        $client->request('GET', '/app/profile/resume');
+        $client->request('GET', '/profile/resume');
 
         self::assertResponseRedirects('/login');
     }

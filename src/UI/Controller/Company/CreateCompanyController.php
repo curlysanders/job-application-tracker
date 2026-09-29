@@ -24,7 +24,7 @@ final readonly class CreateCompanyController
     {
     }
 
-    #[Route('/app/companies/new', name: 'app_company_create', methods: ['GET', 'POST'])]
+    #[Route('/companies/new', name: 'app_company_create', methods: ['GET', 'POST'])]
     public function __invoke(Request $request): Response
     {
         $data = new CompanyData();

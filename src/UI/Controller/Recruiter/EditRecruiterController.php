@@ -28,7 +28,7 @@ final readonly class EditRecruiterController
     {
     }
 
-    #[Route('/app/recruiters/{id}/edit', name: 'app_recruiter_edit', requirements: ['id' => '\\d+'], methods: ['GET', 'POST'])]
+    #[Route('/recruiters/{id}/edit', name: 'app_recruiter_edit', requirements: ['id' => '\\d+'], methods: ['GET', 'POST'])]
     public function __invoke(int $id, Request $request): Response
     {
         $recruiter = $this->recruiters->find($id) ?? throw new NotFoundHttpException('Recruiter not found.');

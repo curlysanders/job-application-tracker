@@ -19,7 +19,7 @@ final readonly class DashboardPipelineVacanciesController
     {
     }
 
-    #[Route('/app/pipeline/vacancies', name: 'app_dashboard_pipeline_vacancies', methods: ['GET'])]
+    #[Route('/pipeline/vacancies', name: 'app_dashboard_pipeline_vacancies', methods: ['GET'])]
     public function __invoke(Request $request): Response
     {
         $user = $this->authenticatedUser();

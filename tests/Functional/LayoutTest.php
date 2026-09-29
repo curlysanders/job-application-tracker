@@ -40,7 +40,7 @@ final class LayoutTest extends WebTestCase
         self::assertSelectorExists('[data-modal-toggle="preview-modal"]');
         self::assertSelectorExists('[data-modal-hide="preview-modal"]');
         self::assertSelectorExists('[data-controller="tech-stack-collection"]');
-        self::assertSelectorExists('input[name="tech_stack_tags[existingTags]"][data-symfony--ux-autocomplete--autocomplete-url-value="/app/tech-stacks/autocomplete"]');
+        self::assertSelectorExists('input[name="tech_stack_tags[existingTags]"][data-symfony--ux-autocomplete--autocomplete-url-value="/tech-stacks/autocomplete"]');
         $existingTechnologyOptions = $client->getCrawler()->filter('input[name="tech_stack_tags[existingTags]"]')->attr('data-symfony--ux-autocomplete--autocomplete-tom-select-options-value');
         self::assertIsString($existingTechnologyOptions);
         self::assertStringContainsString('"maxOptions":null', $existingTechnologyOptions);

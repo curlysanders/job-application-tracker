@@ -35,7 +35,7 @@ final readonly class CreateVacancyController
     ) {
     }
 
-    #[Route('/app/vacancies/new', name: 'app_vacancy_create', methods: ['GET', 'POST'])]
+    #[Route('/vacancies/new', name: 'app_vacancy_create', methods: ['GET', 'POST'])]
     public function __invoke(Request $request): Response
     {
         $user = $this->authenticatedUser();

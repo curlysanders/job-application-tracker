@@ -30,7 +30,7 @@ final readonly class UpdateVacancyScratchpadController
     ) {
     }
 
-    #[Route('/app/vacancies/{id}/scratchpad', name: 'app_vacancy_update_scratchpad', requirements: ['id' => '\\d+'], methods: ['POST'])]
+    #[Route('/vacancies/{id}/scratchpad', name: 'app_vacancy_update_scratchpad', requirements: ['id' => '\\d+'], methods: ['POST'])]
     public function __invoke(int $id, Request $request): JsonResponse
     {
         $user = $this->security->getUser();

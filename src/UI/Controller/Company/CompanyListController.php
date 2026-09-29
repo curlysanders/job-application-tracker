@@ -16,7 +16,7 @@ final readonly class CompanyListController
     {
     }
 
-    #[Route('/app/companies', name: 'app_company_list', methods: ['GET'])]
+    #[Route('/companies', name: 'app_company_list', methods: ['GET'])]
     public function __invoke(Request $request): Response
     {
         $query = trim($request->query->getString('q'));

@@ -26,7 +26,7 @@ final readonly class DeleteVacancyController
     {
     }
 
-    #[Route('/app/vacancies/{id}/delete', name: 'app_vacancy_delete', requirements: ['id' => '\\d+'], methods: ['POST'])]
+    #[Route('/vacancies/{id}/delete', name: 'app_vacancy_delete', requirements: ['id' => '\\d+'], methods: ['POST'])]
     public function __invoke(int $id, Request $request): Response
     {
         $user = $this->security->getUser();
@@ -51,6 +51,6 @@ final readonly class DeleteVacancyController
 
         $return = $request->request->getString('return');
 
-        return new RedirectResponse('/app' === parse_url($return, PHP_URL_PATH) ? $return : $this->urls->generate('app_dashboard'));
+        return new RedirectResponse('/' === parse_url($return, PHP_URL_PATH) ? $return : $this->urls->generate('app_dashboard'));
     }
 }

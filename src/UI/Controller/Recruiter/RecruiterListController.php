@@ -16,7 +16,7 @@ final readonly class RecruiterListController
     {
     }
 
-    #[Route('/app/recruiters', name: 'app_recruiter_list', methods: ['GET'])]
+    #[Route('/recruiters', name: 'app_recruiter_list', methods: ['GET'])]
     public function __invoke(Request $request): Response
     {
         $query = trim($request->query->getString('q'));

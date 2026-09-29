@@ -18,13 +18,13 @@ final class PaginatedAutocompleteResponderTest extends TestCase
         $urls->expects(self::once())
             ->method('generate')
             ->with('app_tech_stack_autocomplete', ['query' => 'PHP', 'page' => 2])
-            ->willReturn('/app/tech-stacks/autocomplete?query=PHP&page=2');
+            ->willReturn('/tech-stacks/autocomplete?query=PHP&page=2');
         $responder = new PaginatedAutocompleteResponder($urls);
 
         $requestedQuery = null;
         $requestedPage = null;
         $response = $responder->respond(
-            Request::create('/app/tech-stacks/autocomplete?query=%20PHP%20&page=0'),
+            Request::create('/tech-stacks/autocomplete?query=%20PHP%20&page=0'),
             'app_tech_stack_autocomplete',
             static function (string $query, int $page) use (&$requestedQuery, &$requestedPage): PaginatedResults {
                 $requestedQuery = $query;
@@ -38,7 +38,7 @@ final class PaginatedAutocompleteResponderTest extends TestCase
         self::assertSame('PHP', $requestedQuery);
         self::assertSame(1, $requestedPage);
         self::assertJsonStringEqualsJsonString(
-            '{"results":[{"value":"php","text":"PHP"}],"next_page":"/app/tech-stacks/autocomplete?query=PHP&page=2"}',
+            '{"results":[{"value":"php","text":"PHP"}],"next_page":"/tech-stacks/autocomplete?query=PHP&page=2"}',
             (string) $response->getContent(),
         );
     }
@@ -50,7 +50,7 @@ final class PaginatedAutocompleteResponderTest extends TestCase
         $responder = new PaginatedAutocompleteResponder($urls);
 
         $response = $responder->respond(
-            Request::create('/app/tech-stack-categories/autocomplete?query=back&page=2'),
+            Request::create('/tech-stack-categories/autocomplete?query=back&page=2'),
             'app_tech_stack_category_autocomplete',
             static fn (string $query, int $page): PaginatedResults => new PaginatedResults([$query.$page], false),
             static fn (string $category): array => ['value' => $category, 'text' => $category],

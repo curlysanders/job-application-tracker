@@ -49,18 +49,18 @@ final class VacancyStatusWorkflowTest extends WebTestCase
         $this->entityManager()->flush();
         $client->loginUser($user);
 
-        $crawler = $client->request('GET', sprintf('/app/vacancies/%d/edit', $vacancy->getId()));
+        $crawler = $client->request('GET', sprintf('/vacancies/%d/edit', $vacancy->getId()));
         self::assertSelectorTextContains('.vacancy-status-panel', 'Current status: Bookmarked');
         self::assertSelectorExists('input[name="transition"][value="start_applying"]');
         self::assertSelectorNotExists('input[name="transition"][value="accept"]');
         self::assertSelectorExists('#vacancy-status-note-modal textarea[name="note"]');
         self::assertSelectorTextContains('.vacancy-status-history-panel', 'No status changes have been recorded yet.');
-        $client->request('POST', sprintf('/app/vacancies/%d/status', $vacancy->getId()), [
+        $client->request('POST', sprintf('/vacancies/%d/status', $vacancy->getId()), [
             '_token' => $this->statusCsrfToken($crawler, 'start_applying'),
             'transition' => 'start_applying',
             'note' => '  First screening scheduled.  ',
         ]);
-        self::assertResponseRedirects(sprintf('/app/vacancies/%d/edit', $vacancy->getId()));
+        self::assertResponseRedirects(sprintf('/vacancies/%d/edit', $vacancy->getId()));
 
         $this->entityManager()->clear();
         $updated = $this->entityManager()->find(Vacancy::class, $vacancy->getId());
@@ -73,7 +73,7 @@ final class VacancyStatusWorkflowTest extends WebTestCase
         self::assertSame(VacancyStatus::Applying, $history[0]->getToStatus());
         self::assertSame('First screening scheduled.', $history[0]->getNotes());
 
-        $client->request('GET', sprintf('/app/vacancies/%d/edit', $vacancy->getId()));
+        $client->request('GET', sprintf('/vacancies/%d/edit', $vacancy->getId()));
         self::assertSelectorTextContains('.vacancy-status-history', 'Bookmarked → Applying');
         self::assertSelectorTextContains('.vacancy-status-history', 'First screening scheduled.');
     }
@@ -90,9 +90,9 @@ final class VacancyStatusWorkflowTest extends WebTestCase
         $this->entityManager()->flush();
         $client->loginUser($user);
 
-        $client->request('POST', sprintf('/app/vacancies/%d/status', $ownedVacancy->getId()), ['_token' => 'invalid', 'transition' => 'start_applying']);
+        $client->request('POST', sprintf('/vacancies/%d/status', $ownedVacancy->getId()), ['_token' => 'invalid', 'transition' => 'start_applying']);
         self::assertResponseStatusCodeSame(403);
-        $client->request('POST', sprintf('/app/vacancies/%d/status', $vacancy->getId()), ['_token' => 'invalid', 'transition' => 'start_applying']);
+        $client->request('POST', sprintf('/vacancies/%d/status', $vacancy->getId()), ['_token' => 'invalid', 'transition' => 'start_applying']);
         self::assertResponseStatusCodeSame(404);
     }
 

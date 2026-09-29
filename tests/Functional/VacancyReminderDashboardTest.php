@@ -25,15 +25,15 @@ final class VacancyReminderDashboardTest extends WebTestCase
         $this->entityManager()->flush();
         $client->loginUser($user);
 
-        $client->request('GET', '/app');
+        $client->request('GET', '/');
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('.dashboard-reminders', 'Overdue vacancy');
         self::assertSelectorTextContains('.dashboard-reminders', 'Today vacancy');
         self::assertSelectorTextNotContains('.dashboard-reminders', 'Future vacancy');
         self::assertSelectorTextNotContains('.dashboard-reminders', 'Archived vacancy');
         self::assertSelectorTextNotContains('.dashboard-reminders', 'Private vacancy');
-        self::assertSelectorExists(sprintf('.dashboard-reminders a[href="/app/vacancies/%d"]', $overdue->getId()));
-        self::assertSelectorExists(sprintf('.dashboard-reminders a[href="/app/vacancies/%d"]', $today->getId()));
+        self::assertSelectorExists(sprintf('.dashboard-reminders a[href="/vacancies/%d"]', $overdue->getId()));
+        self::assertSelectorExists(sprintf('.dashboard-reminders a[href="/vacancies/%d"]', $today->getId()));
     }
 
     private function vacancy(User $user, string $title, ?string $nextActionTitle, \DateTimeImmutable $nextActionAt): Vacancy

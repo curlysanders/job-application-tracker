@@ -41,7 +41,7 @@ final readonly class EditVacancyController
     ) {
     }
 
-    #[Route('/app/vacancies/{id}/edit', name: 'app_vacancy_edit', requirements: ['id' => '\\d+'], methods: ['GET', 'POST'])]
+    #[Route('/vacancies/{id}/edit', name: 'app_vacancy_edit', requirements: ['id' => '\\d+'], methods: ['GET', 'POST'])]
     public function __invoke(int $id, Request $request): Response
     {
         $user = $this->authenticatedUser();

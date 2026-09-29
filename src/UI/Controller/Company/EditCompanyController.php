@@ -28,7 +28,7 @@ final readonly class EditCompanyController
     {
     }
 
-    #[Route('/app/companies/{id}/edit', name: 'app_company_edit', requirements: ['id' => '\\d+'], methods: ['GET', 'POST'])]
+    #[Route('/companies/{id}/edit', name: 'app_company_edit', requirements: ['id' => '\\d+'], methods: ['GET', 'POST'])]
     public function __invoke(int $id, Request $request): Response
     {
         $company = $this->companies->find($id) ?? throw new NotFoundHttpException('Company not found.');
