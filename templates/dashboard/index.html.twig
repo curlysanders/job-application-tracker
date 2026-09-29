@@ -2,6 +2,7 @@
 
 {% block title %}Dashboard · Job Application Tracker{% endblock %}
 {% block page_heading %}Dashboard{% endblock %}
+{% block page_actions %}<a class="button" href="{{ path('app_vacancy_create') }}">Add vacancy</a>{% endblock %}
 
 {% block content %}
     {% if reminders is not empty %}

@@ -1,21 +1,14 @@
 {% set returnUrl = path('app_dashboard', query|merge({page: overview.page})) %}
 <section class="panel dashboard-vacancy-table-panel" aria-labelledby="dashboard-vacancies-heading">
-    <h2 id="dashboard-vacancies-heading">Vacancies</h2>
+    <div class="section-heading"><div><h2 id="dashboard-vacancies-heading">Vacancies</h2><p class="section-description">Search and keep every opportunity moving.</p></div></div>
     <form method="get" action="{{ path('app_dashboard') }}" class="dashboard-vacancy-filters">
-        <label for="vacancy-search">Search</label>
-        <input id="vacancy-search" name="q" type="search" value="{{ filter.query ?? '' }}" placeholder="Title, company, or technology">
-        <label for="vacancy-status-filter">Status</label>
-        <select id="vacancy-status-filter" name="status"><option value="">All statuses</option>{% for status in enum('CurlySanders\\JobApplicationTracker\\Domain\\Vacancy\\VacancyStatus').cases %}<option value="{{ status.value }}"{% if filter.status == status %} selected{% endif %}>{{ status.label }}</option>{% endfor %}</select>
-        <label for="vacancy-excitement-filter">Excitement</label>
-        <select id="vacancy-excitement-filter" name="excitement"><option value="">All ratings</option>{% for rating in 0..5 %}<option value="{{ rating }}"{% if filter.excitement is same as(rating) %} selected{% endif %}>{{ rating }} stars</option>{% endfor %}</select>
-        <label for="vacancy-work-mode-filter">Work mode</label>
-        <select id="vacancy-work-mode-filter" name="work_mode"><option value="">All work modes</option>{% for mode in enum('CurlySanders\\JobApplicationTracker\\Domain\\Vacancy\\WorkMode').cases %}<option value="{{ mode.value }}"{% if filter.workMode == mode %} selected{% endif %}>{{ mode.value|lower|capitalize }}</option>{% endfor %}</select>
-        <label for="vacancy-salary-fit-filter">Salary fit</label>
-        <select id="vacancy-salary-fit-filter" name="salary_fit"><option value="">All salary fits</option>{% for fit in enum('CurlySanders\\JobApplicationTracker\\Application\\Vacancy\\Overview\\SalaryFit').cases %}<option value="{{ fit.value }}"{% if filter.salaryFit == fit %} selected{% endif %}>{{ fit.label }}</option>{% endfor %}</select>
-        <label for="vacancy-archive-filter">Records</label>
-        <select id="vacancy-archive-filter" name="archived"><option value=""{% if not filter.archived %} selected{% endif %}>Active</option><option value="1"{% if filter.archived %} selected{% endif %}>Archived</option></select>
-        <button class="button" type="submit">Apply filters</button>
-        <a class="button button-secondary" href="{{ path('app_dashboard') }}">Reset</a>
+        <label class="filter-field filter-search" for="vacancy-search"><span>Search</span><input id="vacancy-search" name="q" type="search" value="{{ filter.query ?? '' }}" placeholder="Title, company, or technology"></label>
+        <label class="filter-field" for="vacancy-status-filter"><span>Status</span><select id="vacancy-status-filter" name="status"><option value="">All statuses</option>{% for status in enum('CurlySanders\\JobApplicationTracker\\Domain\\Vacancy\\VacancyStatus').cases %}<option value="{{ status.value }}"{% if filter.status == status %} selected{% endif %}>{{ status.label }}</option>{% endfor %}</select></label>
+        <label class="filter-field" for="vacancy-excitement-filter"><span>Excitement</span><select id="vacancy-excitement-filter" name="excitement"><option value="">All ratings</option>{% for rating in 0..5 %}<option value="{{ rating }}"{% if filter.excitement is same as(rating) %} selected{% endif %}>{{ rating }} stars</option>{% endfor %}</select></label>
+        <label class="filter-field" for="vacancy-work-mode-filter"><span>Work mode</span><select id="vacancy-work-mode-filter" name="work_mode"><option value="">All work modes</option>{% for mode in enum('CurlySanders\\JobApplicationTracker\\Domain\\Vacancy\\WorkMode').cases %}<option value="{{ mode.value }}"{% if filter.workMode == mode %} selected{% endif %}>{{ mode.value|lower|capitalize }}</option>{% endfor %}</select></label>
+        <label class="filter-field" for="vacancy-salary-fit-filter"><span>Salary fit</span><select id="vacancy-salary-fit-filter" name="salary_fit"><option value="">All salary fits</option>{% for fit in enum('CurlySanders\\JobApplicationTracker\\Application\\Vacancy\\Overview\\SalaryFit').cases %}<option value="{{ fit.value }}"{% if filter.salaryFit == fit %} selected{% endif %}>{{ fit.label }}</option>{% endfor %}</select></label>
+        <label class="filter-field" for="vacancy-archive-filter"><span>Records</span><select id="vacancy-archive-filter" name="archived"><option value=""{% if not filter.archived %} selected{% endif %}>Active</option><option value="1"{% if filter.archived %} selected{% endif %}>Archived</option></select></label>
+        <div class="filter-actions"><button class="button" type="submit">Apply filters</button><a class="button button-quiet" href="{{ path('app_dashboard') }}">Reset</a></div>
     </form>
 
     {% if overview.vacancies is empty %}
