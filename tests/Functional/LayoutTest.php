@@ -22,8 +22,10 @@ final class LayoutTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h1', 'Your job search');
         self::assertSelectorExists('meta[name="viewport"]');
-        self::assertSelectorExists('nav[aria-label="Main navigation"] a[aria-current="page"]');
-        self::assertSelectorExists('button[data-collapse-toggle="app-sidebar"]');
+        self::assertSelectorExists('nav[aria-label="Account navigation"]');
+        self::assertSelectorNotExists('#app-sidebar');
+        self::assertSelectorExists('button[data-controller="theme"] svg.theme-icon-moon');
+        self::assertSelectorExists('button[data-controller="theme"] svg.theme-icon-sun');
         self::assertSelectorExists('script[type="importmap"]');
         self::assertSelectorExists('link[href^="/assets/"]');
         self::assertResponseNotHasHeader('Server-Timing');

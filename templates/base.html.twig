@@ -4,37 +4,55 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{% block title %}Job Application Tracker{% endblock %}</title>
+        <script>
+            (() => {
+                const key = 'job-application-tracker-theme';
+                const savedTheme = localStorage.getItem(key);
+                document.documentElement.dataset.theme = savedTheme ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            })();
+        </script>
         {% block stylesheets %}{% endblock %}
         {% block javascripts %}
             {% block importmap %}{{ importmap('app') }}{% endblock %}
         {% endblock %}
     </head>
-    <body>
+    <body class="{{ app.user ? 'app-body' : 'auth-body' }}">
         {% block body %}
             <a class="skip-link" href="#main-content">Skip to content</a>
-            {% include 'layout/header.html.twig' %}
-            <div class="app-shell">
-                <aside id="app-sidebar" class="app-sidebar hidden md:block" aria-label="Sidebar">
-                    {% block sidebar %}
-                        <nav aria-label="Main navigation">
-                                <a href="{{ path('app_dashboard') }}" class="nav-link"{% if app.request.attributes.get('_route') == 'app_dashboard' %} aria-current="page"{% endif %}>Home</a>
-                                {% if app.user %}
-                                    <a href="{{ path('app_vacancy_create') }}" class="nav-link"{% if app.request.attributes.get('_route') starts with 'app_vacancy_' %} aria-current="page"{% endif %}>Add vacancy</a>
-                                    <a href="{{ path('app_company_list') }}" class="nav-link"{% if app.request.attributes.get('_route') starts with 'app_company_' %} aria-current="page"{% endif %}>Companies</a>
-                                    <a href="{{ path('app_recruiter_list') }}" class="nav-link"{% if app.request.attributes.get('_route') starts with 'app_recruiter_' %} aria-current="page"{% endif %}>Recruiters</a>
-                                {% endif %}
+            {% set pageHeading %}{% block page_heading %}Job Application Tracker{% endblock %}{% endset %}
+            {% set pageContent %}{% block content %}{% endblock %}{% endset %}
+            {% if app.user %}
+                {% include 'layout/header.html.twig' %}
+                <div class="app-shell">
+                    <aside id="app-sidebar" class="app-sidebar hidden md:block" aria-label="Sidebar">
+                        {% block sidebar %}
+                            <nav class="app-navigation" aria-label="Main navigation">
+                                <a href="{{ path('app_dashboard') }}" class="nav-link"{% if app.request.attributes.get('_route') == 'app_dashboard' %} aria-current="page"{% endif %}>Dashboard</a>
+                                <a href="{{ path('app_company_list') }}" class="nav-link"{% if app.request.attributes.get('_route') starts with 'app_company_' %} aria-current="page"{% endif %}>Companies</a>
+                                <a href="{{ path('app_recruiter_list') }}" class="nav-link"{% if app.request.attributes.get('_route') starts with 'app_recruiter_' %} aria-current="page"{% endif %}>Recruiters</a>
                             {% if app.environment in ['dev', 'test'] %}
                                 <a href="{{ path('app_component_preview') }}" class="nav-link"{% if app.request.attributes.get('_route') == 'app_component_preview' %} aria-current="page"{% endif %}>Component preview</a>
                             {% endif %}
-                        </nav>
-                    {% endblock %}
-                </aside>
-                <main id="main-content" class="app-content" tabindex="-1">
+                            </nav>
+                        {% endblock %}
+                    </aside>
+                    <main id="main-content" class="app-content" tabindex="-1">
+                        {% include 'layout/flashes.html.twig' %}
+                        <div class="page-header">
+                            <div><p class="page-eyebrow">Job application tracker</p><h1 class="page-heading">{{ pageHeading }}</h1></div>
+                            {% block page_actions %}{% endblock %}
+                        </div>
+                        {{ pageContent }}
+                    </main>
+                </div>
+            {% else %}
+                {% include 'layout/auth_header.html.twig' %}
+                <main id="main-content" class="auth-content" tabindex="-1">
                     {% include 'layout/flashes.html.twig' %}
-                    <h1 class="page-heading">{% block page_heading %}Job Application Tracker{% endblock %}</h1>
-                    {% block content %}{% endblock %}
+                    <div class="auth-page-heading"><p class="page-eyebrow">Job application tracker</p><h1 class="page-heading">{{ pageHeading }}</h1></div>
+                    {{ pageContent }}
                 </main>
-            </div>
+            {% endif %}
         {% endblock %}
     </body>
 </html>
