@@ -18,7 +18,7 @@ final readonly class TechStackCategoryAutocompleteController
     ) {
     }
 
-    #[Route('/app/tech-stack-categories/autocomplete', name: 'app_tech_stack_category_autocomplete', methods: ['GET'])]
+    #[Route('/tech-stack-categories/autocomplete', name: 'app_tech_stack_category_autocomplete', methods: ['GET'])]
     public function __invoke(Request $request): JsonResponse
     {
         return $this->responder->respond(

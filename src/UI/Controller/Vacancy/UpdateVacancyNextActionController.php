@@ -30,7 +30,7 @@ final readonly class UpdateVacancyNextActionController
     ) {
     }
 
-    #[Route('/app/vacancies/{id}/next-action', name: 'app_vacancy_update_next_action', requirements: ['id' => '\\d+'], methods: ['POST'])]
+    #[Route('/vacancies/{id}/next-action', name: 'app_vacancy_update_next_action', requirements: ['id' => '\\d+'], methods: ['POST'])]
     public function __invoke(int $id, Request $request): RedirectResponse
     {
         $user = $this->security->getUser();

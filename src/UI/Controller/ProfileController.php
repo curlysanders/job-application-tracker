@@ -34,7 +34,7 @@ final readonly class ProfileController
     ) {
     }
 
-    #[Route('/app/profile', name: 'app_profile', methods: ['GET', 'POST'])]
+    #[Route('/profile', name: 'app_profile', methods: ['GET', 'POST'])]
     public function __invoke(Request $request): Response
     {
         $user = $this->requireAuthenticatedUser();

@@ -11,12 +11,25 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 final class SecurityTest extends WebTestCase
 {
-    public function testAnonymousUserIsRedirectedToLoginForDashboard(): void
+    public function testAnonymousUserSeesThePublicHomePage(): void
     {
         $client = self::createClient();
-        $client->request('GET', '/app');
+        $client->request('GET', '/');
 
-        self::assertResponseRedirects('/login');
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('h1', 'Your job search, in one place');
+        self::assertSelectorExists('a[href="/login"]');
+        self::assertSelectorExists('a[href="/register"]');
+    }
+
+    public function testFormerApplicationUrlsAreAbsent(): void
+    {
+        $client = self::createClient();
+
+        $client->request('GET', '/app');
+        self::assertResponseStatusCodeSame(404);
+        $client->request('GET', '/app/vacancies/new');
+        self::assertResponseStatusCodeSame(404);
     }
 
     public function testUserCanRegisterAndIsAuthenticated(): void
@@ -31,7 +44,7 @@ final class SecurityTest extends WebTestCase
 
         $client->submit($form);
 
-        self::assertResponseRedirects('/app');
+        self::assertResponseRedirects('/');
         $client->followRedirect();
         self::assertSelectorTextContains('h1', 'Dashboard');
 
@@ -89,7 +102,7 @@ final class SecurityTest extends WebTestCase
             '_password' => 'SecurePassword1!',
         ]));
 
-        self::assertResponseRedirects('/app');
+        self::assertResponseRedirects('/');
         $crawler = $client->followRedirect();
         self::assertSelectorTextContains('h1', 'Dashboard');
 
@@ -104,7 +117,7 @@ final class SecurityTest extends WebTestCase
 
         $client->request('GET', '/login');
 
-        self::assertResponseRedirects('/app');
+        self::assertResponseRedirects('/');
     }
 
     private function createUser(string $email): User

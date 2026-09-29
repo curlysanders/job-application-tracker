@@ -32,7 +32,7 @@ final readonly class TransitionVacancyStatusController
     ) {
     }
 
-    #[Route('/app/vacancies/{id}/status', name: 'app_vacancy_transition_status', requirements: ['id' => '\\d+'], methods: ['POST'])]
+    #[Route('/vacancies/{id}/status', name: 'app_vacancy_transition_status', requirements: ['id' => '\\d+'], methods: ['POST'])]
     public function __invoke(int $id, Request $request): Response
     {
         $user = $this->authenticatedUser();
@@ -82,7 +82,7 @@ final readonly class TransitionVacancyStatusController
     {
         $return = $request->request->getString('return');
         $path = parse_url($return, PHP_URL_PATH);
-        if ('/app' === $path || $this->urls->generate('app_vacancy_show', ['id' => $id]) === $path || $this->urls->generate('app_vacancy_edit', ['id' => $id]) === $path) {
+        if ('/' === $path || $this->urls->generate('app_vacancy_show', ['id' => $id]) === $path || $this->urls->generate('app_vacancy_edit', ['id' => $id]) === $path) {
             return $return;
         }
 

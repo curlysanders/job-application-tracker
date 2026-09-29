@@ -24,7 +24,7 @@ final readonly class CreateRecruiterController
     {
     }
 
-    #[Route('/app/recruiters/new', name: 'app_recruiter_create', methods: ['GET', 'POST'])]
+    #[Route('/recruiters/new', name: 'app_recruiter_create', methods: ['GET', 'POST'])]
     public function __invoke(Request $request): Response
     {
         $data = new RecruiterData();

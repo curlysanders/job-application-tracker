@@ -19,7 +19,7 @@ final class DashboardTest extends WebTestCase
     public function testAnonymousUsersAreRedirectedFromDashboardPipelineFragment(): void
     {
         $client = self::createClient();
-        $client->request('GET', '/app/pipeline/vacancies');
+        $client->request('GET', '/pipeline/vacancies');
 
         self::assertResponseRedirects('/login');
     }
@@ -37,15 +37,15 @@ final class DashboardTest extends WebTestCase
         $this->createVacancy($this->createUser('other-dashboard@example.com'), 'Private vacancy', VacancyStatus::Applying);
 
         $client->loginUser($user);
-        $crawler = $client->request('GET', '/app');
+        $crawler = $client->request('GET', '/');
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('.vacancy-chevron[href="/app?status=BOOKMARKED"]', '1');
-        self::assertSelectorTextContains('.vacancy-chevron[href="/app?status=APPLYING"]', '0');
-        self::assertSelectorTextContains('.vacancy-chevron[href="/app?status=APPLIED"]', '1');
-        self::assertSelectorTextContains('.vacancy-chevron[href="/app?status=INTERVIEWING"]', '0');
-        self::assertSelectorTextContains('.vacancy-chevron[href="/app?status=NEGOTIATING"]', '0');
-        self::assertSelectorTextContains('.vacancy-chevron[href="/app?status=ACCEPTED"]', '1');
+        self::assertSelectorTextContains('.vacancy-chevron[href="/?status=BOOKMARKED"]', '1');
+        self::assertSelectorTextContains('.vacancy-chevron[href="/?status=APPLYING"]', '0');
+        self::assertSelectorTextContains('.vacancy-chevron[href="/?status=APPLIED"]', '1');
+        self::assertSelectorTextContains('.vacancy-chevron[href="/?status=INTERVIEWING"]', '0');
+        self::assertSelectorTextContains('.vacancy-chevron[href="/?status=NEGOTIATING"]', '0');
+        self::assertSelectorTextContains('.vacancy-chevron[href="/?status=ACCEPTED"]', '1');
         self::assertSelectorTextContains('.dashboard-vacancy-table', 'Bookmarked vacancy');
         self::assertSelectorTextContains('.dashboard-vacancy-table', 'Applied vacancy');
         self::assertSelectorTextContains('.dashboard-vacancy-table', 'Accepted vacancy');
@@ -55,14 +55,14 @@ final class DashboardTest extends WebTestCase
         self::assertSelectorExists('[data-controller="vacancy-pipeline"]');
         self::assertSelectorExists('[data-vacancy-pipeline-target="results"]');
 
-        $crawler = $client->request('GET', '/app?status=APPLIED');
+        $crawler = $client->request('GET', '/?status=APPLIED');
         self::assertResponseIsSuccessful();
-        self::assertSelectorExists('.vacancy-chevron-selected[href="/app?status=APPLIED"][aria-current="true"]');
+        self::assertSelectorExists('.vacancy-chevron-selected[href="/?status=APPLIED"][aria-current="true"]');
         self::assertSelectorTextContains('.dashboard-vacancy-table', 'Applied vacancy');
         self::assertSelectorTextNotContains('.dashboard-vacancy-table', 'Bookmarked vacancy');
         self::assertSelectorTextContains('.vacancy-pipeline-clear', 'Show all');
 
-        $client->request('GET', '/app/pipeline/vacancies?status=APPLIED');
+        $client->request('GET', '/pipeline/vacancies?status=APPLIED');
         self::assertResponseIsSuccessful();
         self::assertSelectorExists('.dashboard-vacancy-table-panel');
         self::assertSelectorTextContains('.dashboard-vacancy-table', 'Applied vacancy');
@@ -75,10 +75,10 @@ final class DashboardTest extends WebTestCase
         $user = $this->createUser('invalid-dashboard@example.com');
         $client->loginUser($user);
 
-        $client->request('GET', '/app?status=I_WITHDREW');
+        $client->request('GET', '/?status=I_WITHDREW');
         self::assertResponseIsSuccessful();
 
-        $client->request('GET', '/app/pipeline/vacancies?status=UNKNOWN');
+        $client->request('GET', '/pipeline/vacancies?status=UNKNOWN');
         self::assertResponseStatusCodeSame(404);
     }
 
@@ -91,13 +91,13 @@ final class DashboardTest extends WebTestCase
         }
 
         $client->loginUser($user);
-        $client->request('GET', '/app');
+        $client->request('GET', '/');
 
         self::assertResponseIsSuccessful();
         self::assertSelectorCount(20, '.dashboard-vacancy-table tbody tr');
         self::assertSelectorTextContains('.dashboard-vacancy-pagination', 'Page 1 of 2');
 
-        $client->request('GET', '/app?page=2');
+        $client->request('GET', '/?page=2');
 
         self::assertResponseIsSuccessful();
         self::assertSelectorCount(1, '.dashboard-vacancy-table tbody tr');
@@ -122,14 +122,14 @@ final class DashboardTest extends WebTestCase
         $this->entityManager()->getConnection()->executeStatement('UPDATE vacancies SET work_mode = :mode WHERE id = :id', ['mode' => 'REMOTE', 'id' => $meetsTarget->getId()]);
 
         $client->loginUser($user);
-        $client->request('GET', '/app?q=symfony&excitement=4&work_mode=REMOTE&salary_fit=MEETS_TARGET');
+        $client->request('GET', '/?q=symfony&excitement=4&work_mode=REMOTE&salary_fit=MEETS_TARGET');
 
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('.dashboard-vacancy-table', 'Remote platform engineer');
         self::assertSelectorTextNotContains('.dashboard-vacancy-table', 'Office developer');
         self::assertSelectorTextContains('.dashboard-vacancy-table', 'Meets target');
 
-        $client->request('GET', '/app?salary_fit=BELOW_TARGET');
+        $client->request('GET', '/?salary_fit=BELOW_TARGET');
 
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('.dashboard-vacancy-table', 'Office developer');
@@ -142,52 +142,52 @@ final class DashboardTest extends WebTestCase
         $user = $this->createUser('actions-dashboard@example.com');
         $vacancy = $this->createVacancy($user, 'Action vacancy', VacancyStatus::Bookmarked);
         $client->loginUser($user);
-        $crawler = $client->request('GET', '/app');
+        $crawler = $client->request('GET', '/');
         $archiveToken = $crawler->filter('form[action$="/archive"] input[name="_token"]')->attr('value');
         self::assertNotNull($archiveToken);
 
-        $client->request('POST', sprintf('/app/vacancies/%d/archive', $vacancy->getId()), [
+        $client->request('POST', sprintf('/vacancies/%d/archive', $vacancy->getId()), [
             '_token' => $archiveToken,
             'archived' => '1',
-            'return' => '/app',
+            'return' => '/',
         ]);
-        self::assertResponseRedirects('/app');
+        self::assertResponseRedirects('/');
         $this->entityManager()->clear();
         $archivedVacancy = $this->entityManager()->find(Vacancy::class, $vacancy->getId());
         self::assertInstanceOf(Vacancy::class, $archivedVacancy);
         self::assertTrue($archivedVacancy->isArchived());
 
-        $crawler = $client->request('GET', '/app?archived=1');
+        $crawler = $client->request('GET', '/?archived=1');
         $restoreToken = $crawler->filter('form[action$="/archive"] input[name="_token"]')->attr('value');
         self::assertNotNull($restoreToken);
-        $client->request('POST', sprintf('/app/vacancies/%d/archive', $vacancy->getId()), [
+        $client->request('POST', sprintf('/vacancies/%d/archive', $vacancy->getId()), [
             '_token' => $restoreToken,
             'archived' => '0',
-            'return' => '/app',
+            'return' => '/',
         ]);
         $this->entityManager()->clear();
         $restoredVacancy = $this->entityManager()->find(Vacancy::class, $vacancy->getId());
         self::assertInstanceOf(Vacancy::class, $restoredVacancy);
         self::assertFalse($restoredVacancy->isArchived());
 
-        $crawler = $client->request('GET', '/app');
+        $crawler = $client->request('GET', '/');
         $archiveToken = $crawler->filter('form[action$="/archive"] input[name="_token"]')->attr('value');
         self::assertNotNull($archiveToken);
-        $client->request('POST', sprintf('/app/vacancies/%d/archive', $vacancy->getId()), [
+        $client->request('POST', sprintf('/vacancies/%d/archive', $vacancy->getId()), [
             '_token' => $archiveToken,
             'archived' => '1',
-            'return' => '/app?archived=1',
+            'return' => '/?archived=1',
         ]);
 
-        $crawler = $client->request('GET', '/app?archived=1');
+        $crawler = $client->request('GET', '/?archived=1');
         $deleteToken = $crawler->filter('form[action$="/delete"] input[name="_token"]')->attr('value');
         self::assertNotNull($deleteToken);
-        $client->request('POST', sprintf('/app/vacancies/%d/delete', $vacancy->getId()), [
+        $client->request('POST', sprintf('/vacancies/%d/delete', $vacancy->getId()), [
             '_token' => $deleteToken,
             'confirm' => 'delete',
-            'return' => '/app?archived=1',
+            'return' => '/?archived=1',
         ]);
-        self::assertResponseRedirects('/app?archived=1');
+        self::assertResponseRedirects('/?archived=1');
         $this->entityManager()->clear();
         self::assertNull($this->entityManager()->find(Vacancy::class, $vacancy->getId()));
     }

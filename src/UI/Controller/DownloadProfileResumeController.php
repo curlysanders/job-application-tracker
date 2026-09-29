@@ -21,7 +21,7 @@ final readonly class DownloadProfileResumeController
     ) {
     }
 
-    #[Route('/app/profile/resume', name: 'app_profile_resume', methods: ['GET'])]
+    #[Route('/profile/resume', name: 'app_profile_resume', methods: ['GET'])]
     public function __invoke(): Response
     {
         $user = $this->security->getUser();

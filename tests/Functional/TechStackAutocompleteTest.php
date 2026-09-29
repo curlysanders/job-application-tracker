@@ -17,9 +17,9 @@ final class TechStackAutocompleteTest extends WebTestCase
     {
         $client = self::createClient();
 
-        $client->request('GET', '/app/tech-stacks/autocomplete?query=php');
+        $client->request('GET', '/tech-stacks/autocomplete?query=php');
         self::assertResponseRedirects('/login');
-        $client->request('GET', '/app/tech-stack-categories/autocomplete?query=back');
+        $client->request('GET', '/tech-stack-categories/autocomplete?query=back');
         self::assertResponseRedirects('/login');
     }
 
@@ -31,13 +31,13 @@ final class TechStackAutocompleteTest extends WebTestCase
         $this->entityManager()->persist(new TechStack('PHPUnit', 'Testing'));
         $this->entityManager()->flush();
 
-        $client->request('GET', '/app/tech-stacks/autocomplete?query=php');
+        $client->request('GET', '/tech-stacks/autocomplete?query=php');
         self::assertResponseIsSuccessful();
         $technologyContent = $client->getResponse()->getContent();
         self::assertIsString($technologyContent);
         self::assertJsonStringEqualsJsonString('{"results":[{"value":"php","text":"PHP (Backend)"},{"value":"phpunit","text":"PHPUnit (Testing)"}]}', $technologyContent);
 
-        $client->request('GET', '/app/tech-stack-categories/autocomplete?query=back');
+        $client->request('GET', '/tech-stack-categories/autocomplete?query=back');
         self::assertResponseIsSuccessful();
         $categoryContent = $client->getResponse()->getContent();
         self::assertIsString($categoryContent);
@@ -57,7 +57,7 @@ final class TechStackAutocompleteTest extends WebTestCase
         }
         $this->entityManager()->flush();
 
-        $client->request('GET', '/app/tech-stacks/autocomplete?query=technology');
+        $client->request('GET', '/tech-stacks/autocomplete?query=technology');
         self::assertResponseIsSuccessful();
         $firstTechnologyPage = $this->responseData($client);
         self::assertCount(20, $firstTechnologyPage['results']);
@@ -65,13 +65,13 @@ final class TechStackAutocompleteTest extends WebTestCase
         self::assertIsString($firstTechnologyPage['next_page'] ?? null);
         self::assertStringContainsString('page=2', $firstTechnologyPage['next_page']);
 
-        $client->request('GET', '/app/tech-stacks/autocomplete?query=technology&page=2');
+        $client->request('GET', '/tech-stacks/autocomplete?query=technology&page=2');
         self::assertResponseIsSuccessful();
         $secondTechnologyPage = $this->responseData($client);
         self::assertSame([['value' => 'technology-21', 'text' => 'Technology 21 (Category 21)']], $secondTechnologyPage['results']);
         self::assertArrayNotHasKey('next_page', $secondTechnologyPage);
 
-        $client->request('GET', '/app/tech-stack-categories/autocomplete?query=category');
+        $client->request('GET', '/tech-stack-categories/autocomplete?query=category');
         self::assertResponseIsSuccessful();
         $firstCategoryPage = $this->responseData($client);
         self::assertCount(20, $firstCategoryPage['results']);
@@ -79,7 +79,7 @@ final class TechStackAutocompleteTest extends WebTestCase
         self::assertIsString($firstCategoryPage['next_page'] ?? null);
         self::assertStringContainsString('page=2', $firstCategoryPage['next_page']);
 
-        $client->request('GET', '/app/tech-stack-categories/autocomplete?query=category&page=2');
+        $client->request('GET', '/tech-stack-categories/autocomplete?query=category&page=2');
         self::assertResponseIsSuccessful();
         $secondCategoryPage = $this->responseData($client);
         self::assertSame([['value' => 'Category 21', 'text' => 'Category 21']], $secondCategoryPage['results']);

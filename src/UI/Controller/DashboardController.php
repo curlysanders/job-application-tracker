@@ -29,10 +29,13 @@ final readonly class DashboardController
     ) {
     }
 
-    #[Route('/app', name: 'app_dashboard', methods: ['GET'])]
+    #[Route('/', name: 'app_dashboard', methods: ['GET'])]
     public function __invoke(Request $request): Response
     {
-        $user = $this->authenticatedUser();
+        $user = $this->security->getUser();
+        if (!$user instanceof User) {
+            return new Response($this->twig->render('home/index.html.twig'));
+        }
         $userId = $user->getId() ?? throw new \LogicException('The dashboard requires a persisted user.');
         $overviewRequest = VacancyOverviewRequest::fromRequest($request);
         $tomorrow = $this->clock->now()->setTime(0, 0)->modify('+1 day');
@@ -46,15 +49,5 @@ final readonly class DashboardController
             'filter' => $overviewRequest->filter,
             'query' => $overviewRequest->query,
         ]));
-    }
-
-    private function authenticatedUser(): User
-    {
-        $user = $this->security->getUser();
-        if (!$user instanceof User) {
-            throw new \LogicException('The dashboard requires an authenticated user.');
-        }
-
-        return $user;
     }
 }

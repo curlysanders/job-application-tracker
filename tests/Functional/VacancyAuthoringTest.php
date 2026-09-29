@@ -22,7 +22,7 @@ final class VacancyAuthoringTest extends WebTestCase
     public function testAnonymousUsersCannotAuthorVacancies(): void
     {
         $client = self::createClient();
-        $client->request('GET', '/app/vacancies/new');
+        $client->request('GET', '/vacancies/new');
 
         self::assertResponseRedirects('/login');
     }
@@ -41,13 +41,13 @@ final class VacancyAuthoringTest extends WebTestCase
         $this->entityManager()->flush();
         $client->loginUser($user);
 
-        $crawler = $client->request('GET', '/app/vacancies/new');
+        $crawler = $client->request('GET', '/vacancies/new');
         self::assertResponseIsSuccessful();
         self::assertSelectorExists('[data-vacancy-authoring-minimum-preferred-salary-value="5000.00"]');
         self::assertSelectorExists('select[name="vacancy[currencyCode]"] option[value="EUR"][selected]');
         self::assertSelectorExists('select[name="vacancy[currencyCode]"] option[value="USD"]');
         self::assertSelectorNotExists('select[name="vacancy[currencyCode]"] option[value="DEM"]');
-        $client->request('POST', '/app/vacancies/new', ['vacancy' => $this->formData($crawler, $company, $recruiter, $php, 'Senior PHP Developer')]);
+        $client->request('POST', '/vacancies/new', ['vacancy' => $this->formData($crawler, $company, $recruiter, $php, 'Senior PHP Developer')]);
         self::assertResponseRedirects();
 
         $this->entityManager()->clear();
@@ -65,13 +65,13 @@ final class VacancyAuthoringTest extends WebTestCase
         self::assertSame(['php', 'symfony'], $vacancy->getTechStacks()->map(static fn (TechStack $tag): string => $tag->getSlug())->toArray());
         self::assertInstanceOf(TechStack::class, $this->entityManager()->getRepository(TechStack::class)->findOneBy(['slug' => 'symfony']));
 
-        $crawler = $client->request('GET', sprintf('/app/vacancies/%d/edit', $vacancy->getId()));
+        $crawler = $client->request('GET', sprintf('/vacancies/%d/edit', $vacancy->getId()));
         self::assertSame('Senior PHP Developer', $crawler->filter('input[name="vacancy[title]"]')->attr('value'));
         $editData = $this->formData($crawler, $company, $recruiter, $php, 'Lead PHP Developer');
         self::assertIsArray($editData['techStacks']);
         $editData['techStacks']['newTags'] = [['name' => 'Symfony', 'category' => 'Framework']];
-        $client->request('POST', sprintf('/app/vacancies/%d/edit', $vacancy->getId()), ['vacancy' => $editData]);
-        self::assertResponseRedirects(sprintf('/app/vacancies/%d/edit', $vacancy->getId()));
+        $client->request('POST', sprintf('/vacancies/%d/edit', $vacancy->getId()), ['vacancy' => $editData]);
+        self::assertResponseRedirects(sprintf('/vacancies/%d/edit', $vacancy->getId()));
 
         $this->entityManager()->clear();
         $updated = $this->entityManager()->find(Vacancy::class, $vacancy->getId());
@@ -85,12 +85,12 @@ final class VacancyAuthoringTest extends WebTestCase
         $client = self::createClient();
         $user = $this->createUser('vacancy-validation@example.com');
         $client->loginUser($user);
-        $crawler = $client->request('GET', '/app/vacancies/new');
+        $crawler = $client->request('GET', '/vacancies/new');
         self::assertResponseIsSuccessful();
         $data = $this->formData($crawler, null, null, null, 'Invalid salary');
         $data['minimumSalary'] = '6000.00';
         $data['maximumSalary'] = '5000.00';
-        $client->request('POST', '/app/vacancies/new', ['vacancy' => $data]);
+        $client->request('POST', '/vacancies/new', ['vacancy' => $data]);
         self::assertResponseStatusCodeSame(422);
         self::assertSelectorTextContains('.vacancy-form-panel', 'The minimum salary cannot exceed the maximum salary.');
 
@@ -98,7 +98,7 @@ final class VacancyAuthoringTest extends WebTestCase
         $vacancy = new Vacancy($otherUser, 'Private vacancy');
         $this->entityManager()->persist($vacancy);
         $this->entityManager()->flush();
-        $client->request('GET', sprintf('/app/vacancies/%d/edit', $vacancy->getId()));
+        $client->request('GET', sprintf('/vacancies/%d/edit', $vacancy->getId()));
         self::assertResponseStatusCodeSame(404);
     }
 
