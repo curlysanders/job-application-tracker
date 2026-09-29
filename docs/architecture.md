@@ -18,6 +18,7 @@ Phase 1 establishes a rock-solid foundation, focused on manual data entry, respo
 - **Asset / Frontend System**: Symfony UX 3.4 + AssetMapper (no Node.js build step required)
 - **UI Framework**: Flowbite (Tailwind CSS native components) + Twig Components
 - **Interactivity**: Stimulus Controllers via Symfony UX
+- **Markdown Rendering**: League CommonMark renders GitHub-flavored scratchpad Markdown on the server with HTML stripping and unsafe-link protection.
 
 ### Storage & Integration Boundaries
 - **File Storage**: Symfony Flysystem Abstraction (`league/flysystem-bundle`). Local disk storage in Phase 1, seamlessly swappable to AWS S3 or MinIO in future cloud deployments.
@@ -45,6 +46,7 @@ Phase 1 establishes a rock-solid foundation, focused on manual data entry, respo
 - `src/Domain` contains domain models and business rules. Doctrine attributes on internal CRUD entities are permitted; domain code does not depend on application, UI, or infrastructure code.
 - `src/Application` contains commands, command handlers, events, and application ports. Writes are dispatched through `command.bus`; reads will use `query.bus` when read models are introduced.
 - `src/Infrastructure` contains adapters for framework and external services. Messenger adapters bridge the application command and event ports to Symfony Messenger.
+- Scratchpad and next-action edits use owner-scoped commands. The scratchpad's Stimulus controller supplies a Markdown formatting toolbar, autosaves, and receives a safe rendered preview; the dashboard uses a focused read query for unarchived reminders due today or earlier.
 - `src/UI` contains HTTP controllers, forms, and presentation models. Controllers map HTTP input to commands and render responses; they do not persist entities or implement business workflows. Favor constructor-injected framework dependencies over `AbstractController`; extend it only when a specific helper provides a clear benefit.
 - `src/Infrastructure` contains framework and external adapters, including HTTP-kernel subscribers and Messenger, persistence, and security adapters.
 - `event.bus` publishes zero-or-more application events synchronously today. TICK-401 will route applicable events to the Doctrine outbox without changing application callers.

@@ -226,6 +226,22 @@ final class Vacancy
         $this->excitement = $excitement;
     }
 
+    public function updateScratchpadNotes(?string $scratchpadNotes): void
+    {
+        $this->scratchpadNotes = self::optional($scratchpadNotes);
+    }
+
+    public function updateNextAction(?string $title, ?\DateTimeImmutable $at): void
+    {
+        $title = self::optional($title);
+        if (null === $at && null !== $title) {
+            throw new \InvalidArgumentException('A next action title requires a date and time.');
+        }
+
+        $this->nextActionTitle = $title;
+        $this->nextActionAt = $at;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -391,5 +407,10 @@ final class Vacancy
     public function getNextActionTitle(): ?string
     {
         return $this->nextActionTitle;
+    }
+
+    public function getScratchpadNotes(): ?string
+    {
+        return $this->scratchpadNotes;
     }
 }

@@ -107,6 +107,7 @@
                             <form action="{{ path('app_vacancy_transition_status', {id: vacancy.id}) }}" method="post" data-action="submit->vacancy-status-transition#open" data-transition-label="{{ transition.name|replace({'_': ' '})|title }}">
                                 <input type="hidden" name="_token" value="{{ csrf_token('vacancy_status_transition_' ~ vacancy.id) }}">
                                 <input type="hidden" name="transition" value="{{ transition.name }}">
+                                <input type="hidden" name="return" value="{{ path('app_vacancy_edit', {id: vacancy.id}) }}">
                                 <button class="button button-secondary" type="submit">{{ transition.name|replace({'_': ' '})|title }}</button>
                             </form>
                         {% endfor %}
@@ -122,6 +123,7 @@
                         <form action="{{ path('app_vacancy_transition_status', {id: vacancy.id}) }}" method="post">
                             <input data-vacancy-status-transition-target="token" type="hidden" name="_token" value="">
                             <input data-vacancy-status-transition-target="transition" type="hidden" name="transition" value="">
+                            <input type="hidden" name="return" value="{{ path('app_vacancy_edit', {id: vacancy.id}) }}">
                             <label for="vacancy-status-transition-note">Note <span class="form-help">(optional)</span></label>
                             <textarea data-vacancy-status-transition-target="note" id="vacancy-status-transition-note" name="note" rows="4" placeholder="For example, first screening scheduled"></textarea>
                             <div class="vacancy-status-actions">

@@ -81,7 +81,8 @@ final readonly class TransitionVacancyStatusController
     private function returnUrl(Request $request, int $id): string
     {
         $return = $request->request->getString('return');
-        if ('/app' === parse_url($return, PHP_URL_PATH)) {
+        $path = parse_url($return, PHP_URL_PATH);
+        if ('/app' === $path || $this->urls->generate('app_vacancy_show', ['id' => $id]) === $path || $this->urls->generate('app_vacancy_edit', ['id' => $id]) === $path) {
             return $return;
         }
 

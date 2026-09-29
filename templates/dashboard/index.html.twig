@@ -4,6 +4,19 @@
 {% block page_heading %}Dashboard{% endblock %}
 
 {% block content %}
+    {% if reminders is not empty %}
+        <section class="dashboard-reminders panel" aria-labelledby="dashboard-reminders-heading">
+            <h2 id="dashboard-reminders-heading">Due today or overdue</h2>
+            <ul>
+                {% for reminder in reminders %}
+                    <li>
+                        <a href="{{ path('app_vacancy_show', {id: reminder.id}) }}">{{ reminder.title }}</a>
+                        <span>{{ reminder.nextActionTitle ?? 'Next action' }} · <time datetime="{{ reminder.nextActionAt|date('c') }}">{{ reminder.nextActionAt|date('d M Y, H:i') }}</time></span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </section>
+    {% endif %}
     <section
         class="dashboard-pipeline"
         data-controller="vacancy-pipeline"
