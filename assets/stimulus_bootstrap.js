@@ -5,6 +5,7 @@ import TechStackCollectionController from './controllers/tech_stack_collection_c
 import VacancyAuthoringController from './controllers/vacancy_authoring_controller.js';
 import VacancyPipelineController from './controllers/vacancy_pipeline_controller.js';
 import VacancyStatusTransitionController from './controllers/vacancy_status_transition_controller.js';
+import VacancyScratchpadController from './controllers/vacancy_scratchpad_controller.js';
 
 const app = startStimulusApp();
 app.register('contact-collection', ContactCollectionController);
@@ -13,3 +14,4 @@ app.register('tech-stack-collection', TechStackCollectionController);
 app.register('vacancy-authoring', VacancyAuthoringController);
 app.register('vacancy-pipeline', VacancyPipelineController);
 app.register('vacancy-status-transition', VacancyStatusTransitionController);
+app.register('vacancy-scratchpad', VacancyScratchpadController);

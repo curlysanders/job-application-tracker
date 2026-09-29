@@ -22,6 +22,48 @@ p { color: #475569; line-height: 1.65; margin: .75rem 0; }
 .vacancy-form-panel { max-width: 66rem; }
 .vacancy-status-panel { max-width: 66rem; margin-top: 1rem; }
 .vacancy-status-history-panel { max-width: 66rem; margin-top: 1rem; }
+.dashboard-reminders { max-width: 66rem; margin-bottom: 1rem; border-color: #f59e0b; background: #fffbeb; }
+.dashboard-reminders ul { margin: 0; padding-left: 1.25rem; }
+.dashboard-reminders li + li { margin-top: .5rem; }
+.dashboard-reminders span { color: #92400e; }
+.vacancy-detail-actions { margin-bottom: 1rem; }
+.vacancy-detail-grid { display: grid; gap: 1rem; max-width: 78rem; }
+.vacancy-detail-main, .vacancy-detail-sidebar { display: grid; align-content: start; gap: 1rem; }
+.vacancy-overview dl { display: grid; grid-template-columns: minmax(8rem, 1fr) 2fr; gap: .65rem 1rem; margin: 0; }
+.vacancy-overview dl div { display: contents; }
+.vacancy-overview dt { font-weight: 650; color: #334155; }
+.vacancy-overview dd { margin: 0; color: #475569; }
+.vacancy-text-block p, .markdown-preview { overflow-wrap: anywhere; }
+.vacancy-widget-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
+.vacancy-status-form { display: grid; gap: .5rem; padding: .75rem 0; border-top: 1px solid #e2e8f0; }
+.vacancy-status-form:first-of-type { border-top: 0; padding-top: 0; }
+.scratchpad-status { min-height: 1.5rem; font-size: .875rem; }
+.scratchpad-status-saved { color: #166534; }
+.scratchpad-status-error { color: #991b1b; font-weight: 600; }
+.markdown-toolbar { display: flex; flex-wrap: wrap; gap: .35rem; margin: .5rem 0; }
+.markdown-toolbar .button { min-width: 2.5rem; padding: .4rem .55rem; }
+.markdown-preview { padding: .75rem; border: 1px solid #e2e8f0; border-radius: .5rem; background: #f8fafc; }
+.markdown-preview > :first-child { margin-top: 0; }
+.markdown-preview > :last-child { margin-bottom: 0; }
+.markdown-preview h1, .markdown-preview h2, .markdown-preview h3, .markdown-preview h4 { color: #172033; font-weight: 700; line-height: 1.25; }
+.markdown-preview h1 { margin: 1.5rem 0 .75rem; font-size: 1.5rem; }
+.markdown-preview h2 { margin: 1.25rem 0 .65rem; font-size: 1.25rem; }
+.markdown-preview h3 { margin: 1rem 0 .5rem; font-size: 1.125rem; }
+.markdown-preview h4 { margin: .875rem 0 .5rem; font-size: 1rem; }
+.markdown-preview p { margin: .75rem 0; }
+.markdown-preview ul, .markdown-preview ol { margin: .75rem 0; padding-left: 1.5rem; }
+.markdown-preview ul { list-style: disc; }
+.markdown-preview ol { list-style: decimal; }
+.markdown-preview li + li { margin-top: .25rem; }
+.markdown-preview a { color: #1d4ed8; text-decoration: underline; }
+.markdown-preview code { padding: .1rem .3rem; border-radius: .25rem; background: #e2e8f0; font-family: ui-monospace, monospace; }
+.markdown-preview pre { overflow-x: auto; margin: .75rem 0; padding: .75rem; border-radius: .5rem; background: #172033; color: #f8fafc; }
+.markdown-preview pre code { padding: 0; background: transparent; color: inherit; }
+.markdown-preview blockquote { margin: .75rem 0; padding-left: .75rem; border-left: .25rem solid #94a3b8; color: #475569; }
+.markdown-preview table { width: 100%; margin: .75rem 0; border-collapse: collapse; }
+.markdown-preview th, .markdown-preview td { padding: .5rem; border: 1px solid #cbd5e1; text-align: left; }
+.markdown-preview th { background: #e2e8f0; font-weight: 650; }
+.markdown-preview input[type="checkbox"] { margin-right: .5rem; }
 .dashboard-pipeline { display: grid; gap: 1rem; max-width: 66rem; }
 .vacancy-chevron-pipeline-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
 .vacancy-pipeline-clear { color: #1d4ed8; font-weight: 600; }
@@ -117,4 +159,5 @@ p { color: #475569; line-height: 1.65; margin: .75rem 0; }
     .app-content { padding: 2.5rem; }
     .vacancy-date-grid { grid-template-columns: repeat(3, 1fr); }
     .vacancy-salary-grid { grid-template-columns: repeat(3, 1fr); }
+    .vacancy-detail-grid { grid-template-columns: minmax(0, 3fr) minmax(20rem, 2fr); }
 }

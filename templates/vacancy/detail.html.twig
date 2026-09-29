@@ -1,0 +1,109 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ vacancy.title }} · Job Application Tracker{% endblock %}
+{% block page_heading %}{{ vacancy.title }}{% endblock %}
+
+{% block content %}
+    <div class="vacancy-detail-actions">
+        <a class="button button-secondary" href="{{ path('app_vacancy_edit', {id: vacancy.id}) }}">Edit vacancy</a>
+    </div>
+    <div class="vacancy-detail-grid">
+        <div class="vacancy-detail-main">
+            <section class="panel vacancy-overview" aria-labelledby="vacancy-overview-heading">
+                <h2 id="vacancy-overview-heading">Overview</h2>
+                <dl>
+                    <div><dt>Status</dt><dd><span class="vacancy-status-pill">{{ vacancy.status.label }}</span></dd></div>
+                    <div><dt>Company</dt><dd>{{ vacancy.company ? vacancy.company.name : '—' }}</dd></div>
+                    <div><dt>Recruiter</dt><dd>{{ vacancy.recruiter ? vacancy.recruiter.agencyName : '—' }}</dd></div>
+                    <div><dt>Location</dt><dd>{{ vacancy.location ?? '—' }}</dd></div>
+                    <div><dt>Work mode</dt><dd>{{ vacancy.workMode ? vacancy.workMode.value|lower|capitalize : '—' }}{% if vacancy.hybridDetails %}: {{ vacancy.hybridDetails }}{% endif %}</dd></div>
+                    <div><dt>Contract</dt><dd>{{ vacancy.contractType ? vacancy.contractType.value|replace({'_': ' '})|title : '—' }}</dd></div>
+                    <div><dt>Source</dt><dd>{{ vacancy.applicationSource ? vacancy.applicationSource.value|replace({'_': ' '})|title : '—' }}</dd></div>
+                    <div><dt>Posted</dt><dd>{{ vacancy.datePosted ? vacancy.datePosted|date('d M Y') : '—' }}</dd></div>
+                    <div><dt>Deadline</dt><dd>{{ vacancy.deadline ? vacancy.deadline|date('d M Y') : '—' }}</dd></div>
+                    <div><dt>Applied</dt><dd>{{ vacancy.dateApplied ? vacancy.dateApplied|date('d M Y') : '—' }}</dd></div>
+                    <div><dt>Added</dt><dd><time datetime="{{ vacancy.dateAdded|date('c') }}">{{ vacancy.dateAdded|date('d M Y') }}</time></dd></div>
+                </dl>
+            </section>
+
+            {% if (vacancy.company and vacancy.company.directContacts is not empty) or (vacancy.recruiter and vacancy.recruiter.directContacts is not empty) %}
+                <section class="panel" aria-labelledby="vacancy-contacts-heading">
+                    <h2 id="vacancy-contacts-heading">Key contacts</h2>
+                    {% for contact in vacancy.company ? vacancy.company.directContacts : [] %}
+                        <p><strong>{{ contact.name }}</strong>{% if contact.email %} · <a href="mailto:{{ contact.email }}">{{ contact.email }}</a>{% endif %}{% if contact.phone %} · {{ contact.phone }}{% endif %}{% if contact.linkedinUrl %} · <a href="{{ contact.linkedinUrl }}" rel="noreferrer" target="_blank">LinkedIn</a>{% endif %}</p>
+                    {% endfor %}
+                    {% for contact in vacancy.recruiter ? vacancy.recruiter.directContacts : [] %}
+                        <p><strong>{{ contact.name }}</strong>{% if contact.email %} · <a href="mailto:{{ contact.email }}">{{ contact.email }}</a>{% endif %}{% if contact.phone %} · {{ contact.phone }}{% endif %}{% if contact.linkedinUrl %} · <a href="{{ contact.linkedinUrl }}" rel="noreferrer" target="_blank">LinkedIn</a>{% endif %}</p>
+                    {% endfor %}
+                </section>
+            {% endif %}
+
+            {% set textBlocks = {'About the role': vacancy.aboutJob, 'Requirements': vacancy.requirements, 'Responsibilities': vacancy.responsibilities, 'Preferred qualifications': vacancy.preferredQualifications, 'About the company': vacancy.aboutCompany, 'Compensation and benefits': vacancy.compensationBenefits, 'Full vacancy text': vacancy.fullText, 'How to apply': vacancy.howToApply} %}
+            {% for heading, text in textBlocks %}
+                {% if text %}
+                    <section class="panel vacancy-text-block" aria-labelledby="vacancy-{{ loop.index }}-heading">
+                        <h2 id="vacancy-{{ loop.index }}-heading">{{ heading }}</h2>
+                        <p>{{ text|nl2br }}</p>
+                    </section>
+                {% endif %}
+            {% endfor %}
+
+            <section class="panel" aria-labelledby="vacancy-sources-heading">
+                <h2 id="vacancy-sources-heading">Sources and technologies</h2>
+                {% if vacancy.sourceUrls is empty %}<p>No source URLs recorded.</p>{% else %}<ul>{% for sourceUrl in vacancy.sourceUrls %}<li><a href="{{ sourceUrl }}" rel="noreferrer" target="_blank">{{ sourceUrl }}</a></li>{% endfor %}</ul>{% endif %}
+                <p><strong>Technology:</strong> {{ vacancy.techStacks is empty ? '—' : vacancy.techStacks|map(tag => tag.name)|join(', ') }}</p>
+                <p><strong>Salary:</strong> {% set salary = vacancy.salaryRange %}{{ salary ? salary.currencyCode ~ ' ' ~ (salary.minimum ? salary.minimum.amount : '—') ~ (salary.maximum ? ' – ' ~ salary.maximum.amount : '') : '—' }}</p>
+                <p><strong>Excitement:</strong> {{ vacancy.excitement is null ? '—' : vacancy.excitement ~ ' / 5' }}</p>
+            </section>
+        </div>
+
+        <aside class="vacancy-detail-sidebar">
+            <section class="panel" aria-labelledby="next-action-heading">
+                <h2 id="next-action-heading">Next action</h2>
+                <form action="{{ path('app_vacancy_update_next_action', {id: vacancy.id}) }}" method="post">
+                    <input type="hidden" name="_token" value="{{ csrf_token('vacancy_next_action_' ~ vacancy.id) }}">
+                    <label for="next-action-title">Title <span class="form-help">(optional)</span></label>
+                    <input id="next-action-title" name="title" maxlength="255" value="{{ vacancy.nextActionTitle ?? '' }}">
+                    <label for="next-action-at">Date and time</label>
+                    <input id="next-action-at" name="at" type="datetime-local" value="{{ vacancy.nextActionAt ? vacancy.nextActionAt|date('Y-m-d\\TH:i') : '' }}">
+                    <div class="vacancy-widget-actions"><button class="button" type="submit">Save reminder</button>{% if vacancy.nextActionAt %}<button class="button button-secondary" name="clear" value="1" type="submit">Clear</button>{% endif %}</div>
+                </form>
+            </section>
+
+            <section class="panel" aria-labelledby="scratchpad-heading" data-controller="vacancy-scratchpad" data-vacancy-scratchpad-url-value="{{ path('app_vacancy_update_scratchpad', {id: vacancy.id}) }}">
+                <h2 id="scratchpad-heading">Interview scratchpad</h2>
+                <p class="form-help">Use Markdown for prep notes, key contacts, and interview questions.</p>
+                <input data-vacancy-scratchpad-target="token" type="hidden" value="{{ csrf_token('vacancy_scratchpad_' ~ vacancy.id) }}">
+                <label for="vacancy-scratchpad-notes">Notes</label>
+                <div class="markdown-toolbar" role="toolbar" aria-label="Markdown formatting">
+                    <button class="button button-secondary" data-action="vacancy-scratchpad#format" data-markdown-format="heading" type="button" aria-label="Heading">H</button>
+                    <button class="button button-secondary" data-action="vacancy-scratchpad#format" data-markdown-format="bold" type="button" aria-label="Bold"><strong>B</strong></button>
+                    <button class="button button-secondary" data-action="vacancy-scratchpad#format" data-markdown-format="italic" type="button" aria-label="Italic"><em>I</em></button>
+                    <button class="button button-secondary" data-action="vacancy-scratchpad#format" data-markdown-format="list" type="button" aria-label="Bulleted list">List</button>
+                    <button class="button button-secondary" data-action="vacancy-scratchpad#format" data-markdown-format="link" type="button" aria-label="Link">Link</button>
+                    <button class="button button-secondary" data-action="vacancy-scratchpad#format" data-markdown-format="code" type="button" aria-label="Inline code">Code</button>
+                </div>
+                <textarea data-vacancy-scratchpad-target="notes" data-action="input->vacancy-scratchpad#schedule blur->vacancy-scratchpad#save" id="vacancy-scratchpad-notes" rows="12">{{ vacancy.scratchpadNotes ?? '' }}</textarea>
+                <p class="scratchpad-status" data-vacancy-scratchpad-target="status" aria-live="polite"></p>
+                <h3>Preview</h3>
+                <div class="markdown-preview" data-vacancy-scratchpad-target="preview">{{ scratchpadPreview|default('')|raw }}</div>
+            </section>
+
+            <section class="panel vacancy-status-panel" aria-labelledby="vacancy-status-heading">
+                <h2 id="vacancy-status-heading">Change status</h2>
+                {% if enabledStatusTransitions is empty %}<p>This vacancy has reached a final status.</p>{% else %}{% for transition in enabledStatusTransitions %}
+                    <form action="{{ path('app_vacancy_transition_status', {id: vacancy.id}) }}" method="post" class="vacancy-status-form">
+                        <input type="hidden" name="_token" value="{{ csrf_token('vacancy_status_transition_' ~ vacancy.id) }}"><input type="hidden" name="transition" value="{{ transition.name }}"><input type="hidden" name="return" value="{{ path('app_vacancy_show', {id: vacancy.id}) }}">
+                        <label for="status-note-{{ transition.name }}">{{ transition.name|replace({'_': ' '})|title }} note <span class="form-help">(optional)</span></label>
+                        <textarea id="status-note-{{ transition.name }}" name="note" rows="2"></textarea><button class="button button-secondary" type="submit">{{ transition.name|replace({'_': ' '})|title }}</button>
+                    </form>
+                {% endfor %}{% endif %}
+            </section>
+
+            <section class="panel vacancy-status-history-panel" aria-labelledby="vacancy-status-history-heading">
+                <h2 id="vacancy-status-history-heading">Status history</h2>
+                {% if statusHistory is empty %}<p>No status changes have been recorded yet.</p>{% else %}<ol class="vacancy-status-history">{% for history in statusHistory %}<li><strong>{{ history.fromStatus.value|replace({'_': ' '})|title }} → {{ history.toStatus.value|replace({'_': ' '})|title }}</strong><br><time datetime="{{ history.transitionedAt|date('c') }}">{{ history.transitionedAt|date('d M Y, H:i') }}</time>{% if history.notes %}<p>{{ history.notes }}</p>{% endif %}</li>{% endfor %}</ol>{% endif %}
+            </section>
+        </aside>
+    </div>
+{% endblock %}

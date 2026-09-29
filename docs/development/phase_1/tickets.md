@@ -194,8 +194,9 @@
     - Integrate Markdown scratchpad editor for prep notes, key contacts, and questions to ask during interview.
     - Add "Next Action" reminder widget (`next_action_title`, `next_action_at`).
 - **Acceptance Criteria**:
-    - [ ] Scratchpad notes save asynchronously upon user edit/blur.
-    - [ ] Vacancies with upcoming or overdue `next_action_at` display alert callouts on the dashboard.
+    - [x] Scratchpad notes save asynchronously upon user edit/blur.
+    - [x] Vacancies with upcoming or overdue `next_action_at` display alert callouts on the dashboard.
+- **Validation**: [Results and reproduction steps](tick-305-validation.md).
 
 ---
 

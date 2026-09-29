@@ -59,6 +59,23 @@ final class VacancyTest extends TestCase
         $vacancy->setExcitement(6);
     }
 
+    public function testUpdatesScratchpadAndNextAction(): void
+    {
+        $vacancy = new Vacancy(new User(), 'Senior PHP Developer');
+        $nextActionAt = new \DateTimeImmutable('2026-10-01 09:30:00');
+
+        $vacancy->updateScratchpadNotes("  # Prepare\n\nAsk about the team.  ");
+        $vacancy->updateNextAction('  Prepare interview  ', $nextActionAt);
+
+        self::assertSame("# Prepare\n\nAsk about the team.", $vacancy->getScratchpadNotes());
+        self::assertSame('Prepare interview', $vacancy->getNextActionTitle());
+        self::assertSame($nextActionAt, $vacancy->getNextActionAt());
+
+        $vacancy->updateNextAction(null, null);
+        self::assertNull($vacancy->getNextActionTitle());
+        self::assertNull($vacancy->getNextActionAt());
+    }
+
     public function testStateMachineStoresTransitionsThroughTheBackedStatusEnum(): void
     {
         $definition = new DefinitionBuilder()
