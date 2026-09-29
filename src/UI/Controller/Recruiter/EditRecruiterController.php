@@ -8,24 +8,23 @@ use CurlySanders\JobApplicationTracker\Application\Recruiter\Command\UpdateRecru
 use CurlySanders\JobApplicationTracker\Application\Recruiter\RecruiterRepository;
 use CurlySanders\JobApplicationTracker\Application\Shared\Bus\CommandBus;
 use CurlySanders\JobApplicationTracker\Domain\Recruiter\Recruiter;
+use CurlySanders\JobApplicationTracker\UI\Controller\Management\AbstractManagementFormController;
 use CurlySanders\JobApplicationTracker\UI\Form\DirectContactInputFactory;
-use CurlySanders\JobApplicationTracker\UI\Form\Model\Contact\DirectContactData;
 use CurlySanders\JobApplicationTracker\UI\Form\Model\Recruiter\RecruiterData;
 use CurlySanders\JobApplicationTracker\UI\Form\Recruiter\RecruiterType;
 use Symfony\Component\Form\FormFactoryInterface;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Environment;
 
-final readonly class EditRecruiterController
+final readonly class EditRecruiterController extends AbstractManagementFormController
 {
-    public function __construct(private RecruiterRepository $recruiters, private CommandBus $commandBus, private FormFactoryInterface $forms, private Environment $twig, private UrlGeneratorInterface $urls)
+    public function __construct(private RecruiterRepository $recruiters, private CommandBus $commandBus, FormFactoryInterface $forms, Environment $twig, UrlGeneratorInterface $urls)
     {
+        parent::__construct($forms, $twig, $urls);
     }
 
     #[Route('/recruiters/{id}/edit', name: 'app_recruiter_edit', requirements: ['id' => '\\d+'], methods: ['GET', 'POST'])]
@@ -38,10 +37,10 @@ final readonly class EditRecruiterController
         if ($form->isSubmitted() && $form->isValid()) {
             $this->commandBus->dispatch(new UpdateRecruiter($id, $data->agencyName ?? '', $data->website, DirectContactInputFactory::fromForm($data->directContacts)));
 
-            return $this->redirect($request);
+            return $this->redirectWithSuccess($request, 'app_recruiter_list', 'Recruiter updated.', 'Recruiter');
         }
 
-        return new Response($this->twig->render('recruiter/form.html.twig', ['form' => $form->createView(), 'pageTitle' => 'Edit recruiter', 'submitLabel' => 'Save recruiter']), $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK);
+        return $this->formResponse($form, 'recruiter/form.html.twig', 'Edit recruiter', 'Save recruiter');
     }
 
     private function dataFrom(Recruiter $recruiter): RecruiterData
@@ -49,25 +48,8 @@ final readonly class EditRecruiterController
         $data = new RecruiterData();
         $data->agencyName = $recruiter->getAgencyName();
         $data->website = $recruiter->getWebsite();
-        foreach ($recruiter->getDirectContacts() as $contact) {
-            $row = new DirectContactData();
-            $row->name = $contact->getName();
-            $row->email = $contact->getEmail();
-            $row->phone = $contact->getPhone();
-            $row->linkedinUrl = $contact->getLinkedinUrl();
-            $data->directContacts[] = $row;
-        }
+        $data->directContacts = $this->directContactData($recruiter->getDirectContacts());
 
         return $data;
-    }
-
-    private function redirect(Request $request): RedirectResponse
-    {
-        $session = $request->getSession();
-        if (!$session instanceof FlashBagAwareSessionInterface) {
-            throw new \LogicException('Recruiter management requires a flash-aware session.');
-        } $session->getFlashBag()->add('success', 'Recruiter updated.');
-
-        return new RedirectResponse($this->urls->generate('app_recruiter_list'));
     }
 }

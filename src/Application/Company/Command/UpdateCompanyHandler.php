@@ -6,9 +6,8 @@ namespace CurlySanders\JobApplicationTracker\Application\Company\Command;
 
 use CurlySanders\JobApplicationTracker\Application\Company\CompanyRepository;
 use CurlySanders\JobApplicationTracker\Application\Shared\Bus\CommandHandler;
-use CurlySanders\JobApplicationTracker\Application\Shared\DirectContactInput;
+use CurlySanders\JobApplicationTracker\Application\Shared\DirectContactFactory;
 use CurlySanders\JobApplicationTracker\Domain\Company\Company;
-use CurlySanders\JobApplicationTracker\Domain\Contact\DirectContact;
 
 final readonly class UpdateCompanyHandler implements CommandHandler
 {
@@ -20,17 +19,7 @@ final readonly class UpdateCompanyHandler implements CommandHandler
     {
         $company = $this->companies->find($command->companyId) ?? throw new \LogicException('The company no longer exists.');
         $company->update($command->name, $command->website, $command->industry);
-        $company->replaceDirectContacts(
-            ...array_map(
-                static fn (DirectContactInput $contact): DirectContact => new DirectContact(
-                    $contact->name,
-                    $contact->email,
-                    $contact->phone,
-                    $contact->linkedinUrl,
-                ),
-                $command->directContacts,
-            ),
-        );
+        $company->replaceDirectContacts(...DirectContactFactory::fromInputs($command->directContacts));
         $this->companies->save($company);
 
         return $company;
