@@ -6,6 +6,8 @@ namespace CurlySanders\JobApplicationTracker\Application\UserProfile\Command;
 
 use CurlySanders\JobApplicationTracker\Application\Authentication\UserRepository;
 use CurlySanders\JobApplicationTracker\Application\Shared\Bus\CommandHandler;
+use CurlySanders\JobApplicationTracker\Domain\User\PreferredSalary;
+use CurlySanders\JobApplicationTracker\Domain\User\PreferredTransportMode;
 use CurlySanders\JobApplicationTracker\Domain\User\User;
 
 final readonly class UpdateUserPreferencesHandler implements CommandHandler
@@ -21,7 +23,21 @@ final readonly class UpdateUserPreferencesHandler implements CommandHandler
             throw new \LogicException('The authenticated user no longer exists.');
         }
 
-        $user->updatePreferences($command->preferredSalary, $command->maximumCommuteMinutes, $command->preferredTransportMode);
+        $preferredTransportMode = null === $command->preferredTransportMode
+            ? null
+            : PreferredTransportMode::tryFrom($command->preferredTransportMode)
+                ?? throw new \LogicException('The preferred transport mode is invalid.');
+
+        $user->updatePreferences(
+            PreferredSalary::fromDecimal(
+                null === $command->minimumPreferredSalary || '' === trim($command->minimumPreferredSalary)
+                    ? null
+                    : $command->minimumPreferredSalary,
+                $command->minimumPreferredSalaryCurrency,
+            ),
+            $command->maximumCommuteMinutes,
+            $preferredTransportMode,
+        );
         $this->userRepository->save($user);
 
         return $user;

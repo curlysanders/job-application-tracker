@@ -4,16 +4,14 @@ declare(strict_types=1);
 
 namespace CurlySanders\JobApplicationTracker\Application\UserProfile\Command;
 
-use CurlySanders\JobApplicationTracker\Domain\User\PreferredSalary;
-use CurlySanders\JobApplicationTracker\Domain\User\PreferredTransportMode;
-
 final readonly class UpdateUserPreferences
 {
     public function __construct(
         public int $userId,
-        public PreferredSalary $preferredSalary,
+        public ?string $minimumPreferredSalary,
+        public string $minimumPreferredSalaryCurrency,
         public ?int $maximumCommuteMinutes,
-        public ?PreferredTransportMode $preferredTransportMode,
+        public ?string $preferredTransportMode,
     ) {
     }
 }
