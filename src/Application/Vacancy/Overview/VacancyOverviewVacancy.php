@@ -11,7 +11,7 @@ final readonly class VacancyOverviewVacancy
 {
     /** @param list<string> $techStackNames */
     public function __construct(
-        public int $id,
+        public string $id,
         public string $title,
         public ?string $companyName,
         public ?string $recruiterName,

@@ -41,8 +41,8 @@ final readonly class EditVacancyController
     ) {
     }
 
-    #[Route('/vacancies/{id}/edit', name: 'app_vacancy_edit', requirements: ['id' => '\\d+'], methods: ['GET', 'POST'])]
-    public function __invoke(int $id, Request $request): Response
+    #[Route('/vacancies/{id}/edit', name: 'app_vacancy_edit', methods: ['GET', 'POST'])]
+    public function __invoke(string $id, Request $request): Response
     {
         $user = $this->authenticatedUser();
         $vacancy = $this->vacancies->findOwnedBy($id, $this->userId($user)) ?? throw new NotFoundHttpException('Vacancy not found.');
@@ -83,12 +83,12 @@ final readonly class EditVacancyController
         return $user;
     }
 
-    private function userId(User $user): int
+    private function userId(User $user): string
     {
-        return $user->getId() ?? throw new \LogicException('Vacancy authoring requires a persisted user.');
+        return $user->getId()->toRfc4122();
     }
 
-    private function redirect(Request $request, int $id): RedirectResponse
+    private function redirect(Request $request, string $id): RedirectResponse
     {
         $session = $request->getSession();
         if (!$session instanceof FlashBagAwareSessionInterface) {

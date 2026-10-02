@@ -14,8 +14,8 @@ final class VacancyFormDataFactory
     {
         $data = new VacancyData();
         $data->title = $vacancy->getTitle();
-        $data->companyId = $vacancy->getCompany()?->getId();
-        $data->recruiterId = $vacancy->getRecruiter()?->getId();
+        $data->companyId = $vacancy->getCompany()?->getId()->toRfc4122();
+        $data->recruiterId = $vacancy->getRecruiter()?->getId()->toRfc4122();
         $data->location = $vacancy->getLocation();
         $data->applicationSource = $vacancy->getApplicationSource();
         $data->sourceUrls = $vacancy->getSourceUrls();
@@ -42,10 +42,14 @@ final class VacancyFormDataFactory
         return $data;
     }
 
-    public function command(int $userId, ?int $vacancyId, VacancyData $data): SaveVacancy
+    public function command(string $userId, ?string $vacancyId, VacancyData $data): SaveVacancy
     {
         $newTechStacks = [];
         foreach ($data->techStacks->newTags as $newTechStack) {
+            if (null === $newTechStack) {
+                continue;
+            }
+
             if (null === $newTechStack->name || null === $newTechStack->category) {
                 throw new \LogicException('A valid new technology requires a name and category.');
             }

@@ -18,6 +18,7 @@ final readonly class DeleteVacancyHandler implements CommandHandler
         $vacancy = $this->vacancies->findOwnedBy($command->vacancyId, $command->userId)
             ?? throw new \LogicException('The vacancy no longer exists.');
 
+        $vacancy->recordDeleted();
         $this->vacancies->remove($vacancy);
     }
 }

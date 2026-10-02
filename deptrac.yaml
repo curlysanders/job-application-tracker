@@ -65,6 +65,12 @@ deptrac:
                     type: classNameRegex
                     value: '#^Brick\\#'
         -
+            name: Lingoda
+            collectors:
+                -
+                    type: classNameRegex
+                    value: '#^Lingoda\\#'
+        -
             name: PHP
             collectors:
                 -
@@ -86,6 +92,7 @@ deptrac:
             - Symfony
             - Doctrine
             - Brick
+            - Lingoda
             - PHP
         Infrastructure:
             - Application

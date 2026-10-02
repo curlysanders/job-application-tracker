@@ -27,8 +27,8 @@ final readonly class EditRecruiterController extends AbstractManagementFormContr
         parent::__construct($forms, $twig, $urls);
     }
 
-    #[Route('/recruiters/{id}/edit', name: 'app_recruiter_edit', requirements: ['id' => '\\d+'], methods: ['GET', 'POST'])]
-    public function __invoke(int $id, Request $request): Response
+    #[Route('/recruiters/{id}/edit', name: 'app_recruiter_edit', methods: ['GET', 'POST'])]
+    public function __invoke(string $id, Request $request): Response
     {
         $recruiter = $this->recruiters->find($id) ?? throw new NotFoundHttpException('Recruiter not found.');
         $data = $this->dataFrom($recruiter);

@@ -44,11 +44,11 @@ final readonly class CreateVacancyController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $vacancy = $this->commandBus->dispatch($this->dataFactory->command($this->userId($user), null, $data));
-            if (!$vacancy instanceof Vacancy || null === $vacancy->getId()) {
+            if (!$vacancy instanceof Vacancy) {
                 throw new \LogicException('A created vacancy must be persisted.');
             }
 
-            return $this->redirect($request, $vacancy->getId(), 'Vacancy created.');
+            return $this->redirect($request, $vacancy->getId()->toRfc4122(), 'Vacancy created.');
         }
 
         return $this->response($form->createView(), $user, 'Add vacancy', 'Create vacancy', $form->isSubmitted());
@@ -74,12 +74,12 @@ final readonly class CreateVacancyController
         return $user;
     }
 
-    private function userId(User $user): int
+    private function userId(User $user): string
     {
-        return $user->getId() ?? throw new \LogicException('Vacancy authoring requires a persisted user.');
+        return $user->getId()->toRfc4122();
     }
 
-    private function redirect(Request $request, int $id, string $message): RedirectResponse
+    private function redirect(Request $request, string $id, string $message): RedirectResponse
     {
         $session = $request->getSession();
         if (!$session instanceof FlashBagAwareSessionInterface) {

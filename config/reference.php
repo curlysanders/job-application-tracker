@@ -305,7 +305,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         },
  *     },
  *     translator?: bool|array{ // Translator configuration
- *         enabled?: bool|Param, // Default: false
+ *         enabled?: bool|Param, // Default: true
  *         fallbacks?: Param|string|list<scalar|Param|null>,
  *         logging?: bool|Param, // Default: false
  *         formatter?: scalar|Param|null, // Default: "translator.formatter.default"
@@ -419,7 +419,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         enabled?: bool|Param, // Default: false
  *     },
  *     lock?: Param|bool|string|array{ // Lock configuration
- *         enabled?: bool|Param, // Default: false
+ *         enabled?: bool|Param, // Default: true
  *         resources?: Param|string|array<string, Param|string|list<scalar|Param|null>>,
  *     },
  *     semaphore?: Param|bool|string|array{ // Semaphore configuration
@@ -1580,6 +1580,10 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     dump_destination?: scalar|Param|null, // A stream URL where dumps should be written to. // Default: null
  *     theme?: "dark"|"light"|Param, // Changes the color of the dump() output when rendered directly on the templating. "dark" (default) or "light". // Default: "dark"
  * }
+ * @psalm-type LingodaDomainEventsConfig = array{
+ *     message_bus_name?: scalar|Param|null, // Default: "messenger.bus.default"
+ *     enable_event_publisher?: bool|Param, // Default: false
+ * }
  * @psalm-type ConfigType = array{
  *     imports?: ImportsConfig,
  *     parameters?: ParametersConfig,
@@ -1593,6 +1597,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     stimulus?: StimulusConfig,
  *     twig?: TwigConfig,
  *     twig_component?: TwigComponentConfig,
+ *     lingoda_domain_events?: LingodaDomainEventsConfig,
  *     "when@dev"?: array{
  *         imports?: ImportsConfig,
  *         parameters?: ParametersConfig,
@@ -1609,6 +1614,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         maker?: MakerConfig,
  *         web_profiler?: WebProfilerConfig,
  *         debug?: DebugConfig,
+ *         lingoda_domain_events?: LingodaDomainEventsConfig,
  *     },
  *     "when@prod"?: array{
  *         imports?: ImportsConfig,
@@ -1623,6 +1629,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         stimulus?: StimulusConfig,
  *         twig?: TwigConfig,
  *         twig_component?: TwigComponentConfig,
+ *         lingoda_domain_events?: LingodaDomainEventsConfig,
  *     },
  *     "when@test"?: array{
  *         imports?: ImportsConfig,
@@ -1639,6 +1646,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         twig_component?: TwigComponentConfig,
  *         dama_doctrine_test?: DamaDoctrineTestConfig,
  *         web_profiler?: WebProfilerConfig,
+ *         lingoda_domain_events?: LingodaDomainEventsConfig,
  *     },
  *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
  *         imports?: ImportsConfig,

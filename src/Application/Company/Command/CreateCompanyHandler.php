@@ -19,6 +19,7 @@ final readonly class CreateCompanyHandler implements CommandHandler
     {
         $company = new Company($command->name, $command->website, $command->industry);
         $company->replaceDirectContacts(...DirectContactFactory::fromInputs($command->directContacts));
+        $company->recordCreated();
         $this->companies->save($company);
 
         return $company;

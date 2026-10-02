@@ -8,5 +8,5 @@ use CurlySanders\JobApplicationTracker\Domain\Vacancy\VacancyStatus;
 
 interface VacancyPipelineRepository
 {
-    public function forUser(int $userId, ?VacancyStatus $selectedStatus): VacancyPipeline;
+    public function forUser(string $userId, ?VacancyStatus $selectedStatus): VacancyPipeline;
 }

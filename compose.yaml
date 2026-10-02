@@ -33,6 +33,19 @@ services:
       caddy-volume-init:
         condition: service_completed_successfully
 
+  worker:
+    image: job-application-tracker-app
+    restart: unless-stopped
+    command: ["php", "bin/console", "messenger:consume", "outbox", "--time-limit=3600", "--memory-limit=128M"]
+    environment:
+      APP_ENV: ${APP_ENV:-dev}
+      APP_DEBUG: ${APP_DEBUG:-1}
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+
   caddy-volume-init:
     image: job-application-tracker-app
     user: "0:0"

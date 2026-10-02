@@ -8,6 +8,7 @@ use CurlySanders\JobApplicationTracker\Application\Company\CompanyRepository;
 use CurlySanders\JobApplicationTracker\Domain\Company\Company;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\AsAlias;
+use Symfony\Component\Uid\Uuid;
 
 #[AsAlias(CompanyRepository::class)]
 final readonly class DoctrineCompanyRepository implements CompanyRepository
@@ -16,9 +17,13 @@ final readonly class DoctrineCompanyRepository implements CompanyRepository
     {
     }
 
-    public function find(int $id): ?Company
+    public function find(string $id): ?Company
     {
-        return $this->entityManager->find(Company::class, $id);
+        if (!Uuid::isValid($id)) {
+            return null;
+        }
+
+        return $this->entityManager->find(Company::class, Uuid::fromString($id));
     }
 
     public function search(string $query): array

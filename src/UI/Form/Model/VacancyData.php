@@ -16,8 +16,8 @@ final class VacancyData
     #[Assert\NotBlank]
     #[Assert\Length(max: 255)]
     public ?string $title = null;
-    public ?int $companyId = null;
-    public ?int $recruiterId = null;
+    public ?string $companyId = null;
+    public ?string $recruiterId = null;
     #[Assert\Length(max: 255)]
     public ?string $location = null;
     public ?ApplicationSource $applicationSource = null;

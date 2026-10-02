@@ -10,7 +10,7 @@ final readonly class UpdateRecruiter
 {
     /** @param list<DirectContactInput> $directContacts */
     public function __construct(
-        public int $recruiterId,
+        public string $recruiterId,
         public string $agencyName,
         public ?string $website,
         public array $directContacts,

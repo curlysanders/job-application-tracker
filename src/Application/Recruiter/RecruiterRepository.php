@@ -8,7 +8,7 @@ use CurlySanders\JobApplicationTracker\Domain\Recruiter\Recruiter;
 
 interface RecruiterRepository
 {
-    public function find(int $id): ?Recruiter;
+    public function find(string $id): ?Recruiter;
 
     /** @return list<Recruiter> */
     public function search(string $query): array;

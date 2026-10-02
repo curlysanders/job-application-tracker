@@ -11,7 +11,7 @@ final class TechStackTagsData
     #[Assert\Length(max: 4096)]
     public ?string $existingTags = null;
 
-    /** @var list<NewTechStackData> */
+    /** @var list<?NewTechStackData> */
     #[Assert\Valid]
     public array $newTags = [];
 }

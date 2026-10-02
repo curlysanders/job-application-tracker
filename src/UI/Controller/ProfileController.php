@@ -94,7 +94,7 @@ final readonly class ProfileController
     private function requireAuthenticatedUser(): User
     {
         $user = $this->security->getUser();
-        if (!$user instanceof User || null === $user->getId()) {
+        if (!$user instanceof User) {
             throw new \LogicException('Profile settings require an authenticated user.');
         }
 
@@ -113,14 +113,9 @@ final readonly class ProfileController
         return $profile;
     }
 
-    private function authenticatedUserId(User $user): int
+    private function authenticatedUserId(User $user): string
     {
-        $userId = $user->getId();
-        if (null === $userId) {
-            throw new \LogicException('Profile settings require a persisted user.');
-        }
-
-        return $userId;
+        return $user->getId()->toRfc4122();
     }
 
     private function redirectWithSuccessMessage(Request $request, string $message): RedirectResponse

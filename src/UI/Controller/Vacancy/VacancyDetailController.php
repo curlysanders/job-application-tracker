@@ -29,14 +29,14 @@ final readonly class VacancyDetailController
     ) {
     }
 
-    #[Route('/vacancies/{id}', name: 'app_vacancy_show', requirements: ['id' => '\\d+'], methods: ['GET'])]
-    public function __invoke(int $id): Response
+    #[Route('/vacancies/{id}', name: 'app_vacancy_show', methods: ['GET'])]
+    public function __invoke(string $id): Response
     {
         $user = $this->security->getUser();
         if (!$user instanceof User) {
             throw new \LogicException('Vacancy details require an authenticated user.');
         }
-        $userId = $user->getId() ?? throw new \LogicException('Vacancy details require a persisted user.');
+        $userId = $user->getId()->toRfc4122();
         $vacancy = $this->vacancies->findOwnedBy($id, $userId) ?? throw new NotFoundHttpException('Vacancy not found.');
         $notes = $vacancy->getScratchpadNotes();
 

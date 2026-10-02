@@ -22,7 +22,9 @@ final readonly class TransitionVacancyStatusHandler implements CommandHandler
         $vacancy = $this->vacancies->findOwnedBy($command->vacancyId, $command->userId)
             ?? throw new \LogicException('The vacancy no longer exists.');
 
+        $from = $vacancy->getStatus();
         $this->workflow->apply($vacancy, $command->transition, $command->note);
+        $vacancy->recordStatusTransitioned($from, $command->transition);
 
         $this->vacancies->save($vacancy);
 

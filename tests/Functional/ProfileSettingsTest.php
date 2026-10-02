@@ -80,7 +80,7 @@ final class ProfileSettingsTest extends WebTestCase
         self::assertInstanceOf(User::class, $savedUser);
         $firstPath = $savedUser->getResumeStoragePath();
         self::assertNotNull($firstPath);
-        self::assertStringStartsWith(sprintf('resumes/%d/', $user->getId()), $firstPath);
+        self::assertStringStartsWith(sprintf('resumes/%s/', $user->getId()->toRfc4122()), $firstPath);
         self::assertTrue($this->storage()->fileExists($firstPath));
 
         $secondFile = $this->createDocx('Second resume');
@@ -111,7 +111,8 @@ final class ProfileSettingsTest extends WebTestCase
     {
         $client = self::createClient();
         $user = $this->createUser('sander@example.com');
-        $user->replaceResume('resumes/1/active.pdf', 'active.pdf', 'application/pdf', new \DateTimeImmutable());
+        $activeResumePath = sprintf('resumes/%s/active.pdf', $user->getId()->toRfc4122());
+        $user->replaceResume($activeResumePath, 'active.pdf', 'application/pdf', new \DateTimeImmutable());
         $this->entityManager()->flush();
 
         $invalidFile = tempnam(sys_get_temp_dir(), 'resume-invalid-');
@@ -128,7 +129,7 @@ final class ProfileSettingsTest extends WebTestCase
         $this->entityManager()->clear();
         $savedUser = $this->entityManager()->find(User::class, $user->getId());
         self::assertInstanceOf(User::class, $savedUser);
-        self::assertSame('resumes/1/active.pdf', $savedUser->getResumeStoragePath());
+        self::assertSame($activeResumePath, $savedUser->getResumeStoragePath());
     }
 
     public function testAnonymousUsersCannotDownloadAResume(): void

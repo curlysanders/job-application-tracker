@@ -8,7 +8,7 @@ use CurlySanders\JobApplicationTracker\Domain\Company\Company;
 
 interface CompanyRepository
 {
-    public function find(int $id): ?Company;
+    public function find(string $id): ?Company;
 
     /** @return list<Company> */
     public function search(string $query): array;

@@ -30,7 +30,8 @@ final readonly class SaveVacancyHandler implements CommandHandler
     public function __invoke(SaveVacancy $command): Vacancy
     {
         $user = $this->users->find($command->userId) ?? throw new \LogicException('The authenticated user no longer exists.');
-        $vacancy = null === $command->vacancyId
+        $creating = null === $command->vacancyId;
+        $vacancy = $creating
             ? new Vacancy($user, $command->title)
             : $this->vacancies->findOwnedBy($command->vacancyId, $command->userId) ?? throw new \LogicException('The vacancy no longer exists.');
         $vacancy->updateTitle($command->title);
@@ -58,17 +59,22 @@ final readonly class SaveVacancyHandler implements CommandHandler
         $vacancy->replaceSalaryRange(SalaryRange::fromDecimals($command->minimumSalary, $command->maximumSalary, $command->currencyCode));
         $vacancy->setExcitement($command->excitement);
         $vacancy->replaceTechStacks(...$this->resolveTechStacks($command));
+        if ($creating) {
+            $vacancy->recordCreated();
+        } else {
+            $vacancy->recordDetailsUpdated();
+        }
         $this->vacancies->save($vacancy);
 
         return $vacancy;
     }
 
-    private function optionalCompany(?int $id): ?Company
+    private function optionalCompany(?string $id): ?Company
     {
         return null === $id ? null : ($this->companies->find($id) ?? throw new \LogicException('The selected company no longer exists.'));
     }
 
-    private function optionalRecruiter(?int $id): ?Recruiter
+    private function optionalRecruiter(?string $id): ?Recruiter
     {
         return null === $id ? null : ($this->recruiters->find($id) ?? throw new \LogicException('The selected recruiter no longer exists.'));
     }

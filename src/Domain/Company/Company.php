@@ -6,21 +6,25 @@ namespace CurlySanders\JobApplicationTracker\Domain\Company;
 
 use CurlySanders\JobApplicationTracker\Domain\Contact\DirectContact;
 use CurlySanders\JobApplicationTracker\Domain\Shared\NormalizesStrings;
+use CurlySanders\JobApplicationTracker\Domain\Shared\RecordsDomainEvents;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Lingoda\DomainEventsBundle\Domain\Model\DomainEventAware;
+use Symfony\Bridge\Doctrine\Types\UuidType;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'companies')]
 #[ORM\Index(name: 'IDX_COMPANIES_NAME', fields: ['name'])]
-final class Company
+final class Company implements DomainEventAware
 {
     use NormalizesStrings;
+    use RecordsDomainEvents;
 
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    #[ORM\Column(type: UuidType::NAME, unique: true)]
+    private Uuid $id;
     #[ORM\Column(length: 255)]
     private string $name;
     #[ORM\Column(length: 2048, nullable: true)]
@@ -33,6 +37,7 @@ final class Company
 
     public function __construct(string $name, ?string $website, ?string $industry)
     {
+        $this->id = Uuid::v7();
         $this->directContacts = new ArrayCollection();
         $this->update($name, $website, $industry);
     }
@@ -53,9 +58,25 @@ final class Company
         }
     }
 
-    public function getId(): ?int
+    public function getId(): Uuid
     {
         return $this->id;
+    }
+
+    public function recordCreated(): void
+    {
+        $this->recordEvent(new CompanyCreated($this->id, $this->properties()));
+    }
+
+    public function recordDetailsUpdated(): void
+    {
+        $this->recordEvent(new CompanyDetailsUpdated($this->id, $this->properties()));
+    }
+
+    /** @return array<string, mixed> */
+    private function properties(): array
+    {
+        return ['name' => $this->name, 'website' => $this->website, 'industry' => $this->industry];
     }
 
     public function getName(): string
