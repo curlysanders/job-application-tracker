@@ -7,13 +7,14 @@ namespace CurlySanders\JobApplicationTracker\Tests\Domain\Company;
 use CurlySanders\JobApplicationTracker\Domain\Company\Company;
 use CurlySanders\JobApplicationTracker\Domain\Company\CompanyCreated;
 use CurlySanders\JobApplicationTracker\Domain\Contact\DirectContact;
+use CurlySanders\JobApplicationTracker\Domain\User\User;
 use PHPUnit\Framework\TestCase;
 
 final class CompanyDomainEventTest extends TestCase
 {
     public function testCompanyFactsExcludeDirectContactData(): void
     {
-        $company = new Company('Acme', 'https://example.test', 'Software');
+        $company = new Company(new User(), 'Acme', 'https://example.test', 'Software');
         $company->replaceDirectContacts(new DirectContact('Jane Doe', 'jane@example.test', '+31612345678', 'https://linkedin.example.test/jane'));
         $company->recordCreated();
 

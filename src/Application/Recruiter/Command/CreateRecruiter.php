@@ -10,6 +10,7 @@ final readonly class CreateRecruiter
 {
     /** @param list<DirectContactInput> $directContacts */
     public function __construct(
+        public string $userId,
         public string $agencyName,
         public ?string $website,
         public array $directContacts,

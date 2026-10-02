@@ -17,7 +17,7 @@ final readonly class UpdateCompanyHandler implements CommandHandler
 
     public function __invoke(UpdateCompany $command): Company
     {
-        $company = $this->companies->find($command->companyId) ?? throw new \LogicException('The company no longer exists.');
+        $company = $this->companies->findOwnedBy($command->companyId, $command->userId) ?? throw new \LogicException('The company no longer exists.');
         $company->update($command->name, $command->website, $command->industry);
         $company->replaceDirectContacts(...DirectContactFactory::fromInputs($command->directContacts));
         $company->recordDetailsUpdated();

@@ -8,10 +8,10 @@ use CurlySanders\JobApplicationTracker\Domain\Company\Company;
 
 interface CompanyRepository
 {
-    public function find(string $id): ?Company;
+    public function findOwnedBy(string $companyId, string $userId): ?Company;
 
     /** @return list<Company> */
-    public function search(string $query): array;
+    public function searchOwnedBy(string $userId, string $query): array;
 
     public function save(Company $company): void;
 }

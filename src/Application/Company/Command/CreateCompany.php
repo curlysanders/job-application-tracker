@@ -10,6 +10,7 @@ final readonly class CreateCompany
 {
     /** @param list<DirectContactInput> $directContacts */
     public function __construct(
+        public string $userId,
         public string $name,
         public ?string $website,
         public ?string $industry,

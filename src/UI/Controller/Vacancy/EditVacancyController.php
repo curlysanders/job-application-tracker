@@ -9,6 +9,7 @@ use CurlySanders\JobApplicationTracker\Application\Shared\Bus\CommandBus;
 use CurlySanders\JobApplicationTracker\Application\Vacancy\VacancyRepository;
 use CurlySanders\JobApplicationTracker\Application\Vacancy\VacancyStatusHistoryRepository;
 use CurlySanders\JobApplicationTracker\Domain\User\User;
+use CurlySanders\JobApplicationTracker\UI\Controller\AuthenticatedUserTrait;
 use CurlySanders\JobApplicationTracker\UI\Form\VacancyFormDataFactory;
 use CurlySanders\JobApplicationTracker\UI\Form\VacancyType;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -26,6 +27,8 @@ use Twig\Environment;
 
 final readonly class EditVacancyController
 {
+    use AuthenticatedUserTrait;
+
     public function __construct(
         private Security $security,
         private VacancyRepository $vacancies,
@@ -44,10 +47,10 @@ final readonly class EditVacancyController
     #[Route('/vacancies/{id}/edit', name: 'app_vacancy_edit', methods: ['GET', 'POST'])]
     public function __invoke(string $id, Request $request): Response
     {
-        $user = $this->authenticatedUser();
+        $user = $this->requireAuthenticatedUser('Vacancy authoring requires an authenticated user.');
         $vacancy = $this->vacancies->findOwnedBy($id, $this->userId($user)) ?? throw new NotFoundHttpException('Vacancy not found.');
         $data = $this->dataFactory->fromVacancy($vacancy);
-        $form = $this->forms->create(VacancyType::class, $data);
+        $form = $this->forms->create(VacancyType::class, $data, ['user_id' => $this->userId($user)]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $this->commandBus->dispatch($this->dataFactory->command($this->userId($user), $id, $data));
@@ -71,16 +74,6 @@ final readonly class EditVacancyController
             'enabledStatusTransitions' => $this->workflow->getEnabledTransitions($vacancy),
             'statusHistory' => $this->statusHistory->findForVacancy($vacancy),
         ]), $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK);
-    }
-
-    private function authenticatedUser(): User
-    {
-        $user = $this->security->getUser();
-        if (!$user instanceof User) {
-            throw new \LogicException('Vacancy authoring requires an authenticated user.');
-        }
-
-        return $user;
     }
 
     private function userId(User $user): string

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace CurlySanders\JobApplicationTracker\UI\Controller;
 
 use CurlySanders\JobApplicationTracker\Application\UserProfile\ResumeUploaderService;
-use CurlySanders\JobApplicationTracker\Domain\User\User;
 use League\Flysystem\UnableToReadFile;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,6 +14,8 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final readonly class DownloadProfileResumeController
 {
+    use AuthenticatedUserTrait;
+
     public function __construct(
         private Security $security,
         private ResumeUploaderService $resumeUploader,
@@ -24,8 +25,8 @@ final readonly class DownloadProfileResumeController
     #[Route('/profile/resume', name: 'app_profile_resume', methods: ['GET'])]
     public function __invoke(): Response
     {
-        $user = $this->security->getUser();
-        if (!$user instanceof User) {
+        $user = $this->currentUser();
+        if (null === $user) {
             throw new NotFoundHttpException('No active resume was found.');
         }
 

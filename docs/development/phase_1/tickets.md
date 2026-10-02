@@ -66,12 +66,13 @@
 - **Epic**: Epic 2 (Domain Data & Forms)
 - **Dependencies**: TICK-102
 - **Scope**:
-    - Create `Company` entity (`name`, `website`, `industry`, `direct_contacts` array/embeddable: name, email, phone, linkedin).
-    - Create `Recruiter` entity (`agency_name`, `website`, `direct_contacts` array/embeddable: name, email, phone, linkedin).
+    - Create user-owned `Company` entity (`name`, `website`, `industry`, `direct_contacts` array/embeddable: name, email, phone, linkedin).
+    - Create user-owned `Recruiter` entity (`agency_name`, `website`, `direct_contacts` array/embeddable: name, email, phone, linkedin).
     - Create CRUD controllers and forms for standalone Company and Recruiter management.
 - **Acceptance Criteria**:
     - [x] User can create, edit, and search standalone Companies and Recruiters.
     - [x] Contact details support multiple contact entries per company/agency.
+    - [x] Users can only list, select, and modify their own Companies and Recruiters.
 - **Validation**: [Results and reproduction steps](tick-201-validation.md).
 
 ---

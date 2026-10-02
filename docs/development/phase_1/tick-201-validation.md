@@ -2,8 +2,10 @@
 
 ## Implementation
 
-- Companies and recruiters are standalone, system-wide domain entities with
-  optional website metadata and (for companies) industry.
+- Companies and recruiters are standalone, user-owned domain entities with
+  optional website metadata and (for companies) industry. Repository queries,
+  management routes, vacancy choices, and vacancy command handling all scope
+  records to the authenticated user.
 - Direct contacts are relational child entities. A database check constraint
   and domain invariant ensure each contact belongs to exactly one owner.
 - Authenticated users manage companies at `/app/companies` and recruiters at
@@ -27,13 +29,14 @@ docker compose exec app composer ci:php-cs-fixer
 docker compose exec app php bin/console doctrine:schema:validate --skip-sync --env=dev
 ```
 
-## Results — 2026-09-21
+## Results — 2026-10-02
 
 | Acceptance criterion | Evidence | Result |
 | --- | --- | --- |
 | User can create, edit, and search standalone Companies and Recruiters | Functional coverage authenticates a user, exercises both management flows, and searches stored records by direct-contact fields. | Pass |
 | Contact details support multiple entries per company/agency | Functional coverage creates a company with two contacts, then edits it successfully; persisted collection counts are asserted. | Pass |
+| Users can only list, select, and modify their own Companies and Recruiters | Functional coverage uses two users to prove lists and vacancy choices are tenant-scoped and cross-user edit URLs return 404. A handler test rejects a foreign Company ID before a vacancy can be saved. | Pass |
 
-The complete suite passed with 26 tests and 198 assertions. PHPStan, Deptrac,
-PHP CS Fixer, Doctrine mapping validation, and the local development migration
-also passed.
+The complete suite passed with 109 tests and 944 assertions. PHPStan, Deptrac,
+PHP CS Fixer, Twig linting, Doctrine mapping validation, and the local
+development migration also passed.

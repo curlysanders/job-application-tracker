@@ -7,7 +7,7 @@ namespace CurlySanders\JobApplicationTracker\UI\Controller\Vacancy;
 use CurlySanders\JobApplicationTracker\Application\Markdown\MarkdownRenderer;
 use CurlySanders\JobApplicationTracker\Application\Vacancy\VacancyRepository;
 use CurlySanders\JobApplicationTracker\Application\Vacancy\VacancyStatusHistoryRepository;
-use CurlySanders\JobApplicationTracker\Domain\User\User;
+use CurlySanders\JobApplicationTracker\UI\Controller\AuthenticatedUserTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,6 +18,8 @@ use Twig\Environment;
 
 final readonly class VacancyDetailController
 {
+    use AuthenticatedUserTrait;
+
     public function __construct(
         private Security $security,
         private VacancyRepository $vacancies,
@@ -32,10 +34,7 @@ final readonly class VacancyDetailController
     #[Route('/vacancies/{id}', name: 'app_vacancy_show', methods: ['GET'])]
     public function __invoke(string $id): Response
     {
-        $user = $this->security->getUser();
-        if (!$user instanceof User) {
-            throw new \LogicException('Vacancy details require an authenticated user.');
-        }
+        $user = $this->requireAuthenticatedUser('Vacancy details require an authenticated user.');
         $userId = $user->getId()->toRfc4122();
         $vacancy = $this->vacancies->findOwnedBy($id, $userId) ?? throw new NotFoundHttpException('Vacancy not found.');
         $notes = $vacancy->getScratchpadNotes();

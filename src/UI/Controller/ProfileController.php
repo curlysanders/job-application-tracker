@@ -25,6 +25,8 @@ use Twig\Environment;
 
 final readonly class ProfileController
 {
+    use AuthenticatedUserTrait;
+
     public function __construct(
         private Security $security,
         private CommandBus $commandBus,
@@ -37,7 +39,7 @@ final readonly class ProfileController
     #[Route('/profile', name: 'app_profile', methods: ['GET', 'POST'])]
     public function __invoke(Request $request): Response
     {
-        $user = $this->requireAuthenticatedUser();
+        $user = $this->requireAuthenticatedUser('Profile settings require an authenticated user.');
         $userId = $this->authenticatedUserId($user);
         $profile = $this->profileSettingsFor($user);
 
@@ -89,16 +91,6 @@ final readonly class ProfileController
             'resumeForm' => $resumeForm->createView(),
             'user' => $user,
         ]), $form->isSubmitted() || $resumeForm->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK);
-    }
-
-    private function requireAuthenticatedUser(): User
-    {
-        $user = $this->security->getUser();
-        if (!$user instanceof User) {
-            throw new \LogicException('Profile settings require an authenticated user.');
-        }
-
-        return $user;
     }
 
     private function profileSettingsFor(User $user): ProfileSettingsData

@@ -8,7 +8,6 @@ use CurlySanders\JobApplicationTracker\Application\Vacancy\Overview\VacancyOverv
 use CurlySanders\JobApplicationTracker\Application\Vacancy\Pipeline\PipelineStatuses;
 use CurlySanders\JobApplicationTracker\Application\Vacancy\Pipeline\VacancyPipelineRepository;
 use CurlySanders\JobApplicationTracker\Application\Vacancy\Reminder\DueVacancyReminderRepository;
-use CurlySanders\JobApplicationTracker\Domain\User\User;
 use CurlySanders\JobApplicationTracker\UI\Dashboard\VacancyOverviewRequest;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Clock\ClockInterface;
@@ -19,6 +18,8 @@ use Twig\Environment;
 
 final readonly class DashboardController
 {
+    use AuthenticatedUserTrait;
+
     public function __construct(
         private Security $security,
         private VacancyPipelineRepository $pipeline,
@@ -32,8 +33,8 @@ final readonly class DashboardController
     #[Route('/', name: 'app_dashboard', methods: ['GET'])]
     public function __invoke(Request $request): Response
     {
-        $user = $this->security->getUser();
-        if (!$user instanceof User) {
+        $user = $this->currentUser();
+        if (null === $user) {
             return new Response($this->twig->render('home/index.html.twig'));
         }
         $userId = $user->getId()->toRfc4122();

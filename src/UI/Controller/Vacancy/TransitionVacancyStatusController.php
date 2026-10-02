@@ -8,7 +8,7 @@ use CurlySanders\JobApplicationTracker\Application\Shared\Bus\CommandBus;
 use CurlySanders\JobApplicationTracker\Application\Vacancy\Command\TransitionVacancyStatus;
 use CurlySanders\JobApplicationTracker\Application\Vacancy\Exception\VacancyStatusTransitionNotAllowed;
 use CurlySanders\JobApplicationTracker\Application\Vacancy\VacancyRepository;
-use CurlySanders\JobApplicationTracker\Domain\User\User;
+use CurlySanders\JobApplicationTracker\UI\Controller\AuthenticatedUserTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,6 +23,8 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 final readonly class TransitionVacancyStatusController
 {
+    use AuthenticatedUserTrait;
+
     public function __construct(
         private Security $security,
         private VacancyRepository $vacancies,
@@ -35,7 +37,7 @@ final readonly class TransitionVacancyStatusController
     #[Route('/vacancies/{id}/status', name: 'app_vacancy_transition_status', methods: ['POST'])]
     public function __invoke(string $id, Request $request): Response
     {
-        $user = $this->authenticatedUser();
+        $user = $this->requireAuthenticatedUser('Vacancy status changes require an authenticated user.');
         $userId = $user->getId()->toRfc4122();
         $this->vacancies->findOwnedBy($id, $userId) ?? throw new NotFoundHttpException('Vacancy not found.');
         $token = $request->request->getString('_token');
@@ -56,16 +58,6 @@ final readonly class TransitionVacancyStatusController
         }
 
         return new RedirectResponse($this->returnUrl($request, $id));
-    }
-
-    private function authenticatedUser(): User
-    {
-        $user = $this->security->getUser();
-        if (!$user instanceof User) {
-            throw new \LogicException('Vacancy status changes require an authenticated user.');
-        }
-
-        return $user;
     }
 
     private function flash(Request $request, string $type, string $message): void

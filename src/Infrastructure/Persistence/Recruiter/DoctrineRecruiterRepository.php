@@ -7,6 +7,7 @@ namespace CurlySanders\JobApplicationTracker\Infrastructure\Persistence\Recruite
 use CurlySanders\JobApplicationTracker\Application\Recruiter\RecruiterRepository;
 use CurlySanders\JobApplicationTracker\Domain\Recruiter\Recruiter;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\DependencyInjection\Attribute\AsAlias;
 use Symfony\Component\Uid\Uuid;
 
@@ -17,26 +18,35 @@ final readonly class DoctrineRecruiterRepository implements RecruiterRepository
     {
     }
 
-    public function find(string $id): ?Recruiter
+    public function findOwnedBy(string $recruiterId, string $userId): ?Recruiter
     {
-        if (!Uuid::isValid($id)) {
+        if (!Uuid::isValid($recruiterId) || !Uuid::isValid($userId)) {
             return null;
         }
 
-        return $this->entityManager->find(Recruiter::class, Uuid::fromString($id));
+        return $this->entityManager->getRepository(Recruiter::class)->findOneBy([
+            'id' => Uuid::fromString($recruiterId),
+            'user' => Uuid::fromString($userId),
+        ]);
     }
 
-    public function search(string $query): array
+    public function searchOwnedBy(string $userId, string $query): array
     {
+        if (!Uuid::isValid($userId)) {
+            return [];
+        }
+
         $builder = $this->entityManager->createQueryBuilder()
             ->select('DISTINCT recruiter')
             ->from(Recruiter::class, 'recruiter')
             ->leftJoin('recruiter.directContacts', 'contact')
+            ->where('IDENTITY(recruiter.user) = :userId')
+            ->setParameter('userId', Uuid::fromString($userId), UuidType::NAME)
             ->orderBy('recruiter.agencyName', 'ASC');
 
         if ('' !== $query) {
             $builder
-                ->where('LOWER(recruiter.agencyName) LIKE :query OR LOWER(contact.name) LIKE :query OR LOWER(contact.email) LIKE :query')
+                ->andWhere('(LOWER(recruiter.agencyName) LIKE :query OR LOWER(contact.name) LIKE :query OR LOWER(contact.email) LIKE :query)')
                 ->setParameter('query', '%'.mb_strtolower($query).'%');
         }
 

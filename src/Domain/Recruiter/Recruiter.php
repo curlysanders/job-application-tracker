@@ -7,6 +7,7 @@ namespace CurlySanders\JobApplicationTracker\Domain\Recruiter;
 use CurlySanders\JobApplicationTracker\Domain\Contact\DirectContact;
 use CurlySanders\JobApplicationTracker\Domain\Shared\NormalizesStrings;
 use CurlySanders\JobApplicationTracker\Domain\Shared\RecordsDomainEvents;
+use CurlySanders\JobApplicationTracker\Domain\User\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -16,7 +17,7 @@ use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'recruiters')]
-#[ORM\Index(name: 'IDX_RECRUITERS_AGENCY_NAME', fields: ['agencyName'])]
+#[ORM\Index(name: 'IDX_RECRUITERS_USER_AGENCY_NAME', columns: ['user_id', 'agency_name'])]
 final class Recruiter implements DomainEventAware
 {
     use NormalizesStrings;
@@ -25,13 +26,20 @@ final class Recruiter implements DomainEventAware
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     private Uuid $id;
-    #[ORM\Column(length: 255)] private string $agencyName;
-    #[ORM\Column(length: 2048, nullable: true)] private ?string $website;
+
+    #[ORM\Column(length: 255)]
+    private string $agencyName;
+
+    #[ORM\Column(length: 2048, nullable: true)]
+    private ?string $website;
+
     /** @var Collection<int, DirectContact> */
     #[ORM\OneToMany(targetEntity: DirectContact::class, mappedBy: 'recruiter', cascade: ['persist'], orphanRemoval: true)]
     private Collection $directContacts;
 
-    public function __construct(string $agencyName, ?string $website)
+    public function __construct(#[ORM\ManyToOne]
+        #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+        private User $user, string $agencyName, ?string $website)
     {
         $this->id = Uuid::v7();
         $this->directContacts = new ArrayCollection();
@@ -56,6 +64,11 @@ final class Recruiter implements DomainEventAware
     public function getId(): Uuid
     {
         return $this->id;
+    }
+
+    public function getUser(): User
+    {
+        return $this->user;
     }
 
     public function recordCreated(): void

@@ -17,7 +17,7 @@ final readonly class UpdateRecruiterHandler implements CommandHandler
 
     public function __invoke(UpdateRecruiter $command): Recruiter
     {
-        $recruiter = $this->recruiters->find($command->recruiterId) ?? throw new \LogicException('The recruiter no longer exists.');
+        $recruiter = $this->recruiters->findOwnedBy($command->recruiterId, $command->userId) ?? throw new \LogicException('The recruiter no longer exists.');
         $recruiter->update($command->agencyName, $command->website);
         $recruiter->replaceDirectContacts(...DirectContactFactory::fromInputs($command->directContacts));
         $recruiter->recordDetailsUpdated();

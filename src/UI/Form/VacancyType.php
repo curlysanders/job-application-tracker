@@ -33,10 +33,13 @@ final class VacancyType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        /** @var string $userId */
+        $userId = $options['user_id'];
+
         $builder
             ->add('title', TextType::class, ['label' => 'Job title'])
-            ->add('companyId', ChoiceType::class, ['required' => false, 'placeholder' => 'No company selected', 'label' => 'Company', 'choices' => $this->companyChoices()])
-            ->add('recruiterId', ChoiceType::class, ['required' => false, 'placeholder' => 'No recruiter selected', 'label' => 'Recruiter', 'choices' => $this->recruiterChoices()])
+            ->add('companyId', ChoiceType::class, ['required' => false, 'placeholder' => 'No company selected', 'label' => 'Company', 'choices' => $this->companyChoices($userId)])
+            ->add('recruiterId', ChoiceType::class, ['required' => false, 'placeholder' => 'No recruiter selected', 'label' => 'Recruiter', 'choices' => $this->recruiterChoices($userId)])
             ->add('location', TextType::class, ['required' => false, 'label' => 'Location'])
             ->add('applicationSource', EnumType::class, ['required' => false, 'placeholder' => 'Select source', 'label' => 'Application source', 'class' => ApplicationSource::class, 'choice_label' => static fn (ApplicationSource $source): string => str_replace('_', ' ', $source->value)
                     |> strtolower(...)
@@ -66,10 +69,10 @@ final class VacancyType extends AbstractType
     }
 
     /** @return array<string, string> */
-    private function companyChoices(): array
+    private function companyChoices(string $userId): array
     {
         $choices = [];
-        foreach ($this->companies->search('') as $company) {
+        foreach ($this->companies->searchOwnedBy($userId, '') as $company) {
             $id = $company->getId();
             $choices[$company->getName()] = $id->toRfc4122();
         }
@@ -78,10 +81,10 @@ final class VacancyType extends AbstractType
     }
 
     /** @return array<string, string> */
-    private function recruiterChoices(): array
+    private function recruiterChoices(string $userId): array
     {
         $choices = [];
-        foreach ($this->recruiters->search('') as $recruiter) {
+        foreach ($this->recruiters->searchOwnedBy($userId, '') as $recruiter) {
             $id = $recruiter->getId();
             $choices[$recruiter->getAgencyName()] = $id->toRfc4122();
         }
@@ -112,5 +115,7 @@ final class VacancyType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults(['data_class' => VacancyData::class]);
+        $resolver->setRequired('user_id');
+        $resolver->setAllowedTypes('user_id', 'string');
     }
 }
