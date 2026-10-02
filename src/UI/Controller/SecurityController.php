@@ -14,6 +14,8 @@ use Twig\Environment;
 
 final readonly class SecurityController
 {
+    use AuthenticatedUserTrait;
+
     public function __construct(
         private AuthenticationUtils $authenticationUtils,
         private Security $security,
@@ -25,7 +27,7 @@ final readonly class SecurityController
     #[Route('/login', name: 'app_login', methods: ['GET', 'POST'])]
     public function login(): Response
     {
-        if (null !== $this->security->getUser()) {
+        if (null !== $this->currentUser()) {
             return new RedirectResponse($this->urlGenerator->generate('app_dashboard'));
         }
 

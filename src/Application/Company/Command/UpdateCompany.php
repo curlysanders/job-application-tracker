@@ -10,6 +10,7 @@ final readonly class UpdateCompany
 {
     /** @param list<DirectContactInput> $directContacts */
     public function __construct(
+        public string $userId,
         public string $companyId,
         public string $name,
         public ?string $website,

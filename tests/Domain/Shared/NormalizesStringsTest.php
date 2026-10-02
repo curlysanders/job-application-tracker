@@ -7,14 +7,15 @@ namespace CurlySanders\JobApplicationTracker\Tests\Domain\Shared;
 use CurlySanders\JobApplicationTracker\Domain\Company\Company;
 use CurlySanders\JobApplicationTracker\Domain\Contact\DirectContact;
 use CurlySanders\JobApplicationTracker\Domain\Recruiter\Recruiter;
+use CurlySanders\JobApplicationTracker\Domain\User\User;
 use PHPUnit\Framework\TestCase;
 
 final class NormalizesStringsTest extends TestCase
 {
     public function testEntitiesTrimRequiredAndOptionalStrings(): void
     {
-        $company = new Company('  Acme BV  ', '  https://acme.example  ', '  Software  ');
-        $recruiter = new Recruiter('  Talent Partners  ', '  https://talent.example  ');
+        $company = new Company(new User(), '  Acme BV  ', '  https://acme.example  ', '  Software  ');
+        $recruiter = new Recruiter(new User(), '  Talent Partners  ', '  https://talent.example  ');
         $contact = new DirectContact('  Ada Lovelace  ', '  ada@example.com  ', '  +31 6 12345678  ', '  https://www.linkedin.com/in/ada  ');
 
         self::assertSame('Acme BV', $company->getName());
@@ -30,8 +31,8 @@ final class NormalizesStringsTest extends TestCase
 
     public function testEntitiesConvertBlankOptionalStringsToNull(): void
     {
-        $company = new Company('Acme BV', '   ', "\t");
-        $recruiter = new Recruiter('Talent Partners', "\n");
+        $company = new Company(new User(), 'Acme BV', '   ', "\t");
+        $recruiter = new Recruiter(new User(), 'Talent Partners', "\n");
         $contact = new DirectContact('Ada Lovelace', ' ', '  ', "\t");
 
         self::assertNull($company->getWebsite());
@@ -45,8 +46,8 @@ final class NormalizesStringsTest extends TestCase
     public function testEntitiesRejectBlankRequiredStringsWithTheirOwnMessages(): void
     {
         $cases = [
-            [static fn (): Company => new Company(' ', null, null), 'A company name is required.'],
-            [static fn (): Recruiter => new Recruiter("\t", null), 'An agency name is required.'],
+            [static fn (): Company => new Company(new User(), ' ', null, null), 'A company name is required.'],
+            [static fn (): Recruiter => new Recruiter(new User(), "\t", null), 'An agency name is required.'],
             [static fn (): DirectContact => new DirectContact("\n", null, null, null), 'A contact name is required.'],
         ];
 

@@ -7,7 +7,7 @@ namespace CurlySanders\JobApplicationTracker\UI\Controller\Vacancy;
 use CurlySanders\JobApplicationTracker\Application\Shared\Bus\CommandBus;
 use CurlySanders\JobApplicationTracker\Application\Vacancy\Command\UpdateVacancyNextAction;
 use CurlySanders\JobApplicationTracker\Application\Vacancy\VacancyRepository;
-use CurlySanders\JobApplicationTracker\Domain\User\User;
+use CurlySanders\JobApplicationTracker\UI\Controller\AuthenticatedUserTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,6 +21,8 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 final readonly class UpdateVacancyNextActionController
 {
+    use AuthenticatedUserTrait;
+
     public function __construct(
         private Security $security,
         private VacancyRepository $vacancies,
@@ -33,10 +35,7 @@ final readonly class UpdateVacancyNextActionController
     #[Route('/vacancies/{id}/next-action', name: 'app_vacancy_update_next_action', methods: ['POST'])]
     public function __invoke(string $id, Request $request): RedirectResponse
     {
-        $user = $this->security->getUser();
-        if (!$user instanceof User) {
-            throw new \LogicException('Vacancy reminder updates require an authenticated user.');
-        }
+        $user = $this->requireAuthenticatedUser('Vacancy reminder updates require an authenticated user.');
         $userId = $user->getId()->toRfc4122();
         $this->vacancies->findOwnedBy($id, $userId) ?? throw new NotFoundHttpException('Vacancy not found.');
         if (!$this->csrf->isTokenValid(new CsrfToken(sprintf('vacancy_next_action_%s', $id), $request->request->getString('_token')))) {

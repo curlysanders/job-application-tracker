@@ -25,7 +25,8 @@ final class CompanyRecruiterManagementTest extends WebTestCase
     public function testUserCanCreateEditAndSearchACompanyWithMultipleContacts(): void
     {
         $client = self::createClient();
-        $client->loginUser($this->createUser('company@example.com'));
+        $user = $this->createUser('company@example.com');
+        $client->loginUser($user);
         $crawler = $client->request('GET', '/companies/new');
         $client->request('POST', '/companies/new', ['company' => [
             '_token' => $this->csrfToken($crawler), 'name' => 'Acme BV', 'website' => 'https://acme.example', 'industry' => 'Software',
@@ -38,6 +39,7 @@ final class CompanyRecruiterManagementTest extends WebTestCase
         $this->entityManager()->clear();
         $company = $this->entityManager()->getRepository(Company::class)->findOneBy(['name' => 'Acme BV']);
         self::assertInstanceOf(Company::class, $company);
+        self::assertSame($user->getId()->toRfc4122(), $company->getUser()->getId()->toRfc4122());
         self::assertCount(2, $company->getDirectContacts());
 
         $crawler = $client->request('GET', sprintf('/companies/%s/edit', $company->getId()->toRfc4122()));
@@ -55,7 +57,8 @@ final class CompanyRecruiterManagementTest extends WebTestCase
     public function testUserCanCreateAndSearchRecruitersAndSeesValidationErrors(): void
     {
         $client = self::createClient();
-        $client->loginUser($this->createUser('recruiter@example.com'));
+        $user = $this->createUser('recruiter@example.com');
+        $client->loginUser($user);
         $crawler = $client->request('GET', '/recruiters/new');
         $client->request('POST', '/recruiters/new', ['recruiter' => ['_token' => $this->csrfToken($crawler), 'agencyName' => '', 'website' => 'not a url']]);
         self::assertResponseStatusCodeSame(422);
@@ -69,6 +72,7 @@ final class CompanyRecruiterManagementTest extends WebTestCase
         $this->entityManager()->clear();
         $recruiter = $this->entityManager()->getRepository(Recruiter::class)->findOneBy(['agencyName' => 'Talent Partners']);
         self::assertInstanceOf(Recruiter::class, $recruiter);
+        self::assertSame($user->getId()->toRfc4122(), $recruiter->getUser()->getId()->toRfc4122());
         self::assertCount(1, $recruiter->getDirectContacts());
         $client->request('GET', '/recruiters?q=lin@talent.example');
         self::assertSelectorTextContains('.management-results', 'Talent Partners');
@@ -77,9 +81,10 @@ final class CompanyRecruiterManagementTest extends WebTestCase
     public function testUserCanEditARecruiterAndReplaceItsContacts(): void
     {
         $client = self::createClient();
-        $client->loginUser($this->createUser('recruiter-edit@example.com'));
+        $user = $this->createUser('recruiter-edit@example.com');
+        $client->loginUser($user);
 
-        $recruiter = new Recruiter('Talent Partners', 'https://talent.example');
+        $recruiter = new Recruiter($user, 'Talent Partners', 'https://talent.example');
         $recruiter->replaceDirectContacts(new \CurlySanders\JobApplicationTracker\Domain\Contact\DirectContact('Lin Recruiter', 'lin@talent.example', null, null));
         $this->entityManager()->persist($recruiter);
         $this->entityManager()->flush();
@@ -117,6 +122,30 @@ final class CompanyRecruiterManagementTest extends WebTestCase
 
         $client->request('GET', '/recruiters/999999/edit');
 
+        self::assertResponseStatusCodeSame(404);
+    }
+
+    public function testUsersCannotSeeOrEditEachOthersCompaniesOrRecruiters(): void
+    {
+        $client = self::createClient();
+        $owner = $this->createUser('contacts-owner@example.com');
+        $otherUser = $this->createUser('contacts-other@example.com');
+        $company = new Company($owner, 'Owner Company', null, null);
+        $recruiter = new Recruiter($owner, 'Owner Recruiter', null);
+        $this->entityManager()->persist($company);
+        $this->entityManager()->persist($recruiter);
+        $this->entityManager()->flush();
+        $client->loginUser($otherUser);
+
+        $client->request('GET', '/companies?q=Owner');
+        self::assertResponseIsSuccessful();
+        self::assertSelectorNotExists('.management-results');
+        $client->request('GET', '/recruiters?q=Owner');
+        self::assertResponseIsSuccessful();
+        self::assertSelectorNotExists('.management-results');
+        $client->request('GET', sprintf('/companies/%s/edit', $company->getId()->toRfc4122()));
+        self::assertResponseStatusCodeSame(404);
+        $client->request('GET', sprintf('/recruiters/%s/edit', $recruiter->getId()->toRfc4122()));
         self::assertResponseStatusCodeSame(404);
     }
 

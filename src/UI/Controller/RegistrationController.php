@@ -24,6 +24,8 @@ use Twig\Environment;
 
 final readonly class RegistrationController
 {
+    use AuthenticatedUserTrait;
+
     public function __construct(
         private CommandBus $commandBus,
         private Security $security,
@@ -36,7 +38,7 @@ final readonly class RegistrationController
     #[Route('/register', name: 'app_register', methods: ['GET', 'POST'])]
     public function __invoke(Request $request): Response
     {
-        if (null !== $this->security->getUser()) {
+        if (null !== $this->currentUser()) {
             return new RedirectResponse($this->urlGenerator->generate('app_dashboard'));
         }
 

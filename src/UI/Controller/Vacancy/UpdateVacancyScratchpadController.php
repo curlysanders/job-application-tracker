@@ -8,8 +8,8 @@ use CurlySanders\JobApplicationTracker\Application\Markdown\MarkdownRenderer;
 use CurlySanders\JobApplicationTracker\Application\Shared\Bus\CommandBus;
 use CurlySanders\JobApplicationTracker\Application\Vacancy\Command\UpdateVacancyScratchpad;
 use CurlySanders\JobApplicationTracker\Application\Vacancy\VacancyRepository;
-use CurlySanders\JobApplicationTracker\Domain\User\User;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\Vacancy;
+use CurlySanders\JobApplicationTracker\UI\Controller\AuthenticatedUserTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,6 +21,8 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 final readonly class UpdateVacancyScratchpadController
 {
+    use AuthenticatedUserTrait;
+
     public function __construct(
         private Security $security,
         private VacancyRepository $vacancies,
@@ -33,10 +35,7 @@ final readonly class UpdateVacancyScratchpadController
     #[Route('/vacancies/{id}/scratchpad', name: 'app_vacancy_update_scratchpad', methods: ['POST'])]
     public function __invoke(string $id, Request $request): JsonResponse
     {
-        $user = $this->security->getUser();
-        if (!$user instanceof User) {
-            throw new \LogicException('Vacancy scratchpad updates require an authenticated user.');
-        }
+        $user = $this->requireAuthenticatedUser('Vacancy scratchpad updates require an authenticated user.');
         $userId = $user->getId()->toRfc4122();
         $this->vacancies->findOwnedBy($id, $userId) ?? throw new NotFoundHttpException('Vacancy not found.');
         if (!$this->csrf->isTokenValid(new CsrfToken(sprintf('vacancy_scratchpad_%s', $id), $request->request->getString('_token')))) {

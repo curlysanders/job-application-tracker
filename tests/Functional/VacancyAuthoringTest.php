@@ -32,8 +32,8 @@ final class VacancyAuthoringTest extends WebTestCase
         $client = self::createClient();
         $user = $this->createUser('vacancy@example.com');
         $user->updatePreferences(PreferredSalary::fromDecimal('5000.00', 'EUR'), null, null);
-        $company = new Company('Acme BV', null, null);
-        $recruiter = new Recruiter('Talent Partners', null);
+        $company = new Company($user, 'Acme BV', null, null);
+        $recruiter = new Recruiter($user, 'Talent Partners', null);
         $php = new TechStack('PHP', 'Backend');
         $this->entityManager()->persist($company);
         $this->entityManager()->persist($recruiter);
@@ -100,6 +100,24 @@ final class VacancyAuthoringTest extends WebTestCase
         $this->entityManager()->flush();
         $client->request('GET', sprintf('/vacancies/%s/edit', $vacancy->getId()->toRfc4122()));
         self::assertResponseStatusCodeSame(404);
+    }
+
+    public function testVacancyFormExcludesAnotherUsersCompanyAndRecruiterChoices(): void
+    {
+        $client = self::createClient();
+        $user = $this->createUser('vacancy-owner@example.com');
+        $otherUser = $this->createUser('vacancy-other-owner@example.com');
+        $company = new Company($otherUser, 'Private Company', null, null);
+        $recruiter = new Recruiter($otherUser, 'Private Recruiter', null);
+        $this->entityManager()->persist($company);
+        $this->entityManager()->persist($recruiter);
+        $this->entityManager()->flush();
+        $client->loginUser($user);
+
+        $client->request('GET', '/vacancies/new');
+
+        self::assertSelectorNotExists(sprintf('select[name="vacancy[companyId]"] option[value="%s"]', $company->getId()->toRfc4122()));
+        self::assertSelectorNotExists(sprintf('select[name="vacancy[recruiterId]"] option[value="%s"]', $recruiter->getId()->toRfc4122()));
     }
 
     /** @return array<string, mixed> */

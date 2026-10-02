@@ -7,7 +7,7 @@ namespace CurlySanders\JobApplicationTracker\UI\Controller\Vacancy;
 use CurlySanders\JobApplicationTracker\Application\Shared\Bus\CommandBus;
 use CurlySanders\JobApplicationTracker\Application\Vacancy\Command\DeleteVacancy;
 use CurlySanders\JobApplicationTracker\Application\Vacancy\VacancyRepository;
-use CurlySanders\JobApplicationTracker\Domain\User\User;
+use CurlySanders\JobApplicationTracker\UI\Controller\AuthenticatedUserTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,6 +22,8 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 final readonly class DeleteVacancyController
 {
+    use AuthenticatedUserTrait;
+
     public function __construct(private Security $security, private VacancyRepository $vacancies, private CommandBus $commandBus, private CsrfTokenManagerInterface $csrf, private UrlGeneratorInterface $urls)
     {
     }
@@ -29,10 +31,7 @@ final readonly class DeleteVacancyController
     #[Route('/vacancies/{id}/delete', name: 'app_vacancy_delete', methods: ['POST'])]
     public function __invoke(string $id, Request $request): Response
     {
-        $user = $this->security->getUser();
-        if (!$user instanceof User) {
-            throw new \LogicException('Vacancy deletion requires an authenticated user.');
-        }
+        $user = $this->requireAuthenticatedUser('Vacancy deletion requires an authenticated user.');
         $userId = $user->getId()->toRfc4122();
         $this->vacancies->findOwnedBy($id, $userId) ?? throw new NotFoundHttpException('Vacancy not found.');
         if (!$this->csrf->isTokenValid(new CsrfToken(sprintf('vacancy_delete_%s', $id), $request->request->getString('_token')))) {

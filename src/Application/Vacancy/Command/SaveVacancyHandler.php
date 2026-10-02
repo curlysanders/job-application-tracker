@@ -36,8 +36,8 @@ final readonly class SaveVacancyHandler implements CommandHandler
             : $this->vacancies->findOwnedBy($command->vacancyId, $command->userId) ?? throw new \LogicException('The vacancy no longer exists.');
         $vacancy->updateTitle($command->title);
         $vacancy->updateAuthoringDetails(
-            $this->optionalCompany($command->companyId),
-            $this->optionalRecruiter($command->recruiterId),
+            $this->optionalCompany($command->companyId, $command->userId),
+            $this->optionalRecruiter($command->recruiterId, $command->userId),
             $command->fullText,
             $command->requirements,
             $command->responsibilities,
@@ -69,14 +69,14 @@ final readonly class SaveVacancyHandler implements CommandHandler
         return $vacancy;
     }
 
-    private function optionalCompany(?string $id): ?Company
+    private function optionalCompany(?string $id, string $userId): ?Company
     {
-        return null === $id ? null : ($this->companies->find($id) ?? throw new \LogicException('The selected company no longer exists.'));
+        return null === $id ? null : ($this->companies->findOwnedBy($id, $userId) ?? throw new \LogicException('The selected company no longer exists.'));
     }
 
-    private function optionalRecruiter(?string $id): ?Recruiter
+    private function optionalRecruiter(?string $id, string $userId): ?Recruiter
     {
-        return null === $id ? null : ($this->recruiters->find($id) ?? throw new \LogicException('The selected recruiter no longer exists.'));
+        return null === $id ? null : ($this->recruiters->findOwnedBy($id, $userId) ?? throw new \LogicException('The selected recruiter no longer exists.'));
     }
 
     /** @return list<TechStack> */

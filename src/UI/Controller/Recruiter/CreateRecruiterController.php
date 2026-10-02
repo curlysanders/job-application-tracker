@@ -6,10 +6,12 @@ namespace CurlySanders\JobApplicationTracker\UI\Controller\Recruiter;
 
 use CurlySanders\JobApplicationTracker\Application\Recruiter\Command\CreateRecruiter;
 use CurlySanders\JobApplicationTracker\Application\Shared\Bus\CommandBus;
+use CurlySanders\JobApplicationTracker\UI\Controller\AuthenticatedUserTrait;
 use CurlySanders\JobApplicationTracker\UI\Controller\Management\AbstractManagementFormController;
 use CurlySanders\JobApplicationTracker\UI\Form\DirectContactInputFactory;
 use CurlySanders\JobApplicationTracker\UI\Form\Model\Recruiter\RecruiterData;
 use CurlySanders\JobApplicationTracker\UI\Form\Recruiter\RecruiterType;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,7 +21,9 @@ use Twig\Environment;
 
 final readonly class CreateRecruiterController extends AbstractManagementFormController
 {
-    public function __construct(private CommandBus $commandBus, FormFactoryInterface $forms, Environment $twig, UrlGeneratorInterface $urls)
+    use AuthenticatedUserTrait;
+
+    public function __construct(private Security $security, private CommandBus $commandBus, FormFactoryInterface $forms, Environment $twig, UrlGeneratorInterface $urls)
     {
         parent::__construct($forms, $twig, $urls);
     }
@@ -31,11 +35,16 @@ final readonly class CreateRecruiterController extends AbstractManagementFormCon
         $form = $this->forms->create(RecruiterType::class, $data);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->commandBus->dispatch(new CreateRecruiter($data->agencyName ?? '', $data->website, DirectContactInputFactory::fromForm($data->directContacts)));
+            $this->commandBus->dispatch(new CreateRecruiter($this->userId(), $data->agencyName ?? '', $data->website, DirectContactInputFactory::fromForm($data->directContacts)));
 
             return $this->redirectWithSuccess($request, 'app_recruiter_list', 'Recruiter created.', 'Recruiter');
         }
 
         return $this->formResponse($form, 'recruiter/form.html.twig', 'Add recruiter', 'Create recruiter');
+    }
+
+    private function userId(): string
+    {
+        return $this->requireAuthenticatedUser('Recruiter management requires an authenticated user.')->getId()->toRfc4122();
     }
 }

@@ -17,7 +17,7 @@ final class VacancyDetailTest extends WebTestCase
     {
         $client = self::createClient();
         $owner = $this->createUser('detail-owner@example.com');
-        $company = new Company('Acme BV', 'https://acme.example', 'Software');
+        $company = new Company($owner, 'Acme BV', 'https://acme.example', 'Software');
         $vacancy = new Vacancy($owner, 'Senior PHP Developer');
         $vacancy->updateAuthoringDetails($company, null, null, 'Build APIs.', null, null, 'Build products.', null, null, ['https://jobs.example/vacancy'], 'Apply online.', 'Rotterdam', null, null, null, null, null, null, null);
         $vacancy->updateScratchpadNotes('# Initial preparation');

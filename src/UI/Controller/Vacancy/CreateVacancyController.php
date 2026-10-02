@@ -8,6 +8,7 @@ use CurlySanders\JobApplicationTracker\Application\Currency\ExchangeRateProvider
 use CurlySanders\JobApplicationTracker\Application\Shared\Bus\CommandBus;
 use CurlySanders\JobApplicationTracker\Domain\User\User;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\Vacancy;
+use CurlySanders\JobApplicationTracker\UI\Controller\AuthenticatedUserTrait;
 use CurlySanders\JobApplicationTracker\UI\Form\Model\VacancyData;
 use CurlySanders\JobApplicationTracker\UI\Form\VacancyFormDataFactory;
 use CurlySanders\JobApplicationTracker\UI\Form\VacancyType;
@@ -24,6 +25,8 @@ use Twig\Environment;
 
 final readonly class CreateVacancyController
 {
+    use AuthenticatedUserTrait;
+
     public function __construct(
         private Security $security,
         private CommandBus $commandBus,
@@ -38,9 +41,9 @@ final readonly class CreateVacancyController
     #[Route('/vacancies/new', name: 'app_vacancy_create', methods: ['GET', 'POST'])]
     public function __invoke(Request $request): Response
     {
-        $user = $this->authenticatedUser();
+        $user = $this->requireAuthenticatedUser('Vacancy authoring requires an authenticated user.');
         $data = new VacancyData();
-        $form = $this->forms->create(VacancyType::class, $data);
+        $form = $this->forms->create(VacancyType::class, $data, ['user_id' => $this->userId($user)]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $vacancy = $this->commandBus->dispatch($this->dataFactory->command($this->userId($user), null, $data));
@@ -62,16 +65,6 @@ final readonly class CreateVacancyController
         $preferredSalary = $user->getPreferredSalary();
 
         return new Response($this->twig->render('vacancy/form.html.twig', ['form' => $form, 'pageTitle' => $pageTitle, 'submitLabel' => $submitLabel, 'minimumPreferredSalary' => $preferredSalary->getMinimumDecimal(), 'minimumPreferredSalaryCurrency' => $preferredSalary->getCurrencyCode(), 'exchangeRates' => $rateValues]), $submitted ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK);
-    }
-
-    private function authenticatedUser(): User
-    {
-        $user = $this->security->getUser();
-        if (!$user instanceof User) {
-            throw new \LogicException('Vacancy authoring requires an authenticated user.');
-        }
-
-        return $user;
     }
 
     private function userId(User $user): string
