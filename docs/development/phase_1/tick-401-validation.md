@@ -18,6 +18,12 @@ Compose `worker` service. Delivery is at least once, so future handlers must use
 stable outbox message identity for idempotency. Published operational metadata remains
 in the outbox indefinitely; pruning is disabled.
 
+Outbox event documents use JSON rather than PHP serialization. Each document contains
+the concrete `NamedDomainEvent` type, `eventVersion`, aggregate identifier, occurrence
+timestamp, and the minimized changed-properties payload. `Version20261002123000` changes
+the outbox column to JSON; it assumes there are no existing outbox records. New event
+versions need an explicit decoder path before they are written.
+
 ## Identifier migration
 
 `Version20260930120000` is the sole UUID conversion migration. It generates a Symfony

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Carbon\Doctrine\CarbonImmutableType;
+use CurlySanders\JobApplicationTracker\Infrastructure\Persistence\Doctrine\JsonDomainEventType;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
@@ -13,6 +14,7 @@ return static function (ContainerConfigurator $containerConfigurator): void {
             'profiling_collect_backtrace' => '%kernel.debug%',
             'types' => [
                 'carbon_immutable' => CarbonImmutableType::class,
+                'byte_object' => JsonDomainEventType::class,
             ],
         ],
         'orm' => [

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace CurlySanders\JobApplicationTracker\UI\Console;
+namespace CurlySanders\JobApplicationTracker\Infrastructure\Console;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;

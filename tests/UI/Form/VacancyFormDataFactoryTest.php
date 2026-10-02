@@ -16,7 +16,7 @@ final class VacancyFormDataFactoryTest extends TestCase
         $data->title = 'Backend developer';
         $data->techStacks->newTags = [null];
 
-        $command = (new VacancyFormDataFactory())->command('01a0fbfe-5d28-7789-af51-45b5780aa1f3', null, $data);
+        $command = new VacancyFormDataFactory()->command('01a0fbfe-5d28-7789-af51-45b5780aa1f3', null, $data);
 
         self::assertSame([], $command->newTechStacks);
         self::assertNull($command->companyId);
