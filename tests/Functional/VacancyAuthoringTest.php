@@ -65,13 +65,13 @@ final class VacancyAuthoringTest extends WebTestCase
         self::assertSame(['php', 'symfony'], $vacancy->getTechStacks()->map(static fn (TechStack $tag): string => $tag->getSlug())->toArray());
         self::assertInstanceOf(TechStack::class, $this->entityManager()->getRepository(TechStack::class)->findOneBy(['slug' => 'symfony']));
 
-        $crawler = $client->request('GET', sprintf('/vacancies/%d/edit', $vacancy->getId()));
+        $crawler = $client->request('GET', sprintf('/vacancies/%s/edit', $vacancy->getId()->toRfc4122()));
         self::assertSame('Senior PHP Developer', $crawler->filter('input[name="vacancy[title]"]')->attr('value'));
         $editData = $this->formData($crawler, $company, $recruiter, $php, 'Lead PHP Developer');
         self::assertIsArray($editData['techStacks']);
         $editData['techStacks']['newTags'] = [['name' => 'Symfony', 'category' => 'Framework']];
-        $client->request('POST', sprintf('/vacancies/%d/edit', $vacancy->getId()), ['vacancy' => $editData]);
-        self::assertResponseRedirects(sprintf('/vacancies/%d/edit', $vacancy->getId()));
+        $client->request('POST', sprintf('/vacancies/%s/edit', $vacancy->getId()->toRfc4122()), ['vacancy' => $editData]);
+        self::assertResponseRedirects(sprintf('/vacancies/%s/edit', $vacancy->getId()->toRfc4122()));
 
         $this->entityManager()->clear();
         $updated = $this->entityManager()->find(Vacancy::class, $vacancy->getId());
@@ -98,7 +98,7 @@ final class VacancyAuthoringTest extends WebTestCase
         $vacancy = new Vacancy($otherUser, 'Private vacancy');
         $this->entityManager()->persist($vacancy);
         $this->entityManager()->flush();
-        $client->request('GET', sprintf('/vacancies/%d/edit', $vacancy->getId()));
+        $client->request('GET', sprintf('/vacancies/%s/edit', $vacancy->getId()->toRfc4122()));
         self::assertResponseStatusCodeSame(404);
     }
 
@@ -106,7 +106,7 @@ final class VacancyAuthoringTest extends WebTestCase
     private function formData(Crawler $crawler, ?Company $company, ?Recruiter $recruiter, ?TechStack $php, string $title): array
     {
         return [
-            '_token' => $this->csrfToken($crawler), 'title' => $title, 'companyId' => $company?->getId(), 'recruiterId' => $recruiter?->getId(), 'location' => 'Rotterdam',
+            '_token' => $this->csrfToken($crawler), 'title' => $title, 'companyId' => $company?->getId()->toRfc4122(), 'recruiterId' => $recruiter?->getId()->toRfc4122(), 'location' => 'Rotterdam',
             'applicationSource' => ApplicationSource::LinkedIn->value, 'sourceUrls' => ['https://jobs.example/vacancy'], 'howToApply' => 'Apply via the company site.',
             'contractType' => 'PERMANENT', 'datePosted' => '2026-09-20', 'deadline' => '2026-10-01', 'dateApplied' => '2026-09-22',
             'fullText' => 'Full vacancy text.', 'requirements' => 'Build reliable APIs.', 'responsibilities' => 'Lead delivery.', 'preferredQualifications' => 'Symfony expertise.',

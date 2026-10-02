@@ -19,6 +19,7 @@ final readonly class CreateRecruiterHandler implements CommandHandler
     {
         $recruiter = new Recruiter($command->agencyName, $command->website);
         $recruiter->replaceDirectContacts(...DirectContactFactory::fromInputs($command->directContacts));
+        $recruiter->recordCreated();
         $this->recruiters->save($recruiter);
 
         return $recruiter;

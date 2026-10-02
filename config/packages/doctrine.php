@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Carbon\Doctrine\CarbonImmutableType;
+use CurlySanders\JobApplicationTracker\Infrastructure\Persistence\Doctrine\JsonDomainEventType;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
@@ -10,6 +12,10 @@ return static function (ContainerConfigurator $containerConfigurator): void {
         'dbal' => [
             'url' => '%env(resolve:DATABASE_URL)%',
             'profiling_collect_backtrace' => '%kernel.debug%',
+            'types' => [
+                'carbon_immutable' => CarbonImmutableType::class,
+                'byte_object' => JsonDomainEventType::class,
+            ],
         ],
         'orm' => [
             'validate_xml_mapping' => true,
@@ -25,6 +31,13 @@ return static function (ContainerConfigurator $containerConfigurator): void {
                     'dir' => '%kernel.project_dir%/src/Domain',
                     'prefix' => 'CurlySanders\JobApplicationTracker\Domain',
                     'alias' => 'JobApplicationTracker',
+                ],
+                'LingodaDomainEvents' => [
+                    'type' => 'attribute',
+                    'is_bundle' => false,
+                    'dir' => '%kernel.project_dir%/vendor/lingoda/domain-events/src/Infra/Doctrine/Entity',
+                    'prefix' => 'Lingoda\\DomainEventsBundle\\Infra\\Doctrine\\Entity',
+                    'alias' => 'LingodaDomainEvents',
                 ],
             ],
         ],

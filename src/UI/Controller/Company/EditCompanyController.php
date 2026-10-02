@@ -27,8 +27,8 @@ final readonly class EditCompanyController extends AbstractManagementFormControl
         parent::__construct($forms, $twig, $urls);
     }
 
-    #[Route('/companies/{id}/edit', name: 'app_company_edit', requirements: ['id' => '\\d+'], methods: ['GET', 'POST'])]
-    public function __invoke(int $id, Request $request): Response
+    #[Route('/companies/{id}/edit', name: 'app_company_edit', methods: ['GET', 'POST'])]
+    public function __invoke(string $id, Request $request): Response
     {
         $company = $this->companies->find($id) ?? throw new NotFoundHttpException('Company not found.');
         $data = $this->dataFrom($company);

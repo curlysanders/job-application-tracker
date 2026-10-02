@@ -8,6 +8,7 @@ use CurlySanders\JobApplicationTracker\Application\Vacancy\VacancyRepository;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\Vacancy;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\AsAlias;
+use Symfony\Component\Uid\Uuid;
 
 #[AsAlias(VacancyRepository::class)]
 final readonly class DoctrineVacancyRepository implements VacancyRepository
@@ -16,9 +17,16 @@ final readonly class DoctrineVacancyRepository implements VacancyRepository
     {
     }
 
-    public function findOwnedBy(int $vacancyId, int $userId): ?Vacancy
+    public function findOwnedBy(string $vacancyId, string $userId): ?Vacancy
     {
-        return $this->entityManager->getRepository(Vacancy::class)->findOneBy(['id' => $vacancyId, 'user' => $userId]);
+        if (!Uuid::isValid($vacancyId) || !Uuid::isValid($userId)) {
+            return null;
+        }
+
+        return $this->entityManager->getRepository(Vacancy::class)->findOneBy([
+            'id' => Uuid::fromString($vacancyId),
+            'user' => Uuid::fromString($userId),
+        ]);
     }
 
     public function save(Vacancy $vacancy): void

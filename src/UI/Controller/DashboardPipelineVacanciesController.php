@@ -23,7 +23,7 @@ final readonly class DashboardPipelineVacanciesController
     public function __invoke(Request $request): Response
     {
         $user = $this->authenticatedUser();
-        $userId = $user->getId() ?? throw new \LogicException('The dashboard requires a persisted user.');
+        $userId = $user->getId()->toRfc4122();
 
         $overviewRequest = VacancyOverviewRequest::fromRequest($request);
 

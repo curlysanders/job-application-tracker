@@ -5,20 +5,24 @@ declare(strict_types=1);
 namespace CurlySanders\JobApplicationTracker\Domain\TechStack;
 
 use CurlySanders\JobApplicationTracker\Domain\Shared\NormalizesStrings;
+use CurlySanders\JobApplicationTracker\Domain\Shared\RecordsDomainEvents;
 use Doctrine\ORM\Mapping as ORM;
+use Lingoda\DomainEventsBundle\Domain\Model\DomainEventAware;
+use Symfony\Bridge\Doctrine\Types\UuidType;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'tech_stacks')]
 #[ORM\UniqueConstraint(name: 'UNIQ_TECH_STACKS_SLUG', fields: ['slug'])]
 #[ORM\Index(name: 'IDX_TECH_STACKS_CATEGORY', fields: ['category'])]
-final class TechStack
+final class TechStack implements DomainEventAware
 {
     use NormalizesStrings;
+    use RecordsDomainEvents;
 
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    #[ORM\Column(type: UuidType::NAME, unique: true)]
+    private Uuid $id;
 
     #[ORM\Column(length: 255)]
     private string $name;
@@ -31,12 +35,14 @@ final class TechStack
 
     public function __construct(string $name, string $category)
     {
+        $this->id = Uuid::v7();
         $this->name = self::required($name, 'A technology name is required.');
         $this->slug = self::slug($this->name);
         $this->category = self::required($category, 'A technology category is required.');
+        $this->recordEvent(new TechStackCreated($this->id, ['name' => $this->name, 'slug' => $this->slug, 'category' => $this->category]));
     }
 
-    public function getId(): ?int
+    public function getId(): Uuid
     {
         return $this->id;
     }

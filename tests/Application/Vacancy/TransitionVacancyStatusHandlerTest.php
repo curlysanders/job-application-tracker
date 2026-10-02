@@ -16,15 +16,18 @@ use PHPUnit\Framework\TestCase;
 
 final class TransitionVacancyStatusHandlerTest extends TestCase
 {
+    private const string USER_ID = '018f8e3e-1234-7abc-8def-0123456789ab';
+    private const string VACANCY_ID = '018f8e3e-5678-7abc-8def-0123456789ab';
+
     public function testTransitionsAnOwnedVacancyAndSavesIt(): void
     {
         $vacancy = new Vacancy(new User(), 'Senior PHP Developer');
         $repository = $this->createMock(VacancyRepository::class);
-        $repository->expects(self::once())->method('findOwnedBy')->with(11, 7)->willReturn($vacancy);
+        $repository->expects(self::once())->method('findOwnedBy')->with(self::VACANCY_ID, self::USER_ID)->willReturn($vacancy);
         $repository->expects(self::once())->method('save')->with($vacancy);
 
         $result = new TransitionVacancyStatusHandler($repository, $this->workflow())(
-            new TransitionVacancyStatus(7, 11, 'start_applying'),
+            new TransitionVacancyStatus(self::USER_ID, self::VACANCY_ID, 'start_applying'),
         );
 
         self::assertSame($vacancy, $result);
@@ -35,23 +38,23 @@ final class TransitionVacancyStatusHandlerTest extends TestCase
     {
         $vacancy = new Vacancy(new User(), 'Senior PHP Developer');
         $repository = $this->createMock(VacancyRepository::class);
-        $repository->expects(self::once())->method('findOwnedBy')->with(11, 7)->willReturn($vacancy);
+        $repository->expects(self::once())->method('findOwnedBy')->with(self::VACANCY_ID, self::USER_ID)->willReturn($vacancy);
         $repository->expects(self::never())->method('save');
 
         $this->expectException(VacancyStatusTransitionNotAllowed::class);
         new TransitionVacancyStatusHandler($repository, $this->workflow())(
-            new TransitionVacancyStatus(7, 11, 'mark_applied'),
+            new TransitionVacancyStatus(self::USER_ID, self::VACANCY_ID, 'mark_applied'),
         );
     }
 
     public function testRejectsTransitionsForAnotherUsersVacancy(): void
     {
         $repository = $this->createMock(VacancyRepository::class);
-        $repository->expects(self::once())->method('findOwnedBy')->with(11, 7)->willReturn(null);
+        $repository->expects(self::once())->method('findOwnedBy')->with(self::VACANCY_ID, self::USER_ID)->willReturn(null);
 
         $this->expectException(\LogicException::class);
         new TransitionVacancyStatusHandler($repository, $this->workflow())(
-            new TransitionVacancyStatus(7, 11, 'start_applying'),
+            new TransitionVacancyStatus(self::USER_ID, self::VACANCY_ID, 'start_applying'),
         );
     }
 

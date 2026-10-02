@@ -7,5 +7,5 @@ namespace CurlySanders\JobApplicationTracker\Application\Vacancy\Reminder;
 interface DueVacancyReminderRepository
 {
     /** @return list<DueVacancyReminder> */
-    public function forUserDueBefore(int $userId, \DateTimeImmutable $endExclusive): array;
+    public function forUserDueBefore(string $userId, \DateTimeImmutable $endExclusive): array;
 }

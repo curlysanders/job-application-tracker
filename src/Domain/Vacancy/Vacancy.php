@@ -7,11 +7,15 @@ namespace CurlySanders\JobApplicationTracker\Domain\Vacancy;
 use CurlySanders\JobApplicationTracker\Domain\Company\Company;
 use CurlySanders\JobApplicationTracker\Domain\Recruiter\Recruiter;
 use CurlySanders\JobApplicationTracker\Domain\Shared\NormalizesStrings;
+use CurlySanders\JobApplicationTracker\Domain\Shared\RecordsDomainEvents;
 use CurlySanders\JobApplicationTracker\Domain\TechStack\TechStack;
 use CurlySanders\JobApplicationTracker\Domain\User\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Lingoda\DomainEventsBundle\Domain\Model\DomainEventAware;
+use Symfony\Bridge\Doctrine\Types\UuidType;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'vacancies')]
@@ -20,14 +24,14 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(name: 'IDX_VACANCIES_DATE_ADDED', fields: ['dateAdded'])]
 #[ORM\Index(name: 'IDX_VACANCIES_COMPANY', columns: ['company_id'])]
 #[ORM\Index(name: 'IDX_VACANCIES_RECRUITER', columns: ['recruiter_id'])]
-final class Vacancy
+final class Vacancy implements DomainEventAware
 {
     use NormalizesStrings;
+    use RecordsDomainEvents;
 
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    #[ORM\Column(type: UuidType::NAME, unique: true)]
+    private Uuid $id;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
@@ -139,6 +143,7 @@ final class Vacancy
         #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
         private User $user, string $title)
     {
+        $this->id = Uuid::v7();
         $this->title = self::required($title, 'A vacancy title is required.');
         $this->dateAdded = new \DateTimeImmutable();
         $this->techStacks = new ArrayCollection();
@@ -229,6 +234,7 @@ final class Vacancy
     public function updateScratchpadNotes(?string $scratchpadNotes): void
     {
         $this->scratchpadNotes = self::optional($scratchpadNotes);
+        $this->recordEvent(new VacancyScratchpadUpdated($this->id, []));
     }
 
     public function updateNextAction(?string $title, ?\DateTimeImmutable $at): void
@@ -240,11 +246,47 @@ final class Vacancy
 
         $this->nextActionTitle = $title;
         $this->nextActionAt = $at;
+        $this->recordEvent(new VacancyNextActionUpdated($this->id, []));
     }
 
-    public function getId(): ?int
+    public function getId(): Uuid
     {
         return $this->id;
+    }
+
+    public function recordCreated(): void
+    {
+        $this->recordEvent(new VacancyCreated($this->id, $this->lifecycleDetails()));
+    }
+
+    public function recordDetailsUpdated(): void
+    {
+        $this->recordEvent(new VacancyDetailsUpdated($this->id, $this->lifecycleDetails()));
+    }
+
+    public function recordStatusTransitioned(VacancyStatus $from, string $transition): void
+    {
+        $this->recordEvent(new VacancyStatusTransitioned($this->id, [
+            'fromStatus' => $from->value,
+            'toStatus' => $this->status->value,
+            'transition' => $transition,
+        ]));
+    }
+
+    public function recordDeleted(): void
+    {
+        $this->recordEvent(new VacancyDeleted($this->id, []));
+    }
+
+    /** @return array<string, mixed> */
+    private function lifecycleDetails(): array
+    {
+        return [
+            'status' => $this->status->value,
+            'workMode' => $this->workMode?->value,
+            'contractType' => $this->contractType?->value,
+            'applicationSource' => $this->applicationSource?->value,
+        ];
     }
 
     public function getUser(): User
@@ -376,11 +418,13 @@ final class Vacancy
     public function archive(): void
     {
         $this->archived = true;
+        $this->recordEvent(new VacancyArchived($this->id, ['archived' => true]));
     }
 
     public function restore(): void
     {
         $this->archived = false;
+        $this->recordEvent(new VacancyRestored($this->id, ['archived' => false]));
     }
 
     public function getSalaryRange(): ?SalaryRange

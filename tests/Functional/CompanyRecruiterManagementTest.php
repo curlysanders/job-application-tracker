@@ -40,9 +40,9 @@ final class CompanyRecruiterManagementTest extends WebTestCase
         self::assertInstanceOf(Company::class, $company);
         self::assertCount(2, $company->getDirectContacts());
 
-        $crawler = $client->request('GET', sprintf('/companies/%d/edit', $company->getId()));
+        $crawler = $client->request('GET', sprintf('/companies/%s/edit', $company->getId()->toRfc4122()));
         self::assertSelectorCount(1, 'input[name="company[directContacts][0][name]"]');
-        $client->request('POST', sprintf('/companies/%d/edit', $company->getId()), ['company' => [
+        $client->request('POST', sprintf('/companies/%s/edit', $company->getId()->toRfc4122()), ['company' => [
             '_token' => $this->csrfToken($crawler), 'name' => 'Acme Europe BV', 'website' => 'https://acme.example', 'industry' => 'Software',
             'directContacts' => [['name' => 'Ada Lovelace', 'email' => 'ada@acme.example', 'phone' => '+31 6 12345678', 'linkedinUrl' => 'https://www.linkedin.com/in/ada']],
         ]]);
@@ -84,12 +84,12 @@ final class CompanyRecruiterManagementTest extends WebTestCase
         $this->entityManager()->persist($recruiter);
         $this->entityManager()->flush();
 
-        $crawler = $client->request('GET', sprintf('/recruiters/%d/edit', $recruiter->getId()));
+        $crawler = $client->request('GET', sprintf('/recruiters/%s/edit', $recruiter->getId()->toRfc4122()));
         self::assertResponseIsSuccessful();
         self::assertSame('Talent Partners', $crawler->filter('input[name="recruiter[agencyName]"]')->attr('value'));
         self::assertSame('Lin Recruiter', $crawler->filter('input[name="recruiter[directContacts][0][name]"]')->attr('value'));
 
-        $client->request('POST', sprintf('/recruiters/%d/edit', $recruiter->getId()), ['recruiter' => [
+        $client->request('POST', sprintf('/recruiters/%s/edit', $recruiter->getId()->toRfc4122()), ['recruiter' => [
             '_token' => $this->csrfToken($crawler),
             'agencyName' => 'Talent Europe',
             'website' => 'https://talent-europe.example',

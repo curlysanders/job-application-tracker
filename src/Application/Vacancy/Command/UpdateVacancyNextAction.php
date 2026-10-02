@@ -7,8 +7,8 @@ namespace CurlySanders\JobApplicationTracker\Application\Vacancy\Command;
 final readonly class UpdateVacancyNextAction
 {
     public function __construct(
-        public int $userId,
-        public int $vacancyId,
+        public string $userId,
+        public string $vacancyId,
         public ?string $title,
         public ?\DateTimeImmutable $at,
     ) {

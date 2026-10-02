@@ -6,7 +6,7 @@ namespace CurlySanders\JobApplicationTracker\Application\Vacancy\Command;
 
 final readonly class UpdateVacancyScratchpad
 {
-    public function __construct(public int $userId, public int $vacancyId, public ?string $notes)
+    public function __construct(public string $userId, public string $vacancyId, public ?string $notes)
     {
     }
 }

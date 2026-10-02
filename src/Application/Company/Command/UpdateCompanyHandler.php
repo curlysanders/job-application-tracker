@@ -20,6 +20,7 @@ final readonly class UpdateCompanyHandler implements CommandHandler
         $company = $this->companies->find($command->companyId) ?? throw new \LogicException('The company no longer exists.');
         $company->update($command->name, $command->website, $command->industry);
         $company->replaceDirectContacts(...DirectContactFactory::fromInputs($command->directContacts));
+        $company->recordDetailsUpdated();
         $this->companies->save($company);
 
         return $company;

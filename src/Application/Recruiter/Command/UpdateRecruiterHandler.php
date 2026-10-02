@@ -20,6 +20,7 @@ final readonly class UpdateRecruiterHandler implements CommandHandler
         $recruiter = $this->recruiters->find($command->recruiterId) ?? throw new \LogicException('The recruiter no longer exists.');
         $recruiter->update($command->agencyName, $command->website);
         $recruiter->replaceDirectContacts(...DirectContactFactory::fromInputs($command->directContacts));
+        $recruiter->recordDetailsUpdated();
         $this->recruiters->save($recruiter);
 
         return $recruiter;

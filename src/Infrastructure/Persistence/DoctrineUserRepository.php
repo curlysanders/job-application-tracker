@@ -10,6 +10,7 @@ use CurlySanders\JobApplicationTracker\Domain\User\User;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\AsAlias;
+use Symfony\Component\Uid\Uuid;
 
 #[AsAlias(UserRepository::class)]
 final readonly class DoctrineUserRepository implements UserRepository
@@ -23,9 +24,13 @@ final readonly class DoctrineUserRepository implements UserRepository
         return $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
     }
 
-    public function find(int $id): ?User
+    public function find(string $id): ?User
     {
-        return $this->entityManager->find(User::class, $id);
+        if (!Uuid::isValid($id)) {
+            return null;
+        }
+
+        return $this->entityManager->find(User::class, Uuid::fromString($id));
     }
 
     public function save(User $user): void

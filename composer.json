@@ -17,6 +17,7 @@
         "doctrine/orm": "^3.7.2",
         "league/commonmark": "^2.7",
         "league/flysystem-bundle": "^3.7",
+        "lingoda/domain-events": "^3.0",
         "symfony/asset": "~8.1.0",
         "symfony/asset-mapper": "~8.1.7",
         "symfony/cache": "~8.1.0",
@@ -129,6 +130,10 @@
         },
         "ci:coverage": [
             "@php vendor/bin/paratest --coverage-cobertura=var/coverage/cobertura.xml --coverage-text"
+        ],
+        "ci:doctrine-schema": [
+            "@php bin/console doctrine:schema:validate --skip-sync --env=test",
+            "@php bin/console app:doctrine:schema:assert-synchronized --env=test"
         ],
         "ci:deptrac": [
             "@php vendor/bin/deptrac analyse --fail-on-uncovered"

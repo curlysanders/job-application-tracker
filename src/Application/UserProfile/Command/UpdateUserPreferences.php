@@ -7,7 +7,7 @@ namespace CurlySanders\JobApplicationTracker\Application\UserProfile\Command;
 final readonly class UpdateUserPreferences
 {
     public function __construct(
-        public int $userId,
+        public string $userId,
         public ?string $minimumPreferredSalary,
         public string $minimumPreferredSalaryCurrency,
         public ?int $maximumCommuteMinutes,

@@ -206,12 +206,15 @@
 - **Epic**: Epic 4 (Outbox & Performance)
 - **Dependencies**: TICK-302
 - **Scope**:
-    - Configure Symfony Messenger with Doctrine transport outbox table (`messenger_messages`).
-    - Routing domain event messages (e.g., `VacancyStatusChangedEvent`, `ResumeUploadedEvent`) to async outbox queue.
-    - Setup CLI worker consumer command script (`bin/console messenger:consume async`).
+    - Persist named domain facts through Lingoda Domain Events and its transactional Doctrine outbox.
+    - Record aggregate creation, updates, workflow transitions, archive/restore, resume replacement, and deletion with the resulting changed-property values.
+    - Run the `outbox` Messenger consumer as a dedicated Compose worker.
+    - Convert aggregate roots and their relations to binary UUIDv7 identifiers through a data-preserving migration.
 - **Acceptance Criteria**:
-    - [ ] Dispatching domain events writes to the database outbox synchronously without delaying the HTTP request.
-    - [ ] Worker process picks up and processes outbox messages reliably.
+    - [x] Named domain events are stored transactionally even when no handler exists.
+    - [x] An `outbox` worker transport is configured for reliable at-least-once delivery.
+    - [x] Changed-property payloads contain resulting values and omit secrets.
+- **Validation**: [Results and reproduction steps](tick-401-validation.md).
 
 ---
 

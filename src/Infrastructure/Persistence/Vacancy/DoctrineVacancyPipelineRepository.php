@@ -11,7 +11,9 @@ use CurlySanders\JobApplicationTracker\Application\Vacancy\Pipeline\VacancyPipel
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\Vacancy;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\VacancyStatus;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\DependencyInjection\Attribute\AsAlias;
+use Symfony\Component\Uid\Uuid;
 
 #[AsAlias(VacancyPipelineRepository::class)]
 final readonly class DoctrineVacancyPipelineRepository implements VacancyPipelineRepository
@@ -20,7 +22,7 @@ final readonly class DoctrineVacancyPipelineRepository implements VacancyPipelin
     {
     }
 
-    public function forUser(int $userId, ?VacancyStatus $selectedStatus): VacancyPipeline
+    public function forUser(string $userId, ?VacancyStatus $selectedStatus): VacancyPipeline
     {
         $counts = array_fill_keys(array_map(static fn (VacancyStatus $status): string => $status->value, PipelineStatuses::all()), 0);
         /** @var list<array{status: string, total: string}> $countRows */
@@ -30,7 +32,7 @@ final readonly class DoctrineVacancyPipelineRepository implements VacancyPipelin
             ->where('IDENTITY(vacancy.user) = :userId')
             ->andWhere('vacancy.archived = false')
             ->andWhere('vacancy.status IN (:statuses)')
-            ->setParameter('userId', $userId)
+            ->setParameter('userId', Uuid::fromString($userId), UuidType::NAME)
             ->setParameter('statuses', PipelineStatuses::all())
             ->groupBy('vacancy.status')
             ->getQuery()
@@ -52,7 +54,7 @@ final readonly class DoctrineVacancyPipelineRepository implements VacancyPipelin
             ->where('IDENTITY(vacancy.user) = :userId')
             ->andWhere('vacancy.archived = false')
             ->andWhere('vacancy.status IN (:statuses)')
-            ->setParameter('userId', $userId)
+            ->setParameter('userId', Uuid::fromString($userId), UuidType::NAME)
             ->setParameter('statuses', PipelineStatuses::all())
             ->orderBy('vacancy.dateAdded', 'DESC')
             ->addOrderBy('vacancy.id', 'DESC');

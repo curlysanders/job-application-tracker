@@ -8,6 +8,9 @@ use CurlySanders\JobApplicationTracker\Domain\TechStack\TechStack;
 use CurlySanders\JobApplicationTracker\Domain\User\User;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\SalaryRange;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\Vacancy;
+use CurlySanders\JobApplicationTracker\Domain\Vacancy\VacancyCreated;
+use CurlySanders\JobApplicationTracker\Domain\Vacancy\VacancyNextActionUpdated;
+use CurlySanders\JobApplicationTracker\Domain\Vacancy\VacancyScratchpadUpdated;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\VacancyStatus;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Workflow\DefinitionBuilder;
@@ -88,5 +91,23 @@ final class VacancyTest extends TestCase
         $stateMachine->apply($vacancy, 'start_applying');
 
         self::assertSame(VacancyStatus::Applying, $vacancy->getStatus());
+    }
+
+    public function testVacancyFactsRetainLifecycleMetadataAndExcludePrivateContent(): void
+    {
+        $vacancy = new Vacancy(new User(), 'Private role title');
+        $vacancy->updateAuthoringDetails(null, null, 'Private full text', 'Private requirements', null, null, null, null, null, ['https://example.test/private'], 'Private instructions', 'Dordrecht', null, null, null, null, null, null, null);
+        $vacancy->recordCreated();
+        $vacancy->updateScratchpadNotes('Private interview notes');
+        $vacancy->updateNextAction('Private next action', new \DateTimeImmutable('2026-10-01 09:30:00'));
+
+        [$created, $scratchpad, $nextAction] = $vacancy->getRecordedEvents();
+
+        self::assertInstanceOf(VacancyCreated::class, $created);
+        self::assertSame(['status' => 'BOOKMARKED', 'workMode' => null, 'contractType' => null, 'applicationSource' => null], $created->changedProperties);
+        self::assertInstanceOf(VacancyScratchpadUpdated::class, $scratchpad);
+        self::assertSame([], $scratchpad->changedProperties);
+        self::assertInstanceOf(VacancyNextActionUpdated::class, $nextAction);
+        self::assertSame([], $nextAction->changedProperties);
     }
 }

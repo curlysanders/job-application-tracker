@@ -12,10 +12,13 @@ use CurlySanders\JobApplicationTracker\Application\Vacancy\Overview\VacancyOverv
 use CurlySanders\JobApplicationTracker\Domain\User\PreferredSalary;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\SalaryRange;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\Vacancy;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
+use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\DependencyInjection\Attribute\AsAlias;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Workflow\WorkflowInterface;
 
 #[AsAlias(VacancyOverviewRepository::class)]
@@ -28,7 +31,7 @@ final readonly class DoctrineVacancyOverviewRepository implements VacancyOvervie
     ) {
     }
 
-    public function forUser(int $userId, PreferredSalary $preferredSalary, VacancyOverviewFilter $filter): VacancyOverview
+    public function forUser(string $userId, PreferredSalary $preferredSalary, VacancyOverviewFilter $filter): VacancyOverview
     {
         $countBuilder = $this->filteredQuery($userId, $preferredSalary, $filter);
         $total = (int) $countBuilder
@@ -37,7 +40,7 @@ final readonly class DoctrineVacancyOverviewRepository implements VacancyOvervie
             ->getSingleScalarResult();
 
         $page = min($filter->page, max(1, (int) ceil($total / VacancyOverviewFilter::PAGE_SIZE)));
-        /** @var list<array{id: int|string}> $rows */
+        /** @var list<array{id: string}> $rows */
         $rows = $this->filteredQuery($userId, $preferredSalary, $filter)
             ->select('DISTINCT vacancy.id AS id')
             ->orderBy('vacancy.dateAdded', 'DESC')
@@ -46,7 +49,7 @@ final readonly class DoctrineVacancyOverviewRepository implements VacancyOvervie
             ->setMaxResults(VacancyOverviewFilter::PAGE_SIZE)
             ->getQuery()
             ->getScalarResult();
-        $ids = array_map(static fn (array $row): int => (int) $row['id'], $rows);
+        $ids = array_map(static fn (array $row): string => Uuid::fromBinary($row['id'])->toRfc4122(), $rows);
 
         if ([] === $ids) {
             return new VacancyOverview([], $total, $page, VacancyOverviewFilter::PAGE_SIZE);
@@ -60,24 +63,22 @@ final readonly class DoctrineVacancyOverviewRepository implements VacancyOvervie
             ->leftJoin('vacancy.recruiter', 'recruiter')
             ->leftJoin('vacancy.techStacks', 'techStack')
             ->where('vacancy.id IN (:ids)')
-            ->setParameter('ids', $ids)
+            ->setParameter('ids', array_map(static fn (string $id): string => Uuid::fromString($id)->toBinary(), $ids), ArrayParameterType::BINARY)
             ->getQuery()
             ->getResult();
         $byId = [];
         foreach ($vacancies as $vacancy) {
             $id = $vacancy->getId();
-            if (null !== $id) {
-                $byId[$id] = $vacancy;
-            }
+            $byId[$id->toRfc4122()] = $vacancy;
         }
 
         return new VacancyOverview(array_map(
-            fn (int $id): VacancyOverviewVacancy => $this->overviewVacancy($byId[$id], $preferredSalary),
+            fn (string $id): VacancyOverviewVacancy => $this->overviewVacancy($byId[$id], $preferredSalary),
             $ids,
         ), $total, $page, VacancyOverviewFilter::PAGE_SIZE);
     }
 
-    private function filteredQuery(int $userId, PreferredSalary $preferredSalary, VacancyOverviewFilter $filter): QueryBuilder
+    private function filteredQuery(string $userId, PreferredSalary $preferredSalary, VacancyOverviewFilter $filter): QueryBuilder
     {
         $builder = $this->entityManager->createQueryBuilder()
             ->from(Vacancy::class, 'vacancy')
@@ -85,7 +86,7 @@ final readonly class DoctrineVacancyOverviewRepository implements VacancyOvervie
             ->leftJoin('vacancy.techStacks', 'techStack')
             ->where('IDENTITY(vacancy.user) = :userId')
             ->andWhere('vacancy.archived = :archived')
-            ->setParameter('userId', $userId)
+            ->setParameter('userId', Uuid::fromString($userId), UuidType::NAME)
             ->setParameter('archived', $filter->archived);
 
         if (null !== $filter->query) {
@@ -132,7 +133,7 @@ final readonly class DoctrineVacancyOverviewRepository implements VacancyOvervie
 
     private function overviewVacancy(Vacancy $vacancy, PreferredSalary $preferredSalary): VacancyOverviewVacancy
     {
-        $id = $vacancy->getId() ?? throw new \LogicException('Overview vacancies must be persisted.');
+        $id = $vacancy->getId()->toRfc4122();
         $range = $vacancy->getSalaryRange();
         $transitions = array_map(static fn ($transition): string => $transition->getName(), $this->workflow->getEnabledTransitions($vacancy));
 

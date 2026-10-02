@@ -5,19 +5,23 @@ declare(strict_types=1);
 namespace CurlySanders\JobApplicationTracker\Domain\User;
 
 use Brick\Money\Money;
+use CurlySanders\JobApplicationTracker\Domain\Shared\RecordsDomainEvents;
 use Doctrine\ORM\Mapping as ORM;
+use Lingoda\DomainEventsBundle\Domain\Model\DomainEventAware;
+use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'users')]
-final class User implements UserInterface, PasswordAuthenticatedUserInterface
+final class User implements UserInterface, PasswordAuthenticatedUserInterface, DomainEventAware
 {
+    use RecordsDomainEvents;
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    #[ORM\Column(type: UuidType::NAME, unique: true)]
+    private Uuid $id;
 
     #[ORM\Column(length: 180, unique: true)]
     #[Assert\NotBlank]
@@ -60,10 +64,11 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function __construct()
     {
+        $this->id = Uuid::v7();
         $this->createdAt = new \DateTimeImmutable();
     }
 
-    public function getId(): ?int
+    public function getId(): Uuid
     {
         return $this->id;
     }
@@ -141,6 +146,7 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->minimumPreferredSalaryCurrency = $preferredSalary->getCurrencyCode();
         $this->maximumCommuteMinutes = $maximumCommuteMinutes;
         $this->preferredTransportMode = $preferredTransportMode;
+        $this->recordEvent(new UserPreferencesUpdated($this->id, []));
     }
 
     public function getPreferredSalary(): PreferredSalary
@@ -176,6 +182,12 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->resumeOriginalFilename = $originalFilename;
         $this->resumeMimeType = $mimeType;
         $this->resumeUploadedAt = $uploadedAt;
+        $this->recordEvent(new ResumeReplaced($this->id, []));
+    }
+
+    public function recordRegistered(): void
+    {
+        $this->recordEvent(new UserRegistered($this->id, []));
     }
 
     public function getResumeStoragePath(): ?string

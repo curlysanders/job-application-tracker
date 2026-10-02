@@ -6,7 +6,7 @@ namespace CurlySanders\JobApplicationTracker\Application\Vacancy\Command;
 
 final readonly class SetVacancyArchived
 {
-    public function __construct(public int $userId, public int $vacancyId, public bool $archived)
+    public function __construct(public string $userId, public string $vacancyId, public bool $archived)
     {
     }
 }

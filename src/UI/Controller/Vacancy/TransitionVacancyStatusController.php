@@ -32,14 +32,14 @@ final readonly class TransitionVacancyStatusController
     ) {
     }
 
-    #[Route('/vacancies/{id}/status', name: 'app_vacancy_transition_status', requirements: ['id' => '\\d+'], methods: ['POST'])]
-    public function __invoke(int $id, Request $request): Response
+    #[Route('/vacancies/{id}/status', name: 'app_vacancy_transition_status', methods: ['POST'])]
+    public function __invoke(string $id, Request $request): Response
     {
         $user = $this->authenticatedUser();
-        $userId = $user->getId() ?? throw new \LogicException('Vacancy status changes require a persisted user.');
+        $userId = $user->getId()->toRfc4122();
         $this->vacancies->findOwnedBy($id, $userId) ?? throw new NotFoundHttpException('Vacancy not found.');
         $token = $request->request->getString('_token');
-        if (!$this->csrfTokenManager->isTokenValid(new CsrfToken(sprintf('vacancy_status_transition_%d', $id), $token))) {
+        if (!$this->csrfTokenManager->isTokenValid(new CsrfToken(sprintf('vacancy_status_transition_%s', $id), $token))) {
             throw new AccessDeniedHttpException('Invalid CSRF token.');
         }
 
@@ -78,7 +78,7 @@ final readonly class TransitionVacancyStatusController
         $session->getFlashBag()->add($type, $message);
     }
 
-    private function returnUrl(Request $request, int $id): string
+    private function returnUrl(Request $request, string $id): string
     {
         $return = $request->request->getString('return');
         $path = parse_url($return, PHP_URL_PATH);

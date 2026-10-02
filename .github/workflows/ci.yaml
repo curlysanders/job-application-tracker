@@ -85,6 +85,9 @@ jobs:
         if: ${{ hashFiles('tests/**/*Test.php') == '' }}
         run: composer ci:phpunit
 
+      - name: Verify Doctrine schema
+        run: composer ci:doctrine-schema
+
       - name: PHPUnit with coverage
         if: ${{ hashFiles('tests/**/*Test.php') != '' }}
         run: composer ci:coverage

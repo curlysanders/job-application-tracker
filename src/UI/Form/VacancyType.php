@@ -65,29 +65,25 @@ final class VacancyType extends AbstractType
             ->add('excitement', ChoiceType::class, ['required' => false, 'expanded' => true, 'label' => 'Excitement rating', 'choices' => [0, 1, 2, 3, 4, 5]]);
     }
 
-    /** @return array<string, int> */
+    /** @return array<string, string> */
     private function companyChoices(): array
     {
         $choices = [];
         foreach ($this->companies->search('') as $company) {
             $id = $company->getId();
-            if (null !== $id) {
-                $choices[$company->getName()] = $id;
-            }
+            $choices[$company->getName()] = $id->toRfc4122();
         }
 
         return $choices;
     }
 
-    /** @return array<string, int> */
+    /** @return array<string, string> */
     private function recruiterChoices(): array
     {
         $choices = [];
         foreach ($this->recruiters->search('') as $recruiter) {
             $id = $recruiter->getId();
-            if (null !== $id) {
-                $choices[$recruiter->getAgencyName()] = $id;
-            }
+            $choices[$recruiter->getAgencyName()] = $id->toRfc4122();
         }
 
         return $choices;

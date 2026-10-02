@@ -10,7 +10,6 @@ use CurlySanders\JobApplicationTracker\Application\Authentication\Exception\Dupl
 use CurlySanders\JobApplicationTracker\Application\Authentication\Exception\UserAlreadyExists;
 use CurlySanders\JobApplicationTracker\Application\Authentication\PasswordHasher;
 use CurlySanders\JobApplicationTracker\Application\Authentication\UserRepository;
-use CurlySanders\JobApplicationTracker\Application\Shared\Bus\EventBus;
 use PHPUnit\Framework\TestCase;
 
 final class RegisterUserHandlerTest extends TestCase
@@ -22,10 +21,7 @@ final class RegisterUserHandlerTest extends TestCase
         $users->expects(self::once())->method('save')->willThrowException(new DuplicateUserEmail());
         $passwordHasher = $this->createMock(PasswordHasher::class);
         $passwordHasher->expects(self::once())->method('hash')->willReturn('hashed-password');
-        $eventBus = $this->createMock(EventBus::class);
-        $eventBus->expects(self::never())->method('dispatch');
-
         $this->expectException(UserAlreadyExists::class);
-        new RegisterUserHandler($users, $passwordHasher, $eventBus)(new RegisterUser(' Sander@example.com ', 'SecurePassword1!'));
+        new RegisterUserHandler($users, $passwordHasher)(new RegisterUser(' Sander@example.com ', 'SecurePassword1!'));
     }
 }

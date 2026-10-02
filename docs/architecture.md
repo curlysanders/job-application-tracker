@@ -49,7 +49,7 @@ Phase 1 establishes a rock-solid foundation, focused on manual data entry, respo
 - Scratchpad and next-action edits use owner-scoped commands. The scratchpad's Stimulus controller supplies a Markdown formatting toolbar, autosaves, and receives a safe rendered preview; the dashboard uses a focused read query for unarchived reminders due today or earlier.
 - `src/UI` contains HTTP controllers, forms, and presentation models. Controllers map HTTP input to commands and render responses; they do not persist entities or implement business workflows. Favor constructor-injected framework dependencies over `AbstractController`; extend it only when a specific helper provides a clear benefit.
 - `src/Infrastructure` contains framework and external adapters, including HTTP-kernel subscribers and Messenger, persistence, and security adapters.
-- `event.bus` publishes zero-or-more application events synchronously today. TICK-401 will route applicable events to the Doctrine outbox without changing application callers.
+- Domain aggregates record named facts such as `VacancyStatusTransitioned` and `ResumeReplaced`. Lingoda Domain Events persists them in the same Doctrine transaction, then sends outbox records through `event.bus` for at-least-once worker delivery. Handlers must therefore be idempotent; an event is still retained when no handler is registered.
 
 ---
 

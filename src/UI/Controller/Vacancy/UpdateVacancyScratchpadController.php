@@ -30,16 +30,16 @@ final readonly class UpdateVacancyScratchpadController
     ) {
     }
 
-    #[Route('/vacancies/{id}/scratchpad', name: 'app_vacancy_update_scratchpad', requirements: ['id' => '\\d+'], methods: ['POST'])]
-    public function __invoke(int $id, Request $request): JsonResponse
+    #[Route('/vacancies/{id}/scratchpad', name: 'app_vacancy_update_scratchpad', methods: ['POST'])]
+    public function __invoke(string $id, Request $request): JsonResponse
     {
         $user = $this->security->getUser();
         if (!$user instanceof User) {
             throw new \LogicException('Vacancy scratchpad updates require an authenticated user.');
         }
-        $userId = $user->getId() ?? throw new \LogicException('Vacancy scratchpad updates require a persisted user.');
+        $userId = $user->getId()->toRfc4122();
         $this->vacancies->findOwnedBy($id, $userId) ?? throw new NotFoundHttpException('Vacancy not found.');
-        if (!$this->csrf->isTokenValid(new CsrfToken(sprintf('vacancy_scratchpad_%d', $id), $request->request->getString('_token')))) {
+        if (!$this->csrf->isTokenValid(new CsrfToken(sprintf('vacancy_scratchpad_%s', $id), $request->request->getString('_token')))) {
             throw new AccessDeniedHttpException('Invalid CSRF token.');
         }
         $vacancy = $this->commandBus->dispatch(new UpdateVacancyScratchpad($userId, $id, $request->request->getString('notes')));

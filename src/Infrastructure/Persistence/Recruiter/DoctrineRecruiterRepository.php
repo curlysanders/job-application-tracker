@@ -8,6 +8,7 @@ use CurlySanders\JobApplicationTracker\Application\Recruiter\RecruiterRepository
 use CurlySanders\JobApplicationTracker\Domain\Recruiter\Recruiter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\AsAlias;
+use Symfony\Component\Uid\Uuid;
 
 #[AsAlias(RecruiterRepository::class)]
 final readonly class DoctrineRecruiterRepository implements RecruiterRepository
@@ -16,9 +17,13 @@ final readonly class DoctrineRecruiterRepository implements RecruiterRepository
     {
     }
 
-    public function find(int $id): ?Recruiter
+    public function find(string $id): ?Recruiter
     {
-        return $this->entityManager->find(Recruiter::class, $id);
+        if (!Uuid::isValid($id)) {
+            return null;
+        }
+
+        return $this->entityManager->find(Recruiter::class, Uuid::fromString($id));
     }
 
     public function search(string $query): array

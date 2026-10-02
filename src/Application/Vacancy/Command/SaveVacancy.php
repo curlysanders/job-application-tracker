@@ -16,11 +16,11 @@ final readonly class SaveVacancy
      * @param list<array{name: string, category: string}> $newTechStacks
      */
     public function __construct(
-        public int $userId,
-        public ?int $vacancyId,
+        public string $userId,
+        public ?string $vacancyId,
         public string $title,
-        public ?int $companyId,
-        public ?int $recruiterId,
+        public ?string $companyId,
+        public ?string $recruiterId,
         public ?string $location,
         public ?ApplicationSource $applicationSource,
         public array $sourceUrls,

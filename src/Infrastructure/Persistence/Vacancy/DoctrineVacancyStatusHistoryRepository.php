@@ -8,6 +8,7 @@ use CurlySanders\JobApplicationTracker\Application\Vacancy\VacancyStatusHistoryR
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\Vacancy;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\VacancyStatusHistory;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\DependencyInjection\Attribute\AsAlias;
 
 #[AsAlias(VacancyStatusHistoryRepository::class)]
@@ -28,8 +29,8 @@ final readonly class DoctrineVacancyStatusHistoryRepository implements VacancySt
         $history = $this->entityManager->createQueryBuilder()
             ->select('history')
             ->from(VacancyStatusHistory::class, 'history')
-            ->where('history.vacancy = :vacancy')
-            ->setParameter('vacancy', $vacancy)
+            ->where('IDENTITY(history.vacancy) = :vacancyId')
+            ->setParameter('vacancyId', $vacancy->getId(), UuidType::NAME)
             ->orderBy('history.transitionedAt', 'DESC')
             ->addOrderBy('history.id', 'DESC')
             ->getQuery()

@@ -26,7 +26,7 @@ final class VacancyDetailTest extends WebTestCase
         $this->entityManager()->flush();
         $client->loginUser($owner);
 
-        $crawler = $client->request('GET', sprintf('/vacancies/%d', $vacancy->getId()));
+        $crawler = $client->request('GET', sprintf('/vacancies/%s', $vacancy->getId()->toRfc4122()));
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('.vacancy-overview', 'Acme BV');
         self::assertSelectorTextContains('body', 'Build APIs.');
@@ -38,7 +38,7 @@ final class VacancyDetailTest extends WebTestCase
         $token = $crawler->filter('[data-vacancy-scratchpad-target="token"]')->attr('value');
         self::assertIsString($token);
 
-        $client->request('POST', sprintf('/vacancies/%d/scratchpad', $vacancy->getId()), ['_token' => $token, 'notes' => "# Interview\n\nAsk about **ownership**. <script>alert(1)</script>"]);
+        $client->request('POST', sprintf('/vacancies/%s/scratchpad', $vacancy->getId()->toRfc4122()), ['_token' => $token, 'notes' => "# Interview\n\nAsk about **ownership**. <script>alert(1)</script>"]);
         self::assertResponseIsSuccessful();
         $response = json_decode((string) $client->getResponse()->getContent(), true, flags: \JSON_THROW_ON_ERROR);
         self::assertIsArray($response);
@@ -51,11 +51,11 @@ final class VacancyDetailTest extends WebTestCase
         self::assertInstanceOf(Vacancy::class, $saved);
         self::assertStringContainsString('Ask about', (string) $saved->getScratchpadNotes());
 
-        $client->request('POST', sprintf('/vacancies/%d/scratchpad', $vacancy->getId()), ['_token' => 'invalid', 'notes' => 'Denied']);
+        $client->request('POST', sprintf('/vacancies/%s/scratchpad', $vacancy->getId()->toRfc4122()), ['_token' => 'invalid', 'notes' => 'Denied']);
         self::assertResponseStatusCodeSame(403);
 
         $client->loginUser($this->createUser('detail-other@example.com'));
-        $client->request('GET', sprintf('/vacancies/%d', $vacancy->getId()));
+        $client->request('GET', sprintf('/vacancies/%s', $vacancy->getId()->toRfc4122()));
         self::assertResponseStatusCodeSame(404);
     }
 
@@ -68,21 +68,21 @@ final class VacancyDetailTest extends WebTestCase
         $this->entityManager()->flush();
         $client->loginUser($user);
 
-        $crawler = $client->request('GET', sprintf('/vacancies/%d', $vacancy->getId()));
+        $crawler = $client->request('GET', sprintf('/vacancies/%s', $vacancy->getId()->toRfc4122()));
         $token = $crawler->filter('form[action$="/next-action"] input[name="_token"]')->attr('value');
         self::assertIsString($token);
-        $client->request('POST', sprintf('/vacancies/%d/next-action', $vacancy->getId()), ['_token' => $token, 'title' => 'Prepare screening', 'at' => '2026-10-01T09:30']);
-        self::assertResponseRedirects(sprintf('/vacancies/%d', $vacancy->getId()));
+        $client->request('POST', sprintf('/vacancies/%s/next-action', $vacancy->getId()->toRfc4122()), ['_token' => $token, 'title' => 'Prepare screening', 'at' => '2026-10-01T09:30']);
+        self::assertResponseRedirects(sprintf('/vacancies/%s', $vacancy->getId()->toRfc4122()));
         $this->entityManager()->clear();
         $updated = $this->entityManager()->find(Vacancy::class, $vacancy->getId());
         self::assertInstanceOf(Vacancy::class, $updated);
         self::assertSame('Prepare screening', $updated->getNextActionTitle());
         self::assertSame('2026-10-01 09:30', $updated->getNextActionAt()?->format('Y-m-d H:i'));
 
-        $crawler = $client->request('GET', sprintf('/vacancies/%d', $vacancy->getId()));
+        $crawler = $client->request('GET', sprintf('/vacancies/%s', $vacancy->getId()->toRfc4122()));
         $token = $crawler->filter('form[action$="/next-action"] input[name="_token"]')->attr('value');
         self::assertIsString($token);
-        $client->request('POST', sprintf('/vacancies/%d/next-action', $vacancy->getId()), ['_token' => $token, 'clear' => '1']);
+        $client->request('POST', sprintf('/vacancies/%s/next-action', $vacancy->getId()->toRfc4122()), ['_token' => $token, 'clear' => '1']);
         $this->entityManager()->clear();
         $cleared = $this->entityManager()->find(Vacancy::class, $vacancy->getId());
         self::assertInstanceOf(Vacancy::class, $cleared);

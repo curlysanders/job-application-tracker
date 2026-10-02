@@ -15,17 +15,20 @@ use PHPUnit\Framework\TestCase;
 
 final class VacancyLifecycleHandlerTest extends TestCase
 {
+    private const string USER_ID = '018f8e3e-1234-7abc-8def-0123456789ab';
+    private const string VACANCY_ID = '018f8e3e-5678-7abc-8def-0123456789ab';
+
     public function testArchivesAndRestoresAnOwnedVacancy(): void
     {
         $vacancy = new Vacancy(new User(), 'Senior PHP Developer');
         $repository = $this->createMock(VacancyRepository::class);
-        $repository->expects(self::exactly(2))->method('findOwnedBy')->with(12, 3)->willReturn($vacancy);
+        $repository->expects(self::exactly(2))->method('findOwnedBy')->with(self::VACANCY_ID, self::USER_ID)->willReturn($vacancy);
         $repository->expects(self::exactly(2))->method('save')->with($vacancy);
         $handler = new SetVacancyArchivedHandler($repository);
 
-        $handler(new SetVacancyArchived(3, 12, true));
+        $handler(new SetVacancyArchived(self::USER_ID, self::VACANCY_ID, true));
         self::assertTrue($vacancy->isArchived());
-        $handler(new SetVacancyArchived(3, 12, false));
+        $handler(new SetVacancyArchived(self::USER_ID, self::VACANCY_ID, false));
         self::assertFalse($vacancy->isArchived());
     }
 
@@ -33,9 +36,9 @@ final class VacancyLifecycleHandlerTest extends TestCase
     {
         $vacancy = new Vacancy(new User(), 'Senior PHP Developer');
         $repository = $this->createMock(VacancyRepository::class);
-        $repository->expects(self::once())->method('findOwnedBy')->with(12, 3)->willReturn($vacancy);
+        $repository->expects(self::once())->method('findOwnedBy')->with(self::VACANCY_ID, self::USER_ID)->willReturn($vacancy);
         $repository->expects(self::once())->method('remove')->with($vacancy);
 
-        new DeleteVacancyHandler($repository)(new DeleteVacancy(3, 12));
+        new DeleteVacancyHandler($repository)(new DeleteVacancy(self::USER_ID, self::VACANCY_ID));
     }
 }

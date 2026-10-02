@@ -84,6 +84,9 @@
             "var/storage/.gitignore"
         ]
     },
+    "lingoda/domain-events": {
+        "version": "3.0.0"
+    },
     "phpstan/phpstan": {
         "version": "2.2",
         "recipe": {
@@ -195,6 +198,18 @@
             ".editorconfig"
         ]
     },
+    "symfony/lock": {
+        "version": "8.1",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "5.2",
+            "ref": "8e937ff2b4735d110af1770f242c1107fdab4c8e"
+        },
+        "files": [
+            "config/packages/lock.yaml"
+        ]
+    },
     "symfony/maker-bundle": {
         "version": "1.67",
         "recipe": {
@@ -279,6 +294,19 @@
             "assets/controllers/csrf_protection_controller.js",
             "assets/controllers/hello_controller.js",
             "assets/stimulus_bootstrap.js"
+        ]
+    },
+    "symfony/translation": {
+        "version": "8.1",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "6.3",
+            "ref": "620a1b84865ceb2ba304c8f8bf2a185fbf32a843"
+        },
+        "files": [
+            "config/packages/translation.yaml",
+            "translations/.gitignore"
         ]
     },
     "symfony/twig-bundle": {

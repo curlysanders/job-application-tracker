@@ -36,7 +36,7 @@ final readonly class DashboardController
         if (!$user instanceof User) {
             return new Response($this->twig->render('home/index.html.twig'));
         }
-        $userId = $user->getId() ?? throw new \LogicException('The dashboard requires a persisted user.');
+        $userId = $user->getId()->toRfc4122();
         $overviewRequest = VacancyOverviewRequest::fromRequest($request);
         $tomorrow = $this->clock->now()->setTime(0, 0)->modify('+1 day');
 

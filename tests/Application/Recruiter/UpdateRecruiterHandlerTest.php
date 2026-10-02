@@ -14,13 +14,15 @@ use PHPUnit\Framework\TestCase;
 
 final class UpdateRecruiterHandlerTest extends TestCase
 {
+    private const string RECRUITER_ID = '018f8e3e-1234-7abc-8def-0123456789ab';
+
     public function testUpdatesARecruiterAndReplacesItsContacts(): void
     {
         $recruiter = new Recruiter('Talent Partners', null);
         $repository = $this->createMock(RecruiterRepository::class);
-        $repository->expects(self::once())->method('find')->with(4)->willReturn($recruiter);
+        $repository->expects(self::once())->method('find')->with(self::RECRUITER_ID)->willReturn($recruiter);
         $repository->expects(self::once())->method('save')->with($recruiter);
-        $command = new UpdateRecruiter(4, 'Talent Europe', 'https://talent-europe.example', [
+        $command = new UpdateRecruiter(self::RECRUITER_ID, 'Talent Europe', 'https://talent-europe.example', [
             new DirectContactInput('Ada Recruiter', 'ada@talent.example', '+31 6 12345678', 'https://www.linkedin.com/in/ada'),
         ]);
 
@@ -38,9 +40,9 @@ final class UpdateRecruiterHandlerTest extends TestCase
     public function testRejectsUpdatesForADeletedRecruiter(): void
     {
         $repository = $this->createMock(RecruiterRepository::class);
-        $repository->expects(self::once())->method('find')->with(4)->willReturn(null);
+        $repository->expects(self::once())->method('find')->with(self::RECRUITER_ID)->willReturn(null);
 
         $this->expectException(\LogicException::class);
-        new UpdateRecruiterHandler($repository)(new UpdateRecruiter(4, 'Talent Europe', null, []));
+        new UpdateRecruiterHandler($repository)(new UpdateRecruiter(self::RECRUITER_ID, 'Talent Europe', null, []));
     }
 }

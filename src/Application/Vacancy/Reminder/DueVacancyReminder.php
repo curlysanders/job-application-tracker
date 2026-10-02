@@ -7,7 +7,7 @@ namespace CurlySanders\JobApplicationTracker\Application\Vacancy\Reminder;
 final readonly class DueVacancyReminder
 {
     public function __construct(
-        public int $id,
+        public string $id,
         public string $title,
         public ?string $nextActionTitle,
         public \DateTimeImmutable $nextActionAt,

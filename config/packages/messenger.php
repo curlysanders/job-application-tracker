@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Lingoda\DomainEventsBundle\Infra\Symfony\Messenger\OutboxMessage;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
 return static function (ContainerConfigurator $containerConfigurator): void {
@@ -27,8 +28,13 @@ return static function (ContainerConfigurator $containerConfigurator): void {
             ],
             'transports' => [
                 'sync' => 'sync://',
+                'outbox' => [
+                    'dsn' => 'outbox://default?skip_locked=true&lease=300',
+                ],
             ],
-            'routing' => [],
+            'routing' => [
+                OutboxMessage::class => 'outbox',
+            ],
         ],
     ]);
 };

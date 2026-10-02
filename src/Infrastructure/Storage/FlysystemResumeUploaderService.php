@@ -24,12 +24,7 @@ final readonly class FlysystemResumeUploaderService implements ResumeUploaderSer
 
     public function uploadResume(User $user, ResumeUpload $upload): UploadedResume
     {
-        $userId = $user->getId();
-        if (null === $userId) {
-            throw new \LogicException('A resume can only be uploaded for a persisted user.');
-        }
-
-        $storagePath = sprintf('resumes/%d/%s.%s', $userId, Uuid::v7()->toRfc4122(), $upload->extension());
+        $storagePath = sprintf('resumes/%s/%s.%s', $user->getId()->toRfc4122(), Uuid::v7()->toRfc4122(), $upload->extension());
         $this->storage->writeStream($storagePath, $upload->stream);
 
         return new UploadedResume(

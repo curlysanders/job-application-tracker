@@ -9,8 +9,11 @@ use CurlySanders\JobApplicationTracker\Domain\User\PreferredSalary;
 use CurlySanders\JobApplicationTracker\Domain\User\User;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\SalaryRange;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\Vacancy;
+use CurlySanders\JobApplicationTracker\Domain\Vacancy\VacancyArchived;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\VacancyStatus;
 use Doctrine\ORM\EntityManagerInterface;
+use Lingoda\DomainEventsBundle\Infra\Doctrine\Entity\OutboxRecord;
+use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
@@ -33,7 +36,11 @@ final class DashboardTest extends WebTestCase
         $this->createVacancy($user, 'Accepted vacancy', VacancyStatus::Accepted);
         $this->createVacancy($user, 'Withdrawn vacancy', VacancyStatus::IWithdrew);
         $archived = $this->createVacancy($user, 'Archived vacancy', VacancyStatus::Applied);
-        $this->entityManager()->getConnection()->executeStatement('UPDATE vacancies SET archived = 1 WHERE id = :id', ['id' => $archived->getId()]);
+        $this->entityManager()->getConnection()->executeStatement(
+            'UPDATE vacancies SET archived = 1 WHERE id = :id',
+            ['id' => $archived->getId()],
+            ['id' => UuidType::NAME],
+        );
         $this->createVacancy($this->createUser('other-dashboard@example.com'), 'Private vacancy', VacancyStatus::Applying);
 
         $client->loginUser($user);
@@ -119,7 +126,11 @@ final class DashboardTest extends WebTestCase
         $belowTarget = $this->createVacancy($user, 'Office developer', VacancyStatus::Applied);
         $belowTarget->replaceSalaryRange(SalaryRange::fromDecimals('3500.00', '4000.00', 'EUR'));
         $this->entityManager()->flush();
-        $this->entityManager()->getConnection()->executeStatement('UPDATE vacancies SET work_mode = :mode WHERE id = :id', ['mode' => 'REMOTE', 'id' => $meetsTarget->getId()]);
+        $this->entityManager()->getConnection()->executeStatement(
+            'UPDATE vacancies SET work_mode = :mode WHERE id = :id',
+            ['mode' => 'REMOTE', 'id' => $meetsTarget->getId()],
+            ['id' => UuidType::NAME],
+        );
 
         $client->loginUser($user);
         $client->request('GET', '/?q=symfony&excitement=4&work_mode=REMOTE&salary_fit=MEETS_TARGET');
@@ -146,7 +157,7 @@ final class DashboardTest extends WebTestCase
         $archiveToken = $crawler->filter('form[action$="/archive"] input[name="_token"]')->attr('value');
         self::assertNotNull($archiveToken);
 
-        $client->request('POST', sprintf('/vacancies/%d/archive', $vacancy->getId()), [
+        $client->request('POST', sprintf('/vacancies/%s/archive', $vacancy->getId()->toRfc4122()), [
             '_token' => $archiveToken,
             'archived' => '1',
             'return' => '/',
@@ -156,11 +167,16 @@ final class DashboardTest extends WebTestCase
         $archivedVacancy = $this->entityManager()->find(Vacancy::class, $vacancy->getId());
         self::assertInstanceOf(Vacancy::class, $archivedVacancy);
         self::assertTrue($archivedVacancy->isArchived());
+        $outboxRecord = $this->entityManager()->getRepository(OutboxRecord::class)->findOneBy([
+            'entityId' => $vacancy->getId()->toRfc4122(),
+            'eventType' => VacancyArchived::class,
+        ]);
+        self::assertInstanceOf(OutboxRecord::class, $outboxRecord);
 
         $crawler = $client->request('GET', '/?archived=1');
         $restoreToken = $crawler->filter('form[action$="/archive"] input[name="_token"]')->attr('value');
         self::assertNotNull($restoreToken);
-        $client->request('POST', sprintf('/vacancies/%d/archive', $vacancy->getId()), [
+        $client->request('POST', sprintf('/vacancies/%s/archive', $vacancy->getId()->toRfc4122()), [
             '_token' => $restoreToken,
             'archived' => '0',
             'return' => '/',
@@ -173,7 +189,7 @@ final class DashboardTest extends WebTestCase
         $crawler = $client->request('GET', '/');
         $archiveToken = $crawler->filter('form[action$="/archive"] input[name="_token"]')->attr('value');
         self::assertNotNull($archiveToken);
-        $client->request('POST', sprintf('/vacancies/%d/archive', $vacancy->getId()), [
+        $client->request('POST', sprintf('/vacancies/%s/archive', $vacancy->getId()->toRfc4122()), [
             '_token' => $archiveToken,
             'archived' => '1',
             'return' => '/?archived=1',
@@ -182,7 +198,7 @@ final class DashboardTest extends WebTestCase
         $crawler = $client->request('GET', '/?archived=1');
         $deleteToken = $crawler->filter('form[action$="/delete"] input[name="_token"]')->attr('value');
         self::assertNotNull($deleteToken);
-        $client->request('POST', sprintf('/vacancies/%d/delete', $vacancy->getId()), [
+        $client->request('POST', sprintf('/vacancies/%s/delete', $vacancy->getId()->toRfc4122()), [
             '_token' => $deleteToken,
             'confirm' => 'delete',
             'return' => '/?archived=1',
