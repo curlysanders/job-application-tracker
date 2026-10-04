@@ -24,7 +24,7 @@ final readonly class TransitionVacancyStatusHandler implements CommandHandler
 
         $from = $vacancy->getStatus();
         $this->workflow->apply($vacancy, $command->transition, $command->note);
-        $vacancy->recordStatusTransitioned($from, $command->transition);
+        $vacancy->recordStatusTransitioned($from, $command->transition, $command->note);
 
         $this->vacancies->save($vacancy);
 

@@ -18,9 +18,15 @@ final readonly class DoctrineVacancyStatusHistoryRepository implements VacancySt
     {
     }
 
-    public function add(VacancyStatusHistory $history): void
+    public function findByOutboxRecordId(int $outboxRecordId): ?VacancyStatusHistory
+    {
+        return $this->entityManager->getRepository(VacancyStatusHistory::class)->findOneBy(['outboxRecordId' => $outboxRecordId]);
+    }
+
+    public function save(VacancyStatusHistory $history): void
     {
         $this->entityManager->persist($history);
+        $this->entityManager->flush();
     }
 
     public function findForVacancy(Vacancy $vacancy): array

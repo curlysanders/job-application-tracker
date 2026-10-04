@@ -5,5 +5,6 @@ parameters:
         - config/
         - migrations/
         - public/
+        - scripts/benchmark-vacancy-status.php
         - src/
         - tests/

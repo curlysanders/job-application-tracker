@@ -227,7 +227,8 @@
     - Add async file validation listener for newly uploaded resume files.
 - **Acceptance Criteria**:
     - [ ] HTTP responses for status updates complete in under 15ms.
-    - [ ] Audit logs and file post-processing tasks complete asynchronously in background.
+    - [x] Audit logs and file post-processing tasks complete asynchronously in background.
+- **Validation**: [Results and reproduction steps](tick-402-validation.md).
 
 ---
 

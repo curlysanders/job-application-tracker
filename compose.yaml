@@ -46,6 +46,33 @@ services:
       db:
         condition: service_healthy
 
+  benchmark:
+    image: job-application-tracker-app
+    profiles: ["benchmark"]
+    restart: "no"
+    command: ["sh", "-c", "php bin/console cache:warmup && exec frankenphp run --config /etc/frankenphp/Caddyfile"]
+    env_file:
+      - .env.local
+    environment:
+      SERVER_NAME: ":80"
+      FRANKENPHP_CONFIG: "worker /app/public/index.php 2"
+      APP_ENV: prod
+      APP_DEBUG: "0"
+      APP_REQUEST_TIMING: "1"
+      XDEBUG_MODE: "off"
+    ports:
+      - "127.0.0.1:18081:80"
+    volumes:
+      - .:/app:ro
+    tmpfs:
+      - /app/var/cache:mode=1777
+      - /app/var/log:mode=1777
+      - /data:mode=1777
+      - /config:mode=1777
+    depends_on:
+      db:
+        condition: service_healthy
+
   caddy-volume-init:
     image: job-application-tracker-app
     user: "0:0"

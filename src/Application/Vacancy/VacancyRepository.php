@@ -8,6 +8,8 @@ use CurlySanders\JobApplicationTracker\Domain\Vacancy\Vacancy;
 
 interface VacancyRepository
 {
+    public function find(string $vacancyId): ?Vacancy;
+
     public function findOwnedBy(string $vacancyId, string $userId): ?Vacancy;
 
     public function save(Vacancy $vacancy): void;

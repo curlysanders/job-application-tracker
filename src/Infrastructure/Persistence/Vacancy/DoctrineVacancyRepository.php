@@ -17,6 +17,15 @@ final readonly class DoctrineVacancyRepository implements VacancyRepository
     {
     }
 
+    public function find(string $vacancyId): ?Vacancy
+    {
+        if (!Uuid::isValid($vacancyId)) {
+            return null;
+        }
+
+        return $this->entityManager->find(Vacancy::class, Uuid::fromString($vacancyId));
+    }
+
     public function findOwnedBy(string $vacancyId, string $userId): ?Vacancy
     {
         if (!Uuid::isValid($vacancyId) || !Uuid::isValid($userId)) {

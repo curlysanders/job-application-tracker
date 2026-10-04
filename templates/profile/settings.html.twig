@@ -23,9 +23,20 @@
                 Active file: <a href="{{ path('app_profile_resume') }}">{{ user.resumeOriginalFilename }}</a>
                 {% if user.resumeUploadedAt %} (uploaded {{ user.resumeUploadedAt|date('j M Y, H:i') }}){% endif %}
             </p>
-            <p class="form-help">Uploading a new resume replaces this active file.</p>
+            <p class="form-help">A new upload replaces this file after its background validation succeeds.</p>
         {% else %}
             <p class="form-help">No active resume has been uploaded.</p>
+        {% endif %}
+        {% if user.resumeValidationStatus is not null %}
+            <p class="form-help" role="status">
+                {% if user.resumeValidationStatus.value == 'pending' %}
+                    Your uploaded resume is being checked. Your current active file remains available.
+                {% elseif user.resumeValidationStatus.value == 'validated' %}
+                    Your active resume has been validated.
+                {% else %}
+                    Resume validation failed{% if user.resumeValidationFailure %}: {{ user.resumeValidationFailure }}{% endif %}. Your current active file remains available.
+                {% endif %}
+            </p>
         {% endif %}
         {{ form_start(resumeForm) }}
             {{ form_row(resumeForm.resume) }}

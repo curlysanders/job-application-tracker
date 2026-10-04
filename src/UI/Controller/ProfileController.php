@@ -83,7 +83,7 @@ final readonly class ProfileController
                 fclose($stream);
             }
 
-            return $this->redirectWithSuccessMessage($request, 'Your active resume has been uploaded.');
+            return $this->redirectWithSuccessMessage($request, 'Your resume has been uploaded and is being checked.');
         }
 
         return new Response($this->twig->render('profile/settings.html.twig', [
