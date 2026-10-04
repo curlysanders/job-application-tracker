@@ -62,7 +62,7 @@ final class ProfileSettingsTest extends WebTestCase
         self::assertSelectorTextContains('.form-panel', 'The commute time must be positive.');
     }
 
-    public function testUserCanUploadReplaceAndDownloadTheirResume(): void
+    public function testUserCanStageAndReplaceAPendingResume(): void
     {
         $client = self::createClient();
         $user = $this->createUser('sander@example.com');
@@ -78,10 +78,11 @@ final class ProfileSettingsTest extends WebTestCase
         $this->entityManager()->clear();
         $savedUser = $this->entityManager()->find(User::class, $user->getId());
         self::assertInstanceOf(User::class, $savedUser);
-        $firstPath = $savedUser->getResumeStoragePath();
+        $firstPath = $savedUser->getPendingResume()?->storagePath;
         self::assertNotNull($firstPath);
-        self::assertStringStartsWith(sprintf('resumes/%s/', $user->getId()->toRfc4122()), $firstPath);
+        self::assertStringStartsWith(sprintf('resumes/%s/pending/', $user->getId()->toRfc4122()), $firstPath);
         self::assertTrue($this->storage()->fileExists($firstPath));
+        self::assertNull($savedUser->getResumeStoragePath());
 
         $secondFile = $this->createDocx('Second resume');
         $crawler = $client->request('GET', '/profile');
@@ -93,18 +94,13 @@ final class ProfileSettingsTest extends WebTestCase
         $this->entityManager()->clear();
         $savedUser = $this->entityManager()->find(User::class, $user->getId());
         self::assertInstanceOf(User::class, $savedUser);
-        self::assertSame(basename($secondFile), $savedUser->getResumeOriginalFilename());
-        self::assertSame('application/vnd.openxmlformats-officedocument.wordprocessingml.document', $savedUser->getResumeMimeType());
-        self::assertNotSame($firstPath, $savedUser->getResumeStoragePath());
+        $pending = $savedUser->getPendingResume();
+        self::assertNotNull($pending);
+        self::assertSame(basename($secondFile), $pending->originalFilename);
+        self::assertSame('application/vnd.openxmlformats-officedocument.wordprocessingml.document', $pending->mimeType);
+        self::assertNotSame($firstPath, $pending->storagePath);
         self::assertFalse($this->storage()->fileExists($firstPath));
-
-        $client->request('GET', '/profile/resume');
-        self::assertResponseIsSuccessful();
-        self::assertResponseHeaderSame('content-type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-        $contentDisposition = $client->getResponse()->headers->get('content-disposition');
-        self::assertIsString($contentDisposition);
-        self::assertStringContainsString('attachment;', $contentDisposition);
-        self::assertStringContainsString(basename($secondFile), $contentDisposition);
+        self::assertNull($savedUser->getResumeStoragePath());
     }
 
     public function testProfileRejectsInvalidResumeWithoutReplacingActiveResume(): void

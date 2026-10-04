@@ -264,12 +264,13 @@ final class Vacancy implements DomainEventAware
         $this->recordEvent(new VacancyDetailsUpdated($this->id, $this->lifecycleDetails()));
     }
 
-    public function recordStatusTransitioned(VacancyStatus $from, string $transition): void
+    public function recordStatusTransitioned(VacancyStatus $from, string $transition, ?string $note): void
     {
         $this->recordEvent(new VacancyStatusTransitioned($this->id, [
             'fromStatus' => $from->value,
             'toStatus' => $this->status->value,
             'transition' => $transition,
+            'note' => self::optional($note),
         ]));
     }
 

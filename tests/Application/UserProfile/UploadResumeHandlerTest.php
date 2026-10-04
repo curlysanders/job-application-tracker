@@ -33,7 +33,7 @@ final class UploadResumeHandlerTest extends TestCase
         new UploadResumeHandler($users, $uploader, $logger)(new UploadResume(self::USER_ID, $this->upload()));
     }
 
-    public function testReplacesTheResumeAndDeletesThePreviousFile(): void
+    public function testStagesTheResumeAndKeepsTheActiveFile(): void
     {
         $user = new User();
         $user->replaceResume(self::OLD_RESUME_PATH, 'old.pdf', 'application/pdf', new \DateTimeImmutable());
@@ -44,13 +44,14 @@ final class UploadResumeHandlerTest extends TestCase
         $users->expects(self::once())->method('save')->with($user);
         $uploader = $this->createMock(ResumeUploaderService::class);
         $uploader->expects(self::once())->method('uploadResume')->with($user, $upload)->willReturn($uploadedResume);
-        $uploader->expects(self::once())->method('deleteResume')->with(self::OLD_RESUME_PATH);
+        $uploader->expects(self::never())->method('deleteResume');
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects(self::never())->method('warning');
 
         new UploadResumeHandler($users, $uploader, $logger)(new UploadResume(self::USER_ID, $upload));
 
-        self::assertSame(self::NEW_RESUME_PATH, $user->getResumeStoragePath());
+        self::assertSame(self::OLD_RESUME_PATH, $user->getResumeStoragePath());
+        self::assertSame(self::NEW_RESUME_PATH, $user->getPendingResume()?->storagePath);
     }
 
     public function testRemovesTheNewFileWhenSavingMetadataFails(): void
@@ -92,10 +93,10 @@ final class UploadResumeHandlerTest extends TestCase
         new UploadResumeHandler($users, $uploader, $logger)(new UploadResume(self::USER_ID, $upload));
     }
 
-    public function testLogsWhenDeletingTheReplacedFileFails(): void
+    public function testLogsWhenDeletingASupersededPendingFileFails(): void
     {
         $user = new User();
-        $user->replaceResume(self::OLD_RESUME_PATH, 'old.pdf', 'application/pdf', new \DateTimeImmutable());
+        $user->stageResume(self::OLD_RESUME_PATH, 'old.pdf', 'application/pdf', new \DateTimeImmutable());
         $upload = $this->upload();
         $users = $this->createMock(UserRepository::class);
         $users->expects(self::once())->method('find')->with(self::USER_ID)->willReturn($user);
@@ -105,7 +106,7 @@ final class UploadResumeHandlerTest extends TestCase
         $uploader->expects(self::once())->method('deleteResume')->with(self::OLD_RESUME_PATH)->willThrowException(new \RuntimeException('Storage unavailable'));
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects(self::once())->method('warning')->with(
-            'Could not remove the replaced resume.',
+            'Could not remove the superseded pending resume.',
             self::callback(static fn (array $context): bool => self::OLD_RESUME_PATH === $context['storage_path'] && $context['exception'] instanceof \RuntimeException),
         );
 

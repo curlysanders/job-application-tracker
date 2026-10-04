@@ -12,6 +12,7 @@ use CurlySanders\JobApplicationTracker\Application\Vacancy\VacancyStatusWorkflow
 use CurlySanders\JobApplicationTracker\Domain\User\User;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\Vacancy;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\VacancyStatus;
+use CurlySanders\JobApplicationTracker\Domain\Vacancy\VacancyStatusTransitioned;
 use PHPUnit\Framework\TestCase;
 
 final class TransitionVacancyStatusHandlerTest extends TestCase
@@ -32,6 +33,14 @@ final class TransitionVacancyStatusHandlerTest extends TestCase
 
         self::assertSame($vacancy, $result);
         self::assertSame(VacancyStatus::Applying, $vacancy->getStatus());
+        $event = $vacancy->getRecordedEvents()[0];
+        self::assertInstanceOf(VacancyStatusTransitioned::class, $event);
+        self::assertSame([
+            'fromStatus' => VacancyStatus::Bookmarked->value,
+            'toStatus' => VacancyStatus::Applying->value,
+            'transition' => 'start_applying',
+            'note' => null,
+        ], $event->changedProperties);
     }
 
     public function testRejectsAnUnavailableTransitionWithoutSaving(): void

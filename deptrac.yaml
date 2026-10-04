@@ -109,4 +109,5 @@ deptrac:
             - Psr
             - League
             - Carbon
+            - Lingoda
             - PHP

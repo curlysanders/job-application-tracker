@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use CurlySanders\JobApplicationTracker\Infrastructure\Messaging\OutboxRecordIdContextMiddleware;
 use Lingoda\DomainEventsBundle\Infra\Symfony\Messenger\OutboxMessage;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
@@ -23,6 +24,9 @@ return static function (ContainerConfigurator $containerConfigurator): void {
                 'event.bus' => [
                     'default_middleware' => [
                         'allow_no_handlers' => true,
+                    ],
+                    'middleware' => [
+                        OutboxRecordIdContextMiddleware::class,
                     ],
                 ],
             ],

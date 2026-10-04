@@ -9,7 +9,9 @@ use CurlySanders\JobApplicationTracker\Domain\Vacancy\VacancyStatusHistory;
 
 interface VacancyStatusHistoryRepository
 {
-    public function add(VacancyStatusHistory $history): void;
+    public function findByOutboxRecordId(int $outboxRecordId): ?VacancyStatusHistory;
+
+    public function save(VacancyStatusHistory $history): void;
 
     /** @return list<VacancyStatusHistory> */
     public function findForVacancy(Vacancy $vacancy): array;

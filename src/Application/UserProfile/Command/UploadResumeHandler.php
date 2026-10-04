@@ -25,11 +25,10 @@ final readonly class UploadResumeHandler implements CommandHandler
             throw new \LogicException('The authenticated user no longer exists.');
         }
 
-        $previousPath = $user->getResumeStoragePath();
         $resume = $this->resumeUploader->uploadResume($user, $command->upload);
 
         try {
-            $user->replaceResume($resume->storagePath, $resume->originalFilename, $resume->mimeType, $resume->uploadedAt);
+            $previousPendingPath = $user->stageResume($resume->storagePath, $resume->originalFilename, $resume->mimeType, $resume->uploadedAt);
             $this->userRepository->save($user);
         } catch (\Throwable $exception) {
             try {
@@ -44,12 +43,12 @@ final readonly class UploadResumeHandler implements CommandHandler
             throw $exception;
         }
 
-        if (null !== $previousPath) {
+        if (null !== $previousPendingPath) {
             try {
-                $this->resumeUploader->deleteResume($previousPath);
+                $this->resumeUploader->deleteResume($previousPendingPath);
             } catch (\Throwable $cleanupException) {
-                $this->logger->warning('Could not remove the replaced resume.', [
-                    'storage_path' => $previousPath,
+                $this->logger->warning('Could not remove the superseded pending resume.', [
+                    'storage_path' => $previousPendingPath,
                     'exception' => $cleanupException,
                 ]);
             }

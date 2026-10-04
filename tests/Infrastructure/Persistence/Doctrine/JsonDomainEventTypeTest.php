@@ -8,6 +8,7 @@ use CurlySanders\JobApplicationTracker\Domain\User\User;
 use CurlySanders\JobApplicationTracker\Domain\User\UserRegistered;
 use CurlySanders\JobApplicationTracker\Infrastructure\Persistence\Doctrine\JsonDomainEventType;
 use Doctrine\DBAL\Platforms\MariaDBPlatform;
+use Doctrine\DBAL\Types\Exception\ValueNotConvertible;
 use PHPUnit\Framework\TestCase;
 
 final class JsonDomainEventTypeTest extends TestCase
@@ -35,5 +36,23 @@ final class JsonDomainEventTypeTest extends TestCase
         self::assertSame($event->getEntityId(), $restored->getEntityId());
         self::assertSame($event->getOccurredAt()->format('Y-m-d\\TH:i:s.uP'), $restored->getOccurredAt()->format('Y-m-d\\TH:i:s.uP'));
         self::assertSame([], $restored->changedProperties);
+    }
+
+    public function testRejectsNonEventsAndMalformedPayloads(): void
+    {
+        $type = new JsonDomainEventType();
+        $platform = new MariaDBPlatform();
+
+        $type->convertToDatabaseValue(null, $platform);
+        self::assertNull($type->convertToPHPValue('', $platform));
+
+        try {
+            $type->convertToDatabaseValue(new \stdClass(), $platform);
+            self::fail('Expected a non-event value to be rejected.');
+        } catch (ValueNotConvertible) {
+        }
+
+        $this->expectException(ValueNotConvertible::class);
+        $type->convertToPHPValue('{"eventType":"stdClass","eventVersion":1}', $platform);
     }
 }

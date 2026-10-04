@@ -8,9 +8,12 @@ Company and recruiter facts contain organization metadata only, while technology
 contain name, slug, and category. Vacancy create and detail facts contain status, work
 mode, contract type, and application source; transition facts contain only the from
 status, to status, and transition. Archive and restore facts contain the archived flag.
-Registration, preferences, resume, scratchpad, next-action, and deletion facts carry
-no changed properties. Contact details, titles, salaries, URLs, free text, notes,
-resume metadata, preferences, and related aggregate identifiers are excluded.
+Registration, preferences, scratchpad, next-action, and deletion facts carry no
+changed properties. Contact details, titles, salaries, URLs, resume metadata,
+preferences, and related aggregate identifiers are excluded. TICK-402 intentionally
+retains a normalized status-transition note so its asynchronous audit handler can
+preserve the user-visible timeline. Resume-validation requests retain only a random
+candidate ID, never the filename, storage path, MIME metadata, or file contents.
 
 Lingoda Domain Events persists the events during Doctrine's transaction into its
 outbox storage. The configured `outbox://` Messenger transport is consumed by the

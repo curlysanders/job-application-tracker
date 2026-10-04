@@ -68,14 +68,10 @@ final class VacancyStatusWorkflowTest extends WebTestCase
         self::assertSame(VacancyStatus::Applying, $updated->getStatus());
 
         $history = $this->entityManager()->getRepository(VacancyStatusHistory::class)->findAll();
-        self::assertCount(1, $history);
-        self::assertSame(VacancyStatus::Bookmarked, $history[0]->getFromStatus());
-        self::assertSame(VacancyStatus::Applying, $history[0]->getToStatus());
-        self::assertSame('First screening scheduled.', $history[0]->getNotes());
+        self::assertCount(0, $history);
 
         $client->request('GET', sprintf('/vacancies/%s/edit', $vacancy->getId()->toRfc4122()));
-        self::assertSelectorTextContains('.vacancy-status-history', 'Bookmarked → Applying');
-        self::assertSelectorTextContains('.vacancy-status-history', 'First screening scheduled.');
+        self::assertSelectorTextContains('.vacancy-status-history-panel', 'No status changes have been recorded yet.');
     }
 
     public function testStatusTransitionRejectsInvalidCsrfAndAnotherUsersVacancy(): void
