@@ -4,8 +4,9 @@
 
 The public repository contains only the production image contract:
 
-- `.docker/php/Dockerfile.prod` installs production Composer dependencies,
-  publishes AssetMapper assets, and warms the production cache;
+- `.docker/php/Dockerfile.prod` installs production Composer dependencies and
+  publishes AssetMapper assets; it discards its build-time cache because the
+  deployment-only `APP_SECRET` is unavailable during image creation;
 - `.dockerignore` excludes local environment files, dependencies, generated
   assets, caches, and Git metadata from the build context;
 - the tagged-release GitHub workflow publishes the image to GHCR; and
@@ -22,7 +23,9 @@ contains the production Compose stack, Caddy policy, SOPS templates, immutable
 release manifest template, database backup/migration/rollback scripts, and the
 Synology operations runbook. Its `secrets.prod.env` is intended to be an
 encrypted SOPS file committed to that private repository; the age private key
-is NAS-local and excluded from Git.
+is NAS-local and excluded from Git. The app and worker warm their independent
+Symfony caches when their containers start, after SOPS has supplied the real
+runtime environment.
 
 ## Automated validation
 

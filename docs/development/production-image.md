@@ -9,6 +9,11 @@ private deployment repository pins an image digest and contains the production
 Compose stack, Caddy policy, SOPS-encrypted environment values, backup tooling,
 and the Synology deployment runbook.
 
+The image compiles AssetMapper assets during its build but deliberately discards
+the build-time Symfony cache: production secrets are unavailable then. The
+private deployment stack warms each runtime container's cache after SOPS has
+provided the real environment and before it starts FrankenPHP or the worker.
+
 The production runtime requires these environment variables:
 
 - `APP_ENV=prod` and `APP_DEBUG=0`;
