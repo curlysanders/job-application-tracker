@@ -1,0 +1,10 @@
+.git
+.idea
+.ai
+.env.local
+.env.*.local
+vendor
+var
+public/assets
+assets/vendor
+coverage

@@ -1,0 +1,42 @@
+FROM dunglas/frankenphp:php8.5 AS build
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libicu-dev libzip-dev unzip \
+    && docker-php-ext-install -j"$(nproc)" bcmath intl pdo_mysql zip \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+WORKDIR /app
+
+COPY composer.json composer.lock symfony.lock ./
+RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader --no-scripts
+
+COPY . ./
+
+RUN APP_ENV=prod APP_DEBUG=0 APP_SECRET=build-time-only-secret composer run-script auto-scripts \
+    && APP_ENV=prod APP_DEBUG=0 APP_SECRET=build-time-only-secret php bin/console asset-map:compile \
+    && rm -rf var/cache/* var/log/*
+
+FROM dunglas/frankenphp:php8.5
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libicu76 libzip5 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY --from=build /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
+COPY --from=build /usr/local/etc/php/conf.d/docker-php-ext-*.ini /usr/local/etc/php/conf.d/
+COPY --chown=1000:1000 --from=build /app /app
+
+RUN mkdir -p /app/var/cache /app/var/log /app/var/storage/default \
+    && chown -R 1000:1000 /app
+
+ENV APP_ENV=prod \
+    APP_DEBUG=0 \
+    FRANKENPHP_CONFIG="worker /app/public/index.php 1"
+
+USER 1000:1000
+
+EXPOSE 80 443 443/udp

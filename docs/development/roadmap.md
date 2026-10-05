@@ -13,14 +13,16 @@
 
 ## Production deployment hardening
 
-Before the first production deployment, add a dedicated production image and
-Compose configuration. The current Docker setup is intentionally development
-oriented and must not be used unchanged for an internet-accessible deployment.
+The public repository now provides a dedicated production image. Its deployment
+configuration lives in the private `job-application-tracker-deploy` repository;
+the development Compose stack remains unsuitable for an internet-accessible
+deployment.
 
-- Build a minimal production image without Xdebug, Git, development dependencies,
-  or bind-mounted source code.
-- Do not publish MariaDB to host interfaces by default; use non-default secrets
-  supplied through the deployment environment.
-- Define a production response-header policy, including CSP, frame restrictions,
-  Referrer Policy, and production-only HSTS.
-- Pin third-party GitHub Actions to audited commit SHAs.
+- The production image contains no Xdebug, Git, development dependencies, or
+  bind-mounted source code.
+- The private Compose stack does not publish MariaDB and supplies non-default
+  credentials through SOPS-encrypted environment values.
+- The private Caddy configuration defines CSP, frame restrictions, Referrer
+  Policy, `nosniff`, and HSTS.
+- The public image workflow uses a commit-pinned checkout action and Docker CLI
+  commands for the remaining release operations.
