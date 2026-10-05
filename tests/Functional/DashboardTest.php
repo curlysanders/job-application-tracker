@@ -59,6 +59,11 @@ final class DashboardTest extends WebTestCase
         self::assertSelectorTextContains('.dashboard-vacancy-table', 'Withdrawn vacancy');
         self::assertSelectorTextNotContains('.dashboard-vacancy-table', 'Archived vacancy');
         self::assertSelectorTextNotContains('.dashboard-vacancy-table', 'Private vacancy');
+        self::assertSelectorCount(4, '.dashboard-vacancy-card');
+        $cardText = implode(' ', $crawler->filter('.dashboard-vacancy-card')->each(static fn ($card): string => $card->text()));
+        self::assertStringContainsString('Bookmarked vacancy', $cardText);
+        self::assertStringContainsString('Applied vacancy', $cardText);
+        self::assertSelectorExists('.dashboard-vacancy-card .dashboard-vacancy-actions summary');
         self::assertSelectorExists('[data-controller="vacancy-pipeline"]');
         self::assertSelectorExists('[data-vacancy-pipeline-target="results"]');
 

@@ -14,6 +14,27 @@
     {% if overview.vacancies is empty %}
         <p>No vacancies match these filters.</p>
     {% else %}
+        <div class="dashboard-vacancy-cards">
+            {% for vacancy in overview.vacancies %}
+                <article class="dashboard-vacancy-card">
+                    <div class="dashboard-vacancy-card-heading">
+                        <div>
+                            <h3><a href="{{ path('app_vacancy_show', {id: vacancy.id}) }}">{{ vacancy.title }}</a></h3>
+                            <p>{{ vacancy.companyName ?? vacancy.recruiterName ?? 'No company or recruiter' }}</p>
+                        </div>
+                        <span class="vacancy-status-pill">{{ vacancy.status.label }}</span>
+                    </div>
+                    <dl class="dashboard-vacancy-card-details">
+                        <div><dt>Work mode</dt><dd>{{ vacancy.workMode ? vacancy.workMode.value|lower|capitalize : '—' }}</dd></div>
+                        <div><dt>Tech stack</dt><dd>{{ vacancy.techStackNames is empty ? '—' : vacancy.techStackNames|join(', ') }}</dd></div>
+                        <div><dt>Excitement</dt><dd aria-label="{{ vacancy.excitement is null ? 'No excitement rating' : vacancy.excitement ~ ' of 5 stars' }}">{% if vacancy.excitement is null %}—{% else %}{% for star in 1..5 %}{{ star <= vacancy.excitement ? '★' : '☆' }}{% endfor %}{% endif %}</dd></div>
+                        <div><dt>Salary</dt><dd>{{ vacancy.salary ?? '—' }} <small>({{ vacancy.salaryFit.label }})</small></dd></div>
+                        <div><dt>Next action</dt><dd>{% if vacancy.nextActionAt %}{{ vacancy.nextActionTitle ?? 'Next action' }}<br><time datetime="{{ vacancy.nextActionAt|date('c') }}">{{ vacancy.nextActionAt|date('d M Y, H:i') }}</time>{% else %}—{% endif %}</dd></div>
+                    </dl>
+                    {% include 'dashboard/_vacancy_actions.html.twig' with { vacancy: vacancy, returnUrl: returnUrl } only %}
+                </article>
+            {% endfor %}
+        </div>
         <div class="dashboard-vacancy-table-wrapper">
             <table class="dashboard-vacancy-table">
                 <thead><tr><th scope="col">Job title</th><th scope="col">Company / recruiter</th><th scope="col">Work mode</th><th scope="col">Tech stack</th><th scope="col">Excitement</th><th scope="col">Salary</th><th scope="col">Next action</th><th scope="col">Status</th><th scope="col">Actions</th></tr></thead>
@@ -28,17 +49,7 @@
                             <td>{{ vacancy.salary ?? '—' }} <small>({{ vacancy.salaryFit.label }})</small></td>
                             <td>{% if vacancy.nextActionAt %}{{ vacancy.nextActionTitle ?? 'Next action' }}<br><time datetime="{{ vacancy.nextActionAt|date('c') }}">{{ vacancy.nextActionAt|date('d M Y, H:i') }}</time>{% else %}—{% endif %}</td>
                             <td><span class="vacancy-status-pill">{{ vacancy.status.label }}</span></td>
-                            <td>
-                                <details class="dashboard-vacancy-actions">
-                                    <summary>Actions</summary>
-                                    <a href="{{ path('app_vacancy_show', {id: vacancy.id}) }}">View details</a>
-                                    {% for transition in vacancy.enabledTransitions %}
-                                        <form action="{{ path('app_vacancy_transition_status', {id: vacancy.id}) }}" method="post"><input type="hidden" name="_token" value="{{ csrf_token('vacancy_status_transition_' ~ vacancy.id) }}"><input type="hidden" name="transition" value="{{ transition }}"><input type="hidden" name="return" value="{{ returnUrl }}"><button type="submit">{{ transition|replace({'_': ' '})|title }}</button></form>
-                                    {% endfor %}
-                                    <form action="{{ path('app_vacancy_archive', {id: vacancy.id}) }}" method="post"><input type="hidden" name="_token" value="{{ csrf_token('vacancy_archive_' ~ vacancy.id) }}"><input type="hidden" name="return" value="{{ returnUrl }}"><input type="hidden" name="archived" value="{{ vacancy.archived ? '0' : '1' }}"><button type="submit">{{ vacancy.archived ? 'Restore' : 'Archive' }}</button></form>
-                                    <form action="{{ path('app_vacancy_delete', {id: vacancy.id}) }}" method="post" onsubmit="return confirm('Permanently delete this vacancy? This cannot be undone.');"><input type="hidden" name="_token" value="{{ csrf_token('vacancy_delete_' ~ vacancy.id) }}"><input type="hidden" name="return" value="{{ returnUrl }}"><input type="hidden" name="confirm" value="delete"><button type="submit">Delete</button></form>
-                                </details>
-                            </td>
+                            <td>{% include 'dashboard/_vacancy_actions.html.twig' with { vacancy: vacancy, returnUrl: returnUrl } only %}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
