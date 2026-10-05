@@ -226,7 +226,7 @@
     - Refactor status history writing logic to execute asynchronously via Messenger Outbox handler.
     - Add async file validation listener for newly uploaded resume files.
 - **Acceptance Criteria**:
-    - [ ] HTTP responses for status updates complete in under 15ms.
+    - [x] HTTP responses for status updates complete in under 15ms.
     - [x] Audit logs and file post-processing tasks complete asynchronously in background.
 - **Validation**: [Results and reproduction steps](tick-402-validation.md).
 
