@@ -6,13 +6,25 @@ The dashboard presents each vacancy as a compact card below 768px. Cards retain
 the same vacancy details, status, and actions as the tablet-and-desktop table.
 At 768px and above the semantic table remains the visible dashboard result.
 
-Manually verify the authenticated dashboard at 390px, 768px, and 1440px:
+Manually verify authenticated pages at 320px, 390px, 412px, 768px, and 1440px:
 
 1. Open and close the mobile navigation, then move through the pipeline with
    keyboard and pointer input.
 2. Apply and reset dashboard filters; confirm the result cards or table update.
 3. Open a vacancy action menu, tab through it, and use a non-destructive action.
-4. Confirm page-level horizontal overflow does not occur at 390px.
+4. Confirm `document.documentElement.scrollWidth` equals `document.documentElement.clientWidth` on the dashboard, vacancy create/edit/detail, company/recruiter list and form, and profile pages. Horizontal scrolling is permitted only inside the pipeline and Markdown tables/code blocks.
+
+### Regression found after the original validation
+
+The original TICK-403 verification reported the dashboard responsive, but a
+Pixel 8 viewport at 412px exposed a page-level overflow: the document was
+921px wide. The dashboard filter grid's intrinsic control widths expanded its
+parent grid track, which then widened the pipeline and results panels.
+
+The responsive repair makes dashboard tracks shrinkable, constrains form
+controls to their containers, stacks dashboard filters on phone widths, and
+applies the same shrink/wrap safeguards to authenticated-page action and list
+layouts.
 
 ## Query indexes
 
@@ -36,7 +48,7 @@ docker compose exec -T app php bin/console dbal:run-sql 'SHOW INDEX FROM vacanci
 ## Automated checks
 
 ```bash
-docker compose exec -T app php vendor/bin/paratest tests/Functional/DashboardTest.php tests/Functional/VacancyIndexesTest.php
+docker compose exec -T app php vendor/bin/paratest tests/Functional --filter 'DashboardTest|LayoutTest|VacancyIndexesTest'
 docker compose exec -T app composer tests
 docker compose exec -T app composer ci:coverage
 docker compose exec -T app composer analyse
@@ -54,8 +66,16 @@ the production deployment configuration exists.
 
 ## Verification result — 2026-10-05
 
-The focused dashboard and index checks completed with 8 tests and 214
-assertions. The full suite completed with 142 tests and 1,082 assertions;
+The repaired authenticated dashboard, vacancy create/detail/edit, company and
+recruiter list/create, and profile pages were checked at 320px, 390px, 412px,
+768px, and 1440px. At every width,
+`document.documentElement.scrollWidth` equalled `clientWidth`. The dashboard
+filters stack into one column below 768px, while the pipeline remains locally
+horizontally scrollable.
+
+The follow-up focused dashboard and layout checks completed with 11 tests and
+240 assertions. The original dashboard and index checks completed with 8 tests
+and 214 assertions. The full suite completed with 142 tests and 1,082 assertions;
 coverage was 93.38% (1,722 of 1,844 lines). PHPStan, PHP-CS-Fixer check,
 container lint, Doctrine schema validation, Twig lint, and `git diff --check`
 also passed. The migration was applied to development, the base test database,

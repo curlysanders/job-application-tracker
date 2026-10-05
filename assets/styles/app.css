@@ -20,8 +20,8 @@
 
 * { box-sizing: border-box; }
 html { background: var(--canvas); }
-body { min-width: 320px; margin: 0; color: var(--text); background: var(--canvas); }
-button, input, select, textarea { font: inherit; }
+body { margin: 0; color: var(--text); background: var(--canvas); }
+button, input, select, textarea { min-width: 0; max-width: 100%; font: inherit; }
 button { cursor: pointer; }
 a { color: var(--primary-text); text-decoration: none; }
 a:hover { text-decoration: underline; }
@@ -31,7 +31,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 
 .app-header, .auth-header { display: flex; align-items: center; justify-content: space-between; min-height: 4.25rem; padding: .75rem 1.25rem; background: var(--surface); border-bottom: 1px solid var(--border); }
 .app-header { position: sticky; z-index: 30; top: 0; }
-.app-brand { color: var(--text); font-size: 1rem; font-weight: 750; letter-spacing: -.025em; }
+.app-brand { min-width: 0; overflow-wrap: anywhere; color: var(--text); font-size: 1rem; font-weight: 750; letter-spacing: -.025em; }
 .app-brand:hover { color: var(--primary-text); text-decoration: none; }
 .header-actions { display: flex; align-items: center; gap: .35rem; }
 .header-actions form { margin: 0; }
@@ -51,7 +51,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .nav-link-primary { margin: .35rem 0 .75rem; color: white; background: var(--primary); justify-content: center; }
 .nav-link-primary:hover, .nav-link-primary[aria-current="page"] { color: white; background: var(--primary-hover); }
 .app-content { width: 100%; min-width: 0; max-width: 100rem; padding: 1.5rem 1rem 3rem; }
-.page-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; margin: 0 0 1.5rem; }
+.page-header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 1rem; margin: 0 0 1.5rem; }
+.page-header > :first-child { min-width: 0; }
 .page-eyebrow { margin: 0 0 .35rem; color: var(--text-muted); font-size: .75rem; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
 .page-heading { margin: 0; color: var(--text); font-size: clamp(1.65rem, 4vw, 2.25rem); letter-spacing: -.04em; line-height: 1.15; }
 .auth-body { min-height: 100vh; display: grid; grid-template-rows: auto 1fr; }
@@ -66,6 +67,7 @@ p { color: var(--text-muted); line-height: 1.55; }
 .panel, .modal-panel { background: var(--surface); border: 1px solid var(--border); border-radius: .75rem; box-shadow: var(--shadow); }
 .panel { padding: 1.25rem; }
 .section-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; }
+.section-heading > * { min-width: 0; }
 .section-description, .form-help { margin: .3rem 0 0; color: var(--text-muted); font-size: .875rem; }
 
 .button { display: inline-flex; min-height: 2.5rem; align-items: center; justify-content: center; padding: .55rem .9rem; color: white; background: var(--primary); border: 1px solid var(--primary); border-radius: .5rem; font-size: .875rem; font-weight: 700; line-height: 1.2; }
@@ -82,7 +84,8 @@ p { color: var(--text-muted); line-height: 1.55; }
 .flash-info { color: var(--primary-text); background: var(--primary-soft); border-color: color-mix(in srgb, var(--primary) 35%, var(--border)); }
 .flash-dismiss { color: inherit; background: transparent; border: 0; font-size: 1.5rem; }
 
-.dashboard-pipeline { display: grid; max-width: none; gap: 1rem; }
+.dashboard-pipeline { display: grid; grid-template-columns: minmax(0, 1fr); max-width: none; gap: 1rem; }
+.vacancy-chevron-pipeline, .dashboard-vacancy-results { min-width: 0; }
 .dashboard-reminders { margin-bottom: 1rem; background: var(--warning-soft); border-color: color-mix(in srgb, var(--warning) 40%, var(--border)); }
 .dashboard-reminders h2, .dashboard-reminders span { color: var(--warning); }
 .dashboard-reminders ul { margin: .75rem 0 0; padding-left: 1.25rem; }
@@ -99,14 +102,15 @@ p { color: var(--text-muted); line-height: 1.55; }
 .vacancy-chevron-count { display: inline-grid; min-width: 1.65rem; min-height: 1.65rem; place-items: center; color: var(--primary-text); background: var(--primary-soft); border-radius: 999px; }
 .vacancy-chevron-selected .vacancy-chevron-count { color: var(--primary); background: white; }
 
-.dashboard-vacancy-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: .75rem; align-items: end; padding: 1rem; margin-bottom: 1.25rem; background: var(--surface-muted); border: 1px solid var(--border); border-radius: .65rem; }
-.filter-field { display: grid; gap: .35rem; color: var(--text-muted); font-size: .75rem; font-weight: 750; }
+.dashboard-vacancy-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(10rem, 100%), 1fr)); gap: .75rem; align-items: end; padding: 1rem; margin-bottom: 1.25rem; background: var(--surface-muted); border: 1px solid var(--border); border-radius: .65rem; }
+.filter-field { display: grid; min-width: 0; gap: .35rem; color: var(--text-muted); font-size: .75rem; font-weight: 750; }
 .filter-search { grid-column: span 2; }
 .filter-actions { display: flex; align-items: end; gap: .35rem; }
 .dashboard-vacancy-table-panel { overflow: hidden; }
 .dashboard-vacancy-cards { display: grid; gap: .75rem; }
 .dashboard-vacancy-card { display: grid; gap: 1rem; padding: 1rem; background: var(--surface-muted); border: 1px solid var(--border); border-radius: .65rem; }
 .dashboard-vacancy-card-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; }
+.dashboard-vacancy-card-heading > * { min-width: 0; }
 .dashboard-vacancy-card-heading h3 { margin: 0; }
 .dashboard-vacancy-card-heading h3 a { color: var(--text); }
 .dashboard-vacancy-card-heading p { margin: .2rem 0 0; font-size: .875rem; }
@@ -161,17 +165,20 @@ p { color: var(--text-muted); line-height: 1.55; }
 .management-actions label { display: grid; flex: 1 1 15rem; gap: .35rem; }
 .management-results { display: grid; gap: .65rem; padding: 0; margin: 0; list-style: none; }
 .management-results li { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem; background: var(--surface-muted); border: 1px solid var(--border); border-radius: .6rem; }
+.management-results li > * { min-width: 0; }
+.management-results li > div { overflow-wrap: anywhere; }
 .management-results span { display: block; margin-top: .25rem; color: var(--text-muted); font-size: .875rem; }
 
 .vacancy-detail-actions { display: flex; justify-content: flex-end; margin: -4.25rem 0 1.75rem; }
-.vacancy-detail-grid { display: grid; gap: 1rem; max-width: 90rem; }
-.vacancy-detail-main, .vacancy-detail-sidebar { display: grid; align-content: start; gap: 1rem; }
+.vacancy-detail-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; max-width: 90rem; }
+.vacancy-detail-main, .vacancy-detail-sidebar { display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0; align-content: start; gap: 1rem; }
 .vacancy-detail-sidebar input:not([type="hidden"]), .vacancy-detail-sidebar select, .vacancy-detail-sidebar textarea { width: 100%; min-height: 2.55rem; padding: .55rem .7rem; color: var(--text); background: var(--surface-raised); border: 1px solid var(--border-strong); border-radius: .45rem; }
 .vacancy-detail-sidebar textarea { min-height: 7rem; resize: vertical; }
 .vacancy-overview dl { display: grid; grid-template-columns: minmax(7rem, 1fr) 2fr; gap: .7rem 1rem; margin: 0; }
 .vacancy-overview dl div { display: contents; }
 .vacancy-overview dt { color: var(--text-muted); font-size: .875rem; font-weight: 650; }
-.vacancy-overview dd { margin: 0; }
+.vacancy-overview dd { min-width: 0; margin: 0; overflow-wrap: anywhere; }
+.vacancy-detail-main .panel a { overflow-wrap: anywhere; }
 .vacancy-text-block p, .markdown-preview { overflow-wrap: anywhere; }
 .vacancy-widget-actions, .vacancy-status-actions, .markdown-toolbar, .preview-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
 .vacancy-status-form { display: grid; gap: .5rem; padding: 1rem 0; border-top: 1px solid var(--border); }
@@ -187,7 +194,7 @@ p { color: var(--text-muted); line-height: 1.55; }
 .markdown-preview a { text-decoration: underline; }
 .markdown-preview code { padding: .1rem .3rem; background: var(--surface-raised); border-radius: .25rem; }
 .markdown-preview pre { overflow-x: auto; padding: .75rem; color: var(--text); background: var(--canvas); border-radius: .45rem; }
-.markdown-preview table { width: 100%; border-collapse: collapse; }
+.markdown-preview table { display: block; width: 100%; overflow-x: auto; border-collapse: collapse; }
 .markdown-preview th, .markdown-preview td { padding: .5rem; border: 1px solid var(--border-strong); text-align: left; }
 .scratchpad-status { min-height: 1.4rem; margin: 0; font-size: .875rem; }
 .scratchpad-status-saved { color: var(--success); }
@@ -220,11 +227,15 @@ p { color: var(--text-muted); line-height: 1.55; }
 @media (max-width: 767px) {
     .app-sidebar:not(.hidden) { position: fixed; top: 4.25rem; bottom: 0; left: 0; width: min(19rem, 85vw); box-shadow: var(--shadow); overflow-y: auto; }
     .header-profile, .header-actions form { display: none; }
+    .page-header { align-items: flex-start; }
+    .dashboard-vacancy-filters { grid-template-columns: minmax(0, 1fr); }
     .filter-search { grid-column: auto; }
-    .filter-actions { grid-column: 1 / -1; }
+    .filter-actions { grid-column: auto; flex-wrap: wrap; }
     .dashboard-vacancy-table-wrapper { display: none; }
     .dashboard-vacancy-card-details { grid-template-columns: 1fr; }
     .dashboard-vacancy-pagination { align-items: flex-start; flex-direction: column; }
+    .management-actions { align-items: stretch; flex-direction: column; }
+    .management-actions form, .management-actions label { flex-basis: auto; min-width: 0; }
     .vacancy-detail-actions { margin: -4.25rem 0 1.5rem; }
     .source-url-row { align-items: stretch; flex-direction: column; }
 }

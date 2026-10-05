@@ -240,6 +240,6 @@
     - Optimize MariaDB indexes on `user_id`, `status`, `next_action_at`, and `date_added`.
     - Defer Synology DS416play FrankenPHP memory-footprint validation until deployment preparation.
 - **Acceptance Criteria**:
-    - [x] Dashboard pipeline and vacancy cards are fully responsive on mobile viewports.
+    - [x] Dashboard pipeline and vacancy cards are fully responsive on mobile viewports, with no page-level horizontal overflow at supported phone widths.
     - [ ] Validate container memory usage under peak execution during deployment preparation.
 - **Validation**: [Results and reproduction steps](tick-403-validation.md).
