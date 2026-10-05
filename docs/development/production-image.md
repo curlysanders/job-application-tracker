@@ -6,8 +6,8 @@ unencrypted secrets.
 
 Release images are published to GHCR from signed version tags. A separate,
 private deployment repository pins an image digest and contains the production
-Compose stack, Caddy policy, SOPS-encrypted environment values, backup tooling,
-and the Synology deployment runbook.
+Compose stack, DSM reverse-proxy contract, SOPS-encrypted environment values,
+backup tooling, and the Synology deployment runbook.
 
 The image compiles AssetMapper assets during its build but deliberately discards
 the build-time Symfony cache: production secrets are unavailable then. The
@@ -26,3 +26,8 @@ The production runtime requires these environment variables:
 `/healthz` returns `200 {"status":"ok"}` only when Symfony can query the
 database. It contains no application or database details and is intended for
 container and deployment readiness checks.
+
+When a trusted reverse proxy terminates HTTPS, set `SYMFONY_TRUSTED_PROXIES` to
+the immediate proxy address. The Synology stack uses `REMOTE_ADDR` because its
+application port is bound to the NAS loopback interface, so external clients
+cannot connect to Caddy directly.

@@ -251,7 +251,7 @@
 - **Dependencies**: TICK-401, TICK-402, TICK-403
 - **Scope**:
     - Publish a minimal immutable FrankenPHP production image to GHCR from release tags.
-    - Provide a private, Git-backed Synology deployment stack with SOPS-encrypted secrets, Caddy HTTPS, MariaDB, persistent resume storage, the outbox worker, backup, migration, rollback, and health-check procedures.
+    - Provide a private, Git-backed Synology deployment stack with SOPS-encrypted secrets, DSM Reverse Proxy HTTPS, internal Caddy HTTP, MariaDB, persistent resume storage, the outbox worker, backup, migration, rollback, and health-check procedures.
     - Keep deployment configuration and secrets outside this public application repository.
 - **Acceptance Criteria**:
     - [x] The public repository builds a production image without Xdebug, Git, development dependencies, or bind-mounted source.
