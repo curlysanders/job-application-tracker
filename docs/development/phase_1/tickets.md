@@ -232,13 +232,14 @@
 
 ---
 
-## TICK-403: Responsive Polish & NAS Docker Performance Tuning
+## TICK-403: Responsive Polish & Query Index Tuning
 - **Epic**: Epic 4 (Outbox & Performance)
 - **Dependencies**: All prior tickets
 - **Scope**:
-    - Test UI on mobile, tablet, and desktop breakpoints using Flowbite responsive utilities.
+    - Test dashboard UI on mobile, tablet, and desktop breakpoints using Flowbite responsive utilities.
     - Optimize MariaDB indexes on `user_id`, `status`, `next_action_at`, and `date_added`.
-    - Validate memory footprint under FrankenPHP worker mode on Synology DS416play (target memory usage under 250MB RAM).
+    - Defer Synology DS416play FrankenPHP memory-footprint validation until deployment preparation.
 - **Acceptance Criteria**:
-    - [ ] Dashboard pipeline and vacancy tables fully responsive on mobile viewports.
-    - [ ] Container memory usage remains steady under peak execution.
+    - [x] Dashboard pipeline and vacancy cards are fully responsive on mobile viewports.
+    - [ ] Validate container memory usage under peak execution during deployment preparation.
+- **Validation**: [Results and reproduction steps](tick-403-validation.md).

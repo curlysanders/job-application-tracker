@@ -19,9 +19,9 @@ use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'vacancies')]
-#[ORM\Index(name: 'IDX_VACANCIES_STATUS', fields: ['status'])]
-#[ORM\Index(name: 'IDX_VACANCIES_USER', columns: ['user_id'])]
-#[ORM\Index(name: 'IDX_VACANCIES_DATE_ADDED', fields: ['dateAdded'])]
+#[ORM\Index(name: 'IDX_VACANCIES_DASHBOARD', columns: ['user_id', 'archived', 'date_added'])]
+#[ORM\Index(name: 'IDX_VACANCIES_DASHBOARD_STATUS', columns: ['user_id', 'archived', 'status', 'date_added'])]
+#[ORM\Index(name: 'IDX_VACANCIES_REMINDERS', columns: ['user_id', 'archived', 'next_action_at'])]
 #[ORM\Index(name: 'IDX_VACANCIES_COMPANY', columns: ['company_id'])]
 #[ORM\Index(name: 'IDX_VACANCIES_RECRUITER', columns: ['recruiter_id'])]
 final class Vacancy implements DomainEventAware

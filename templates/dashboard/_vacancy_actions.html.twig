@@ -1,0 +1,9 @@
+<details class="dashboard-vacancy-actions">
+    <summary>Actions</summary>
+    <a href="{{ path('app_vacancy_show', {id: vacancy.id}) }}">View details</a>
+    {% for transition in vacancy.enabledTransitions %}
+        <form action="{{ path('app_vacancy_transition_status', {id: vacancy.id}) }}" method="post"><input type="hidden" name="_token" value="{{ csrf_token('vacancy_status_transition_' ~ vacancy.id) }}"><input type="hidden" name="transition" value="{{ transition }}"><input type="hidden" name="return" value="{{ returnUrl }}"><button type="submit">{{ transition|replace({'_': ' '})|title }}</button></form>
+    {% endfor %}
+    <form action="{{ path('app_vacancy_archive', {id: vacancy.id}) }}" method="post"><input type="hidden" name="_token" value="{{ csrf_token('vacancy_archive_' ~ vacancy.id) }}"><input type="hidden" name="return" value="{{ returnUrl }}"><input type="hidden" name="archived" value="{{ vacancy.archived ? '0' : '1' }}"><button type="submit">{{ vacancy.archived ? 'Restore' : 'Archive' }}</button></form>
+    <form action="{{ path('app_vacancy_delete', {id: vacancy.id}) }}" method="post" onsubmit="return confirm('Permanently delete this vacancy? This cannot be undone.');"><input type="hidden" name="_token" value="{{ csrf_token('vacancy_delete_' ~ vacancy.id) }}"><input type="hidden" name="return" value="{{ returnUrl }}"><input type="hidden" name="confirm" value="delete"><button type="submit">Delete</button></form>
+</details>
