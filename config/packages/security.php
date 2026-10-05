@@ -51,7 +51,7 @@ return static function (ContainerConfigurator $containerConfigurator): void {
                 'roles' => 'PUBLIC_ACCESS',
             ],
             [
-                'path' => '^/(?:login|register|_components)$',
+                'path' => '^/(?:login|register|healthz|_components)$',
                 'roles' => 'PUBLIC_ACCESS',
             ],
             [

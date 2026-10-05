@@ -243,3 +243,19 @@
     - [x] Dashboard pipeline and vacancy cards are fully responsive on mobile viewports, with no page-level horizontal overflow at supported phone widths.
     - [ ] Validate container memory usage under peak execution during deployment preparation.
 - **Validation**: [Results and reproduction steps](tick-403-validation.md).
+
+---
+
+## TICK-404: Synology Production Deployment Preparation
+- **Epic**: Epic 4 (Outbox & Performance)
+- **Dependencies**: TICK-401, TICK-402, TICK-403
+- **Scope**:
+    - Publish a minimal immutable FrankenPHP production image to GHCR from release tags.
+    - Provide a private, Git-backed Synology deployment stack with SOPS-encrypted secrets, Caddy HTTPS, MariaDB, persistent resume storage, the outbox worker, backup, migration, rollback, and health-check procedures.
+    - Keep deployment configuration and secrets outside this public application repository.
+- **Acceptance Criteria**:
+    - [x] The public repository builds a production image without Xdebug, Git, development dependencies, or bind-mounted source.
+    - [x] The application exposes a public database-readiness endpoint and production storage can use a mounted absolute directory.
+    - [x] The private deployment stack pins GHCR images by digest and keeps encrypted production secrets versioned separately from private decryption keys.
+    - [ ] Validate public HTTPS, automatic certificate renewal, backup restoration, worker delivery, and peak memory use on the Synology.
+- **Validation**: [Results and reproduction steps](tick-404-validation.md).
