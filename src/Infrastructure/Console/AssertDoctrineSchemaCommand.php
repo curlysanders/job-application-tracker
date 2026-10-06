@@ -20,7 +20,11 @@ final class AssertDoctrineSchemaCommand extends Command
         'ALTER TABLE outbox CHANGE occurredAt occurredAt DATETIME(6) NOT NULL, CHANGE publishedOn publishedOn DATETIME(6) DEFAULT NULL, CHANGE claimedAt claimedAt DATETIME(6) DEFAULT NULL',
     ];
 
-    private const string MIGRATION_METADATA_TABLE_DIFF = 'DROP TABLE doctrine_migration_versions';
+    /** @var list<string> */
+    private const array UNMAPPED_TABLE_DIFFS = [
+        'DROP TABLE doctrine_migration_versions',
+        'DROP TABLE sessions',
+    ];
 
     public function __construct(private readonly EntityManagerInterface $entityManager)
     {
@@ -31,7 +35,10 @@ final class AssertDoctrineSchemaCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $sql = new SchemaTool($this->entityManager)->getUpdateSchemaSql($this->entityManager->getMetadataFactory()->getAllMetadata());
-        $entitySchemaSql = array_values(array_filter($sql, static fn (string $statement): bool => self::MIGRATION_METADATA_TABLE_DIFF !== $statement));
+        $entitySchemaSql = array_values(array_filter(
+            $sql,
+            static fn (string $statement): bool => !in_array($statement, self::UNMAPPED_TABLE_DIFFS, true),
+        ));
         $unexpected = array_values(array_diff($entitySchemaSql, self::EXPECTED_LINGODA_CARBON_DIFFS));
 
         if ([] !== $unexpected) {
