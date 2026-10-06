@@ -9,6 +9,15 @@ private deployment repository pins an image digest and contains the production
 Compose stack, DSM reverse-proxy contract, SOPS-encrypted environment values,
 backup tooling, and the Synology deployment runbook.
 
+After GHCR has accepted a tagged image, the publishing workflow sends its
+immutable digest to the private deployment repository through a
+`repository_dispatch` event. It requires the public-repository Actions secret
+`DEPLOYMENT_DISPATCH_TOKEN`: a fine-grained token limited to the private
+deployment repository with **Contents: write** permission. The private
+repository records the digest in its versioned release manifest; a NAS-local
+scheduled task then applies that manifest. The public repository never receives
+NAS access, deployment secrets, or the SOPS age key.
+
 The image compiles AssetMapper assets during its build but deliberately discards
 the build-time Symfony cache: production secrets are unavailable then. The
 private deployment stack warms each runtime container's cache after SOPS has

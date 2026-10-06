@@ -39,6 +39,7 @@ jobs:
         run: printf '%s' "$TOKEN" | docker login "$REGISTRY" --username "$USERNAME" --password-stdin
 
       - name: Build and push release image
+        id: image
         env:
           IMAGE: ghcr.io/${{ github.repository }}
           VERSION: ${{ steps.release.outputs.version }}
@@ -47,4 +48,30 @@ jobs:
           docker build --pull --file .docker/php/Dockerfile.prod --tag "$IMAGE:$VERSION" --tag "$IMAGE:sha-$REVISION" .
           docker push "$IMAGE:$VERSION"
           docker push "$IMAGE:sha-$REVISION"
-          docker buildx imagetools inspect "$IMAGE:$VERSION" --format '{{json .Manifest.Digest}}' >> "$GITHUB_STEP_SUMMARY"
+          digest=$(docker buildx imagetools inspect "$IMAGE:$VERSION" --format '{{json .Manifest.Digest}}')
+          printf 'image=%s@%s\n' "$IMAGE" "$digest" >> "$GITHUB_OUTPUT"
+          printf 'Published `%s@%s`\n' "$IMAGE" "$digest" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Request production rollout
+        env:
+          DEPLOYMENT_DISPATCH_TOKEN: ${{ secrets.DEPLOYMENT_DISPATCH_TOKEN }}
+          IMAGE: ${{ steps.image.outputs.image }}
+          VERSION: ${{ steps.release.outputs.version }}
+          REVISION: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          test -n "$DEPLOYMENT_DISPATCH_TOKEN"
+
+          payload=$(jq --null-input --compact-output \
+            --arg image "$IMAGE" \
+            --arg revision "$REVISION" \
+            --arg source_repository "$GITHUB_REPOSITORY" \
+            --arg tag "$VERSION" \
+            '{event_type: "production-image-published", client_payload: {image: $image, revision: $revision, source_repository: $source_repository, tag: $tag}}')
+
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --header 'Accept: application/vnd.github+json' \
+            --header "Authorization: Bearer $DEPLOYMENT_DISPATCH_TOKEN" \
+            --header 'X-GitHub-Api-Version: 2022-11-28' \
+            --data "$payload" \
+            https://api.github.com/repos/curlysanders/job-application-tracker-deploy/dispatches
