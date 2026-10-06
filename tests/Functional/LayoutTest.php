@@ -28,6 +28,10 @@ final class LayoutTest extends WebTestCase
         self::assertSelectorExists('button[data-controller="theme"] svg.theme-icon-sun');
         self::assertSelectorExists('script[type="importmap"]');
         self::assertSelectorExists('link[href^="/assets/"]');
+        self::assertSelectorExists('link[href*="tom-select.default"]');
+        self::assertSelectorExists('link[href*="flowbite.min"]');
+        self::assertSelectorExists('link[href*="/app-"]');
+        self::assertStringNotContainsString('data:application/javascript', (string) $client->getResponse()->getContent());
         self::assertResponseNotHasHeader('Server-Timing');
     }
 
