@@ -9,6 +9,8 @@ private deployment repository pins an image digest and contains the production
 Compose stack, DSM reverse-proxy contract, SOPS-encrypted environment values,
 backup tooling, and the Synology deployment runbook.
 
+The production Dockerfile pins FrankenPHP 1.13.0 on Debian Trixie for both build and runtime stages. Updating FrankenPHP is an explicit reviewed change rather than an incidental rebuild result.
+
 After GHCR has accepted a tagged image, the publishing workflow sends its
 immutable digest to the private deployment repository through a
 `repository_dispatch` event. It requires the public-repository Actions secret
