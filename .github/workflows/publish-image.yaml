@@ -48,7 +48,7 @@ jobs:
           docker build --pull --file .docker/php/Dockerfile.prod --tag "$IMAGE:$VERSION" --tag "$IMAGE:sha-$REVISION" .
           docker push "$IMAGE:$VERSION"
           docker push "$IMAGE:sha-$REVISION"
-          digest=$(docker buildx imagetools inspect "$IMAGE:$VERSION" --format '{{json .Manifest.Digest}}')
+          digest=$(docker buildx imagetools inspect "$IMAGE:$VERSION" --format '{{.Manifest.Digest}}')
           printf 'image=%s@%s\n' "$IMAGE" "$digest" >> "$GITHUB_OUTPUT"
           printf 'Published `%s@%s`\n' "$IMAGE" "$digest" >> "$GITHUB_STEP_SUMMARY"
 
