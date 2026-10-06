@@ -6,7 +6,9 @@ The public repository contains only the production image contract:
 
 - `.docker/php/Dockerfile.prod` installs production Composer dependencies and
   publishes AssetMapper assets; it discards its build-time cache because the
-  deployment-only `APP_SECRET` is unavailable during image creation;
+  deployment-only `APP_SECRET` is unavailable during image creation. Its
+  rootless runtime user owns Caddy's `/config/caddy` and `/data/caddy`
+  directories, which Caddy uses for its autosaved configuration and storage;
 - `.dockerignore` excludes local environment files, dependencies, generated
   assets, caches, and Git metadata from the build context;
 - the tagged-release GitHub workflow publishes the image to GHCR; and
