@@ -10,9 +10,10 @@ Manually verify authenticated pages at 320px, 390px, 412px, 768px, and 1440px:
 
 1. Open and close the mobile navigation, then move through the pipeline with
    keyboard and pointer input.
-2. Apply and reset dashboard filters; confirm the result cards or table update.
-3. Open a vacancy action menu, tab through it, and use a non-destructive action.
-4. Confirm `document.documentElement.scrollWidth` equals `document.documentElement.clientWidth` on the dashboard, vacancy create/edit/detail, company/recruiter list and form, and profile pages. Horizontal scrolling is permitted only inside the pipeline and Markdown tables/code blocks.
+2. Confirm the Profile link remains visible in the authenticated header.
+3. Apply and reset dashboard filters; confirm the result cards or table update.
+4. Open a vacancy action menu, tab through it, and use a non-destructive action.
+5. Confirm `document.documentElement.scrollWidth` equals `document.documentElement.clientWidth` on the dashboard, vacancy create/edit/detail, company/recruiter list and form, and profile pages. Horizontal scrolling is permitted only inside the pipeline and Markdown tables/code blocks.
 
 ### Regression found after the original validation
 
@@ -80,3 +81,9 @@ coverage was 93.38% (1,722 of 1,844 lines). PHPStan, PHP-CS-Fixer check,
 container lint, Doctrine schema validation, Twig lint, and `git diff --check`
 also passed. The migration was applied to development, the base test database,
 and all 12 ParaTest worker databases.
+
+## Follow-up verification — 2026-10-09
+
+The authenticated header now keeps Profile visible below 768px while retaining
+the compact mobile Sign out behavior. `ProfileSettingsTest` passed with 7 tests
+and 76 assertions, including the Profile-link regression check.
