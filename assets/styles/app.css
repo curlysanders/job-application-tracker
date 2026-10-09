@@ -50,6 +50,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .nav-link[aria-current="page"] { color: var(--primary-text); background: var(--primary-soft); }
 .nav-link-primary { margin: .35rem 0 .75rem; color: white; background: var(--primary); justify-content: center; }
 .nav-link-primary:hover, .nav-link-primary[aria-current="page"] { color: white; background: var(--primary-hover); }
+.mobile-sidebar-sign-out { display: none; }
 .app-content { width: 100%; min-width: 0; max-width: 100rem; padding: 1.5rem 1rem 3rem; }
 .page-header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 1rem; margin: 0 0 1.5rem; }
 .page-header > :first-child { min-width: 0; }
@@ -225,8 +226,10 @@ p { color: var(--text-muted); line-height: 1.55; }
 .modal-panel { width: 100%; max-width: 32rem; padding: 1.25rem; }
 
 @media (max-width: 767px) {
-    .app-sidebar:not(.hidden) { position: fixed; top: 4.25rem; bottom: 0; left: 0; width: min(19rem, 85vw); box-shadow: var(--shadow); overflow-y: auto; }
+    .app-sidebar:not(.hidden) { position: fixed; top: 4.25rem; bottom: 0; left: 0; display: flex; flex-direction: column; width: min(19rem, 85vw); box-shadow: var(--shadow); overflow-y: auto; }
     .header-actions form { display: none; }
+    .mobile-sidebar-sign-out { display: block; margin-top: auto; padding-top: 1rem; }
+    .mobile-sidebar-sign-out .button { width: 100%; }
     .page-header { align-items: flex-start; }
     .dashboard-vacancy-filters { grid-template-columns: minmax(0, 1fr); }
     .filter-search { grid-column: auto; }

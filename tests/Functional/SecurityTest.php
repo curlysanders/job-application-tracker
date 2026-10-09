@@ -105,8 +105,9 @@ final class SecurityTest extends WebTestCase
         self::assertResponseRedirects('/');
         $crawler = $client->followRedirect();
         self::assertSelectorTextContains('h1', 'Dashboard');
+        self::assertSelectorExists('#app-sidebar .mobile-sidebar-sign-out');
 
-        $client->submit($crawler->selectButton('Sign out')->form());
+        $client->submit($crawler->filter('#app-sidebar .mobile-sidebar-sign-out button')->form());
         self::assertResponseRedirects('/');
     }
 

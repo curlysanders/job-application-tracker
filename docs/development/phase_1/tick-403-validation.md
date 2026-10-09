@@ -10,7 +10,7 @@ Manually verify authenticated pages at 320px, 390px, 412px, 768px, and 1440px:
 
 1. Open and close the mobile navigation, then move through the pipeline with
    keyboard and pointer input.
-2. Confirm the Profile link remains visible in the authenticated header.
+2. Confirm the Profile link remains visible in the authenticated header and Sign out is accessible at the bottom of the mobile menu.
 3. Apply and reset dashboard filters; confirm the result cards or table update.
 4. Open a vacancy action menu, tab through it, and use a non-destructive action.
 5. Confirm `document.documentElement.scrollWidth` equals `document.documentElement.clientWidth` on the dashboard, vacancy create/edit/detail, company/recruiter list and form, and profile pages. Horizontal scrolling is permitted only inside the pipeline and Markdown tables/code blocks.
@@ -87,3 +87,8 @@ and all 12 ParaTest worker databases.
 The authenticated header now keeps Profile visible below 768px while retaining
 the compact mobile Sign out behavior. `ProfileSettingsTest` passed with 7 tests
 and 76 assertions, including the Profile-link regression check.
+
+The mobile menu now provides a full-width, CSRF-protected Sign out control at
+its bottom. It remains reachable by scrolling within the sidebar when needed.
+The focused `SecurityTest|ProfileSettingsTest` check passed with 14 tests and
+118 assertions, including sidebar-specific logout submission.
