@@ -10,7 +10,7 @@
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}">
             <button type="submit" class="button button-quiet">Sign out</button>
         </form>
-        <button type="button" class="icon-button md:hidden" data-collapse-toggle="app-sidebar" aria-controls="app-sidebar" aria-expanded="false">
+        <button type="button" class="icon-button md:hidden" data-controller="mobile-menu" data-collapse-toggle="app-sidebar" aria-controls="app-sidebar" aria-expanded="false">
             <span>Menu</span>
         </button>
     </div>
