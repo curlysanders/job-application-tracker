@@ -47,6 +47,25 @@ final class ProfileSettingsTest extends WebTestCase
         self::assertSame(PreferredTransportMode::PublicTransport, $savedUser->getPreferredTransportMode());
     }
 
+    public function testProfileLinkIsAvailableInTheAuthenticatedHeader(): void
+    {
+        $client = self::createClient();
+        $client->loginUser($this->createUser('header-profile@example.com'));
+
+        $client->request('GET', '/profile');
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('.app-header .header-profile[href="/profile"]');
+        $projectDirectory = self::getContainer()->getParameter('kernel.project_dir');
+        self::assertIsString($projectDirectory);
+        $styles = file_get_contents($projectDirectory.'/assets/styles/app.css');
+        self::assertIsString($styles);
+        self::assertStringNotContainsString(
+            '.header-profile, .header-actions form { display: none; }',
+            $styles,
+        );
+    }
+
     public function testProfileRejectsNonPositivePreferences(): void
     {
         $client = self::createClient();
