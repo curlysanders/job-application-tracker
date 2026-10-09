@@ -30,6 +30,7 @@ WORKDIR /app
 
 COPY --from=build /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
 COPY --from=build /usr/local/etc/php/conf.d/docker-php-ext-*.ini /usr/local/etc/php/conf.d/
+COPY .docker/php/config/prod.ini /usr/local/etc/php/conf.d/99-production-security.ini
 COPY --chown=1000:1000 --from=build /app /app
 
 RUN mkdir -p /app/var/cache /app/var/log /app/var/storage/default /config/caddy /data/caddy \
