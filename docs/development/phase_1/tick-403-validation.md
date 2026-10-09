@@ -8,8 +8,9 @@ At 768px and above the semantic table remains the visible dashboard result.
 
 Manually verify authenticated pages at 320px, 390px, 412px, 768px, and 1440px:
 
-1. Open and close the mobile navigation, then move through the pipeline with
-   keyboard and pointer input.
+1. Open the mobile navigation, then confirm a click outside its pane closes it
+   and clicks inside the pane leave it open before moving through the pipeline
+   with keyboard and pointer input.
 2. Confirm the Profile link remains visible in the authenticated header and Sign out is accessible at the bottom of the mobile menu.
 3. Apply and reset dashboard filters; confirm the result cards or table update.
 4. Open a vacancy action menu, tab through it, and use a non-destructive action.
@@ -92,3 +93,7 @@ The mobile menu now provides a full-width, CSRF-protected Sign out control at
 its bottom. It remains reachable by scrolling within the sidebar when needed.
 The focused `SecurityTest|ProfileSettingsTest` check passed with 14 tests and
 118 assertions, including sidebar-specific logout submission.
+
+The mobile Menu toggle now has an outside-click controller that delegates
+dismissal to Flowbite's existing collapse toggle. `SecurityTest` passed with 7
+tests and 43 assertions, including its authenticated-menu wiring check.
