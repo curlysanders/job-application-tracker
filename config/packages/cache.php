@@ -6,6 +6,13 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigura
 
 return static function (ContainerConfigurator $containerConfigurator): void {
     $containerConfigurator->extension('framework', [
-        'cache' => null,
+        'cache' => [
+            'default_doctrine_dbal_provider' => 'doctrine.dbal.default_connection',
+            'pools' => [
+                'cache.registration_rate_limiter' => [
+                    'adapter' => 'cache.adapter.doctrine_dbal',
+                ],
+            ],
+        ],
     ]);
 };

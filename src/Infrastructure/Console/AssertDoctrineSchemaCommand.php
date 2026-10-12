@@ -22,6 +22,7 @@ final class AssertDoctrineSchemaCommand extends Command
 
     /** @var list<string> */
     private const array UNMAPPED_TABLE_DIFFS = [
+        'DROP TABLE cache_items',
         'DROP TABLE doctrine_migration_versions',
         'DROP TABLE sessions',
     ];
