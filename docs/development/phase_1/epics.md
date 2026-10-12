@@ -26,7 +26,7 @@
     - Vacancy Detail page with rich text scratchpad notes and next action date reminders.
 
 ## Epic 4: Asynchronous Outbox Architecture & Performance Tuning
-- **Goal**: Integrate Symfony Messenger with Doctrine transport for async background processing of outbox events and validate performance on Synology DS416play.
+- **Goal**: Integrate Symfony Messenger with Doctrine transport for async background processing of outbox events and validate performance in Docker.
 - **Key Deliverables**:
     - Messenger Outbox pattern configuration.
     - Async worker handling for status history logging and background file processing.

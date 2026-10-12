@@ -75,10 +75,7 @@ docker compose up -d --no-deps app
 ```
 
 The development app is served at `http://localhost/`. Component previews are
-available at `/_components` only in `dev` and `test`. For production, run
-`APP_ENV=prod APP_DEBUG=0 php bin/console asset-map:compile` inside the
-deployment container. Do not keep `public/assets/` from a production build when
-working on development assets, because published assets take precedence.
+available at `/_components` only in `dev` and `test`.
 
 ## Architecture and implementation conventions
 
@@ -134,8 +131,6 @@ working on development assets, because published assets take precedence.
 - Use squash merge and delete the feature branch afterward.
 - Commits on non-`main` branches must be verified signed. The resulting squash
   commit on `main` is intentionally not required to be signed.
-- Production is the GitHub `production` environment targeting the Synology, not
-  a Git branch. CD is future work; do not assume a deployment pipeline exists.
 
 ## Scope awareness
 

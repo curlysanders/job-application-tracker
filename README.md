@@ -2,7 +2,7 @@
 
 [![codecov](https://codecov.io/github/curlysanders/job-application-tracker/graph/badge.svg?token=Z76SXCMIDK)](https://codecov.io/github/curlysanders/job-application-tracker)
 
-**Job Application Tracker** is a self-hosted, privacy-first job application and vacancy management platform. Built using Symfony 8.1, PHP 8.5, and FrankenPHP in worker mode, it is optimized to run with a low memory footprint on home servers (such as a Synology NAS via Docker) or VPS instances.
+**Job Application Tracker** is a self-hosted, privacy-first job application and vacancy management platform. Built using Symfony 8.1, PHP 8.5, and FrankenPHP in worker mode, it is optimized to run efficiently on Docker hosts.
 
 It helps job seekers track vacancies, record application audit histories, manage contact networks, prep for interviews with scratchpad notes, and visually track their job hunt pipeline.
 
@@ -47,7 +47,7 @@ It helps job seekers track vacancies, record application audit histories, manage
 ## 📋 Prerequisites
 
 - Docker & Docker Compose
-- Docker host hardware with >= 1 GB available RAM (tested on Synology DS416play with 4GB RAM)
+- Docker host hardware with >= 1 GB available RAM
 
 ---
 
@@ -165,14 +165,8 @@ If Symfony needs to generate absolute URLs in that mode, also set
 `DEFAULT_URI=http://localhost` in `.env.local`. To return to the HTTPS default,
 unset `FRANKENPHP_SERVER_NAME`, restore the HTTPS URI, and recreate the app.
 The older `SERVER_NAME` environment variable remains supported for existing
-deployment setups, but `FRANKENPHP_SERVER_NAME` is preferred for new local
+environments, but `FRANKENPHP_SERVER_NAME` is preferred for new local
 configuration.
-
-For production, publish assets with `APP_ENV=prod APP_DEBUG=0 php bin/console
-asset-map:compile` inside the deployment container after installing dependencies.
-This copies/version-tags assets; it does not compile JavaScript or Tailwind CSS.
-Do not retain `public/assets/` from a production build when working on development
-assets, as published assets take precedence.
 
 See [TICK-101 validation and benchmark instructions](docs/development/phase_1/tick-101-validation.md).
 

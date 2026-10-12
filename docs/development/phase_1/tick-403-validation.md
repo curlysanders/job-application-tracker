@@ -60,12 +60,6 @@ docker compose exec -T app composer ci:doctrine-schema
 docker compose exec -T app php bin/console lint:twig templates
 ```
 
-## Deferred deployment validation
-
-No Synology DS416play deployment or FrankenPHP worker memory measurement is part
-of TICK-403. Measure container memory under realistic peak execution only after
-the production deployment configuration exists.
-
 ## Verification result — 2026-10-05
 
 The repaired authenticated dashboard, vacancy create/detail/edit, company and
