@@ -4,7 +4,8 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{% block title %}Job Application Tracker{% endblock %}</title>
-        <script>
+        {% set scriptNonce = csp_nonce('script') %}
+        <script nonce="{{ scriptNonce }}">
             (() => {
                 const key = 'job-application-tracker-theme';
                 const savedTheme = localStorage.getItem(key);
@@ -17,7 +18,7 @@
             <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
         {% endblock %}
         {% block javascripts %}
-            {% block importmap %}{{ importmap('app') }}{% endblock %}
+            {% block importmap %}{{ importmap('app', { nonce: scriptNonce }) }}{% endblock %}
         {% endblock %}
     </head>
     <body class="{{ app.user ? 'app-body' : 'auth-body' }}">

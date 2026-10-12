@@ -1,4 +1,7 @@
-ARG FRANKENPHP_IMAGE=dunglas/frankenphp:1.13.0-php8.5-trixie
+ARG FRANKENPHP_IMAGE=dunglas/frankenphp@sha256:2a9c6663f73ad1e401909634206bd25e13bed5b94d86eefa3b5ec64c985b4595
+ARG COMPOSER_IMAGE=composer@sha256:af98f42dfff7c68ba8d53c2164fd9fde1087b7d449514baa38c418b1f6bc4bac
+
+FROM ${COMPOSER_IMAGE} AS composer-bin
 
 FROM ${FRANKENPHP_IMAGE} AS build
 
@@ -7,7 +10,7 @@ RUN apt-get update \
     && docker-php-ext-install -j"$(nproc)" bcmath intl pdo_mysql zip \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+COPY --from=composer-bin /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 

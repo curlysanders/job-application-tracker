@@ -92,7 +92,7 @@ services:
       MYSQL_USER: job_application_tracker
       MYSQL_PASSWORD: password
     ports:
-      - "3306:3306"
+      - "127.0.0.1:3306:3306"
     volumes:
       - database_data:/var/lib/mysql:rw
     healthcheck:

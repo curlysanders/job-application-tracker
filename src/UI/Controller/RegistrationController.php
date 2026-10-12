@@ -11,6 +11,7 @@ use CurlySanders\JobApplicationTracker\Domain\User\User;
 use CurlySanders\JobApplicationTracker\UI\Form\Model\RegistrationData;
 use CurlySanders\JobApplicationTracker\UI\Form\RegistrationType;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
@@ -18,6 +19,8 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface;
+use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Environment;
@@ -32,6 +35,8 @@ final readonly class RegistrationController
         private FormFactoryInterface $formFactory,
         private Environment $twig,
         private UrlGeneratorInterface $urlGenerator,
+        #[Target('registration')]
+        private RateLimiterFactoryInterface $registrationLimiter,
     ) {
     }
 
@@ -42,6 +47,13 @@ final readonly class RegistrationController
             return new RedirectResponse($this->urlGenerator->generate('app_dashboard'));
         }
 
+        if ($request->isMethod(Request::METHOD_POST)) {
+            $limit = $this->registrationLimiter->create($request->getClientIp() ?? 'unknown')->consume();
+            if (!$limit->isAccepted()) {
+                throw new TooManyRequestsHttpException(max(1, $limit->getRetryAfter()->getTimestamp() - time()), 'Too many registration attempts.');
+            }
+        }
+
         $registration = new RegistrationData();
         $form = $this->formFactory->create(RegistrationType::class, $registration);
         $form->handleRequest($request);
@@ -49,8 +61,8 @@ final readonly class RegistrationController
         if ($form->isSubmitted() && $form->isValid()) {
             try {
                 $user = $this->commandBus->dispatch(new RegisterUser($registration->email, $registration->plainPassword));
-            } catch (UserAlreadyExists $exception) {
-                $form->get('email')->addError(new FormError($exception->getMessage()));
+            } catch (UserAlreadyExists) {
+                $form->addError(new FormError('We could not create an account with those details.'));
 
                 return $this->renderRegistrationForm($form, Response::HTTP_UNPROCESSABLE_ENTITY);
             }

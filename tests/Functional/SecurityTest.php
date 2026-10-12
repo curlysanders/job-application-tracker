@@ -89,7 +89,33 @@ final class SecurityTest extends WebTestCase
         $client->submit($form);
 
         self::assertResponseStatusCodeSame(422);
-        self::assertSelectorTextContains('.form-panel', 'An account already exists for this email address.');
+        self::assertSelectorTextContains('.form-panel', 'We could not create an account with those details.');
+        self::assertSelectorTextNotContains('.form-panel', 'already exists');
+    }
+
+    public function testRegistrationIsLimitedPerClientIp(): void
+    {
+        $client = self::createClient();
+
+        for ($attempt = 1; $attempt <= 5; ++$attempt) {
+            $crawler = $client->request('GET', '/register');
+            $client->submit($crawler->selectButton('Create account')->form([
+                'registration[email]' => 'limited@example.com',
+                'registration[plainPassword][first]' => 'invalid',
+                'registration[plainPassword][second]' => 'invalid',
+            ]));
+            self::assertResponseStatusCodeSame(422);
+        }
+
+        $crawler = $client->request('GET', '/register');
+        $client->submit($crawler->selectButton('Create account')->form([
+            'registration[email]' => 'limited@example.com',
+            'registration[plainPassword][first]' => 'invalid',
+            'registration[plainPassword][second]' => 'invalid',
+        ]));
+
+        self::assertResponseStatusCodeSame(429);
+        self::assertResponseHasHeader('Retry-After');
     }
 
     public function testUserCanLogInAndOut(): void
