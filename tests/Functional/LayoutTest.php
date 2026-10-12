@@ -31,7 +31,13 @@ final class LayoutTest extends WebTestCase
         self::assertSelectorExists('link[href^="/assets/styles/tom-select/tom-select.default-"]');
         self::assertSelectorExists('link[href*="flowbite.min"]');
         self::assertSelectorExists('link[href*="/app-"]');
+        self::assertSelectorExists('script[nonce]');
         self::assertStringNotContainsString('data:application/javascript', (string) $client->getResponse()->getContent());
+        self::assertResponseHasHeader('Content-Security-Policy');
+        $contentSecurityPolicy = $client->getResponse()->headers->get('Content-Security-Policy');
+        self::assertIsString($contentSecurityPolicy);
+        self::assertMatchesRegularExpression("/script-src 'self' 'nonce-[^']+'(?:;|$)/", $contentSecurityPolicy);
+        self::assertDoesNotMatchRegularExpression("/script-src[^;]*'unsafe-inline'/", $contentSecurityPolicy);
         self::assertResponseNotHasHeader('Server-Timing');
     }
 
