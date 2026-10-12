@@ -62,6 +62,8 @@ It helps job seekers track vacancies, record application audit histories, manage
    Set a unique `APP_SECRET` in `.env.local`. The checked-in database credentials
    are local-development defaults; an existing database volume needs its original
    credentials. MariaDB initialization variables apply only to a fresh volume.
+   MariaDB is published only on `127.0.0.1:3306`; containers use the internal
+   `db` hostname, while local database tools can use the loopback endpoint.
 
 2. **Build and install dependencies before starting workers**:
    ```bash
