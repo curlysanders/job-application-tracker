@@ -11,7 +11,7 @@ final class Version20261006160000 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return 'Persist web sessions in MariaDB so deployments retain authenticated sessions.';
+        return 'Persist web sessions in MariaDB across container replacements.';
     }
 
     public function up(Schema $schema): void

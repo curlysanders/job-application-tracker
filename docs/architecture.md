@@ -2,7 +2,7 @@
 
 ## 1. Executive Summary & Vision
 
-**Job Application Tracker** (working title for Phase 1 open-source release) is a self-hosted, privacy-first job application and vacancy management platform. Built to run efficiently on low-resource hardware like a home NAS (Synology DS416play, 4GB RAM) via Docker and FrankenPHP, it provides job seekers with structured tracking, salary alignment insights, application status history, and scratchpad prep notes.
+**Job Application Tracker** (working title for Phase 1 open-source release) is a self-hosted, privacy-first job application and vacancy management platform. Built to run efficiently on low-resource Docker hosts with FrankenPHP, it provides job seekers with structured tracking, salary alignment insights, application status history, and scratchpad prep notes.
 
 Phase 1 establishes a rock-solid foundation, focused on manual data entry, responsive interactive pipeline visualization, robust entity modeling, and outbox messaging, laying the groundwork for future AI-driven resume matching and automatic vacancy parsing (Phase 2+).
 
@@ -21,7 +21,7 @@ Phase 1 establishes a rock-solid foundation, focused on manual data entry, respo
 - **Markdown Rendering**: League CommonMark renders GitHub-flavored scratchpad Markdown on the server with HTML stripping and unsafe-link protection.
 
 ### Storage & Integration Boundaries
-- **File Storage**: Symfony Flysystem Abstraction (`league/flysystem-bundle`). Local disk storage in Phase 1, seamlessly swappable to AWS S3 or MinIO in future cloud deployments.
+- **File Storage**: Symfony Flysystem Abstraction (`league/flysystem-bundle`). Local disk storage in Phase 1, seamlessly swappable to AWS S3 or MinIO in future cloud environments.
 - **Asynchronous Messaging**: Symfony Messenger configured with the **Outbox Pattern** (Doctrine transport for transactional event queuing + background worker execution).
 - **Workflow / State Engine**: Symfony Workflow Component (configured as a strict state machine with transition validation and event listeners).
 

@@ -238,27 +238,13 @@
 - **Scope**:
     - Test dashboard UI on mobile, tablet, and desktop breakpoints using Flowbite responsive utilities.
     - Optimize MariaDB indexes on `user_id`, `status`, `next_action_at`, and `date_added`.
-    - Defer Synology DS416play FrankenPHP memory-footprint validation until deployment preparation.
+    - Defer worker memory-footprint validation until runtime operations are prepared.
 - **Acceptance Criteria**:
     - [x] Dashboard pipeline and vacancy cards are fully responsive on mobile viewports, with no page-level horizontal overflow at supported phone widths.
     - [x] The authenticated header keeps the Profile link visible on mobile viewports.
     - [x] Mobile navigation provides an accessible Sign out control at the bottom of the menu.
     - [x] Open mobile navigation closes when the user clicks outside its pane.
-    - [ ] Validate container memory usage under peak execution during deployment preparation.
+    - [ ] Validate container memory usage under peak execution during runtime operations.
 - **Validation**: [Results and reproduction steps](tick-403-validation.md).
 
 ---
-
-## TICK-404: Synology Production Deployment Preparation
-- **Epic**: Epic 4 (Outbox & Performance)
-- **Dependencies**: TICK-401, TICK-402, TICK-403
-- **Scope**:
-    - Publish a minimal immutable FrankenPHP production image to GHCR from release tags.
-    - Provide a private, Git-backed Synology deployment stack with SOPS-encrypted secrets, DSM Reverse Proxy HTTPS, internal Caddy HTTP, MariaDB, persistent resume storage, the outbox worker, backup, migration, rollback, and health-check procedures.
-    - Keep deployment configuration and secrets outside this public application repository.
-- **Acceptance Criteria**:
-    - [x] The public repository builds a production image without Xdebug, Git, development dependencies, or bind-mounted source.
-    - [x] The application exposes a public database-readiness endpoint and production storage can use a mounted absolute directory.
-    - [x] The private deployment stack pins GHCR images by digest and keeps encrypted production secrets versioned separately from private decryption keys.
-    - [ ] Validate public HTTPS, automatic certificate renewal, backup restoration, worker delivery, and peak memory use on the Synology.
-- **Validation**: [Results and reproduction steps](tick-404-validation.md).
