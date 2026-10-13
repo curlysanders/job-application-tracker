@@ -13,6 +13,12 @@ return static function (ContainerConfigurator $containerConfigurator): void {
                 'interval' => '1 hour',
                 'cache_pool' => 'cache.registration_rate_limiter',
             ],
+            'public_navigation' => [
+                'policy' => 'fixed_window',
+                'limit' => 10,
+                'interval' => '1 minute',
+                'cache_pool' => 'cache.public_navigation_rate_limiter',
+            ],
         ],
     ]);
 };
