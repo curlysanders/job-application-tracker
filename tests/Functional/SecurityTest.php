@@ -22,6 +22,34 @@ final class SecurityTest extends WebTestCase
         self::assertSelectorExists('a[href="/register"]');
     }
 
+    public function testApplicationResponsesPreventSearchIndexing(): void
+    {
+        $client = self::createClient();
+
+        foreach (['/', '/login', '/register', '/healthz', '/missing'] as $path) {
+            $client->request('GET', $path);
+
+            self::assertResponseHasHeader('X-Robots-Tag');
+            self::assertResponseHeaderSame('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet');
+        }
+    }
+
+    public function testAnonymousPublicNavigationIsRateLimitedPerRouteAndIp(): void
+    {
+        $client = self::createClient();
+
+        for ($attempt = 1; $attempt <= 10; ++$attempt) {
+            $client->request('GET', '/', server: ['REMOTE_ADDR' => '198.51.100.10']);
+            self::assertResponseIsSuccessful();
+        }
+
+        $client->request('GET', '/', server: ['REMOTE_ADDR' => '198.51.100.10']);
+
+        self::assertResponseStatusCodeSame(429);
+        self::assertResponseHasHeader('Retry-After');
+        self::assertResponseHeaderSame('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet');
+    }
+
     public function testFormerApplicationUrlsAreAbsent(): void
     {
         $client = self::createClient();

@@ -12,6 +12,9 @@ return static function (ContainerConfigurator $containerConfigurator): void {
                 'cache.registration_rate_limiter' => [
                     'adapter' => 'cache.adapter.doctrine_dbal',
                 ],
+                'cache.public_navigation_rate_limiter' => [
+                    'adapter' => 'cache.adapter.doctrine_dbal',
+                ],
             ],
         ],
     ]);

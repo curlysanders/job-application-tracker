@@ -22,6 +22,7 @@ final class LayoutTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h1', 'Your job search');
         self::assertSelectorExists('meta[name="viewport"]');
+        self::assertSelectorExists('meta[name="robots"][content="noindex, nofollow, noarchive, nosnippet"]');
         self::assertSelectorExists('nav[aria-label="Account navigation"]');
         self::assertSelectorNotExists('#app-sidebar');
         self::assertSelectorExists('button[data-controller="theme"] svg.theme-icon-moon');
@@ -34,6 +35,7 @@ final class LayoutTest extends WebTestCase
         self::assertSelectorExists('script[nonce]');
         self::assertStringNotContainsString('data:application/javascript', (string) $client->getResponse()->getContent());
         self::assertResponseHasHeader('Content-Security-Policy');
+        self::assertResponseHeaderSame('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet');
         $contentSecurityPolicy = $client->getResponse()->headers->get('Content-Security-Policy');
         self::assertIsString($contentSecurityPolicy);
         self::assertMatchesRegularExpression("/script-src 'self' 'nonce-[^']+'(?:;|$)/", $contentSecurityPolicy);
