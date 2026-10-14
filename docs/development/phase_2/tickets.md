@@ -21,6 +21,7 @@
     - [ ] All corpus responses validate against the extraction schema; the
       documented accuracy threshold is met before local extraction is enabled.
     - [ ] CI uses fakes or recorded responses and makes no real provider calls.
+- **Validation**: [Provider boundary, corpus gate, and check commands](tick-501-validation.md).
 
 ---
 
