@@ -126,6 +126,28 @@
             "bin/phpunit"
         ]
     },
+    "symfony/ai-bundle": {
+        "version": "0.14",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "0.1",
+            "ref": "2be6ccd77335c2631fdf12d1680649b072efb8ad"
+        },
+        "files": [
+            "config/packages/ai.php"
+        ]
+    },
+    "symfony/ai-ollama-platform": {
+        "version": "0.14",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "0.1",
+            "ref": "2f0ac0a8bc59c4e46b47a962a3ad7fe8104457d6"
+        },
+        "files": []
+    },
     "symfony/asset-mapper": {
         "version": "8.1",
         "recipe": {
