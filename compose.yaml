@@ -45,6 +45,12 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "grep -aq 'messenger:consume' /proc/1/cmdline && grep -aq 'outbox' /proc/1/cmdline"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   benchmark:
     image: job-application-tracker-app
@@ -83,7 +89,7 @@ services:
       - caddy_config:/config
 
   db:
-    image: mariadb:12.3
+    image: mariadb:13.0.2@sha256:f1bba652ba57bea3099ca2fe1af692af537c27d96e0bcde39dce29e2ba1ec4f3
     container_name: job_application_tracker_db
     restart: unless-stopped
     environment:

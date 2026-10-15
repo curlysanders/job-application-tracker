@@ -59,7 +59,7 @@ final readonly class EditVacancyController
         }
 
         $rates = $this->exchangeRates->latestRates();
-        $rateValues = null === $rates ? [] : $rates->ratesPerEuro;
+        $rateValues = $rates->ratesPerEuro ?? [];
 
         $preferredSalary = $user->getPreferredSalary();
 

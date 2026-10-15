@@ -1,5 +1,10 @@
-# FrankenPHP base image met PHP 8.5
-FROM dunglas/frankenphp:php8.5
+ARG FRANKENPHP_IMAGE=dunglas/frankenphp@sha256:2a9c6663f73ad1e401909634206bd25e13bed5b94d86eefa3b5ec64c985b4595
+ARG COMPOSER_IMAGE=composer@sha256:af98f42dfff7c68ba8d53c2164fd9fde1087b7d449514baa38c418b1f6bc4bac
+
+# FrankenPHP 1.13.0 with PHP 8.5.11.
+FROM ${COMPOSER_IMAGE} AS composer-bin
+
+FROM ${FRANKENPHP_IMAGE}
 
 # Install system dependencies & PHP extensions required for Symfony & MariaDB
 # 1. Alles in één RUN-stap om lagen te beperken
@@ -17,8 +22,8 @@ RUN pecl install xdebug \
 
 COPY .docker/php/config/xdebug.ini /usr/local/etc/php/conf.d/99-xdebug.ini
 
-# Install Composer from official image
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Install Composer from the pinned official image.
+COPY --from=composer-bin /usr/bin/composer /usr/bin/composer
 
 RUN mkdir -p /home/appuser/.cache/composer /opt/phpstorm-coverage \
     && chown -R 1000:1000 /home/appuser /opt/phpstorm-coverage
