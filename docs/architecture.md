@@ -13,8 +13,8 @@ Phase 1 establishes a rock-solid foundation, focused on manual data entry, respo
 ### Core Stack
 - **Language**: PHP 8.5 (leveraging latest performance & type system enhancements)
 - **Framework**: Symfony 8.1
-- **Application Server / Runtime**: FrankenPHP 1.12.7 (running in Worker Mode for high-performance zero-overhead execution)
-- **Database**: MariaDB 12.3.3
+- **Application Server / Runtime**: FrankenPHP 1.13.0 / PHP 8.5.11 (running in Worker Mode for high-performance zero-overhead execution)
+- **Database**: MariaDB 13.0.2
 - **Asset / Frontend System**: Symfony UX 3.4 + AssetMapper (no Node.js build step required)
 - **UI Framework**: Flowbite (Tailwind CSS native components) + Twig Components
 - **Interactivity**: Stimulus Controllers via Symfony UX

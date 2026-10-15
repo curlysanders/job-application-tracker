@@ -60,7 +60,7 @@ final readonly class CreateVacancyController
     private function response(FormView $form, User $user, string $pageTitle, string $submitLabel, bool $submitted): Response
     {
         $rates = $this->exchangeRates->latestRates();
-        $rateValues = null === $rates ? [] : $rates->ratesPerEuro;
+        $rateValues = $rates->ratesPerEuro ?? [];
 
         $preferredSalary = $user->getPreferredSalary();
 
