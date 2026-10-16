@@ -11,6 +11,7 @@ use CurlySanders\JobApplicationTracker\UI\Controller\DownloadProfileResumeContro
 use League\Flysystem\UnableToReadFile;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class DownloadProfileResumeControllerTest extends TestCase
@@ -46,6 +47,28 @@ final class DownloadProfileResumeControllerTest extends TestCase
 
         $this->expectException(\LogicException::class);
         new DownloadProfileResumeController($security, $uploader)();
+    }
+
+    public function testStreamsTheActiveResumeWithSafeDownloadHeaders(): void
+    {
+        $stream = fopen('php://temp', 'r+');
+        self::assertIsResource($stream);
+        fwrite($stream, 'resume content');
+        rewind($stream);
+        $security = $this->createMock(Security::class);
+        $security->expects(self::once())->method('getUser')->willReturn(new SecurityUser($this->userWithResume()));
+        $uploader = $this->createMock(ResumeUploaderService::class);
+        $uploader->expects(self::once())->method('readResume')->with('resumes/1/resume.pdf')->willReturn($stream);
+
+        $response = new DownloadProfileResumeController($security, $uploader)();
+
+        self::assertInstanceOf(StreamedResponse::class, $response);
+        self::assertSame('application/pdf', $response->headers->get('Content-Type'));
+        self::assertSame('nosniff', $response->headers->get('X-Content-Type-Options'));
+        ob_start();
+        $response->sendContent();
+        self::assertSame('resume content', ob_get_clean());
+        self::assertFalse(is_resource($stream));
     }
 
     private function userWithResume(): User

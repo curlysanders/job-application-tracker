@@ -58,4 +58,41 @@ final class JsonDomainEventTypeTest extends TestCase
         $this->expectException(ValueNotConvertible::class);
         $type->convertToPHPValue('{"eventType":"stdClass","eventVersion":1}', $platform);
     }
+
+    public function testRejectsChangedPropertiesWithNonStringKeys(): void
+    {
+        $type = new JsonDomainEventType();
+        $payload = [
+            'eventType' => UserRegistered::class,
+            'eventVersion' => 1,
+            'entityId' => '018f0957-8a79-7fcb-bab5-2ccfbe98de81',
+            'occurredAt' => '2026-10-16T12:00:00.000000+00:00',
+            'changedProperties' => ['1' => 'invalid'],
+        ];
+
+        $this->expectException(ValueNotConvertible::class);
+        $type->convertToPHPValue(json_encode($payload, JSON_THROW_ON_ERROR), new MariaDBPlatform());
+    }
+
+    public function testRejectsAnUnparseableOccurrenceTimestamp(): void
+    {
+        $type = new JsonDomainEventType();
+        $payload = [
+            'eventType' => UserRegistered::class,
+            'eventVersion' => 1,
+            'entityId' => '018f0957-8a79-7fcb-bab5-2ccfbe98de81',
+            'occurredAt' => 'not-a-timestamp',
+            'changedProperties' => [],
+        ];
+
+        $this->expectException(ValueNotConvertible::class);
+        $type->convertToPHPValue(json_encode($payload, JSON_THROW_ON_ERROR), new MariaDBPlatform());
+    }
+
+    public function testRejectsAJsonPayloadThatIsNotAnObject(): void
+    {
+        $this->expectException(ValueNotConvertible::class);
+
+        new JsonDomainEventType()->convertToPHPValue('null', new MariaDBPlatform());
+    }
 }
