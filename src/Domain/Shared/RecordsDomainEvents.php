@@ -4,9 +4,24 @@ declare(strict_types=1);
 
 namespace CurlySanders\JobApplicationTracker\Domain\Shared;
 
-use Lingoda\DomainEventsBundle\Domain\Model\Traits\EventRecorderTrait;
-
 trait RecordsDomainEvents
 {
-    use EventRecorderTrait;
+    /** @var list<DomainEvent> */
+    private array $recordedEvents = [];
+
+    /** @return list<DomainEvent> */
+    public function getRecordedEvents(): array
+    {
+        return $this->recordedEvents;
+    }
+
+    public function clearRecordedEvents(): void
+    {
+        $this->recordedEvents = [];
+    }
+
+    protected function recordEvent(DomainEvent $event): void
+    {
+        $this->recordedEvents[] = $event;
+    }
 }

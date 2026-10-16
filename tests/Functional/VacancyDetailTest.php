@@ -24,7 +24,7 @@ final class VacancyDetailTest extends WebTestCase
         $this->entityManager()->persist($company);
         $this->entityManager()->persist($vacancy);
         $this->entityManager()->flush();
-        $client->loginUser($owner);
+        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($owner));
 
         $crawler = $client->request('GET', sprintf('/vacancies/%s', $vacancy->getId()->toRfc4122()));
         self::assertResponseIsSuccessful();
@@ -54,7 +54,7 @@ final class VacancyDetailTest extends WebTestCase
         $client->request('POST', sprintf('/vacancies/%s/scratchpad', $vacancy->getId()->toRfc4122()), ['_token' => 'invalid', 'notes' => 'Denied']);
         self::assertResponseStatusCodeSame(403);
 
-        $client->loginUser($this->createUser('detail-other@example.com'));
+        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($this->createUser('detail-other@example.com')));
         $client->request('GET', sprintf('/vacancies/%s', $vacancy->getId()->toRfc4122()));
         self::assertResponseStatusCodeSame(404);
     }
@@ -66,7 +66,7 @@ final class VacancyDetailTest extends WebTestCase
         $vacancy = new Vacancy($user, 'Reminder vacancy');
         $this->entityManager()->persist($vacancy);
         $this->entityManager()->flush();
-        $client->loginUser($user);
+        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user));
 
         $crawler = $client->request('GET', sprintf('/vacancies/%s', $vacancy->getId()->toRfc4122()));
         $token = $crawler->filter('form[action$="/next-action"] input[name="_token"]')->attr('value');
@@ -93,7 +93,7 @@ final class VacancyDetailTest extends WebTestCase
     private function createUser(string $email): User
     {
         $user = new User()->setEmail($email);
-        $user->setPassword($this->passwordHasher()->hashPassword($user, 'SecurePassword1!'));
+        $user->setPassword($this->passwordHasher()->hashPassword(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user), 'SecurePassword1!'));
         $this->entityManager()->persist($user);
         $this->entityManager()->flush();
 

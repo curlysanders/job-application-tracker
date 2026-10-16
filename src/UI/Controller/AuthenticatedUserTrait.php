@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace CurlySanders\JobApplicationTracker\UI\Controller;
 
+use CurlySanders\JobApplicationTracker\Application\Authentication\AuthenticatedUser;
 use CurlySanders\JobApplicationTracker\Domain\User\User;
 
 trait AuthenticatedUserTrait
@@ -12,7 +13,7 @@ trait AuthenticatedUserTrait
     {
         $user = $this->security->getUser();
 
-        return $user instanceof User ? $user : null;
+        return $user instanceof AuthenticatedUser ? $user->domainUser() : null;
     }
 
     private function requireAuthenticatedUser(string $message): User

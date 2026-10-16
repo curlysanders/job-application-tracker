@@ -6,6 +6,7 @@ namespace CurlySanders\JobApplicationTracker\Tests\UI\Controller;
 
 use CurlySanders\JobApplicationTracker\Application\UserProfile\ResumeUploaderService;
 use CurlySanders\JobApplicationTracker\Domain\User\User;
+use CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser;
 use CurlySanders\JobApplicationTracker\UI\Controller\DownloadProfileResumeController;
 use League\Flysystem\UnableToReadFile;
 use PHPUnit\Framework\TestCase;
@@ -17,7 +18,7 @@ final class DownloadProfileResumeControllerTest extends TestCase
     public function testReturnsNotFoundWhenThereIsNoActiveResume(): void
     {
         $security = $this->createMock(Security::class);
-        $security->expects(self::once())->method('getUser')->willReturn(new User());
+        $security->expects(self::once())->method('getUser')->willReturn(new SecurityUser(new User()));
         $uploader = $this->createMock(ResumeUploaderService::class);
         $uploader->expects(self::never())->method('readResume');
 
@@ -28,7 +29,7 @@ final class DownloadProfileResumeControllerTest extends TestCase
     public function testTranslatesStorageReadFailuresToNotFound(): void
     {
         $security = $this->createMock(Security::class);
-        $security->expects(self::once())->method('getUser')->willReturn($this->userWithResume());
+        $security->expects(self::once())->method('getUser')->willReturn(new SecurityUser($this->userWithResume()));
         $uploader = $this->createMock(ResumeUploaderService::class);
         $uploader->expects(self::once())->method('readResume')->willThrowException(UnableToReadFile::fromLocation('resumes/1/resume.pdf'));
 
@@ -39,7 +40,7 @@ final class DownloadProfileResumeControllerTest extends TestCase
     public function testRejectsAnInvalidStorageStream(): void
     {
         $security = $this->createMock(Security::class);
-        $security->expects(self::once())->method('getUser')->willReturn($this->userWithResume());
+        $security->expects(self::once())->method('getUser')->willReturn(new SecurityUser($this->userWithResume()));
         $uploader = $this->createMock(ResumeUploaderService::class);
         $uploader->expects(self::once())->method('readResume')->willReturn('not-a-stream');
 

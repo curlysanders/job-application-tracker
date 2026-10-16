@@ -12,5 +12,11 @@ final readonly class UploadedResume
         public string $mimeType,
         public \DateTimeImmutable $uploadedAt,
     ) {
+        if ('' === trim($storagePath) || '' === trim($originalFilename) || $originalFilename !== basename($originalFilename)) {
+            throw new \InvalidArgumentException('Uploaded resume metadata must contain a path and filename.');
+        }
+        if (!in_array($mimeType, ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'], true)) {
+            throw new \InvalidArgumentException('Only PDF and DOCX resumes are supported.');
+        }
     }
 }

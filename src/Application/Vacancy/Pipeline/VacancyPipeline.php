@@ -12,5 +12,10 @@ final readonly class VacancyPipeline
      */
     public function __construct(public array $counts, public array $vacancies)
     {
+        foreach ($counts as $count) {
+            if ($count < 0) {
+                throw new \InvalidArgumentException('Pipeline counts must map statuses to non-negative integers.');
+            }
+        }
     }
 }

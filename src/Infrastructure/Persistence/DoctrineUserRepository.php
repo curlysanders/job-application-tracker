@@ -6,11 +6,11 @@ namespace CurlySanders\JobApplicationTracker\Infrastructure\Persistence;
 
 use CurlySanders\JobApplicationTracker\Application\Authentication\Exception\DuplicateUserEmail;
 use CurlySanders\JobApplicationTracker\Application\Authentication\UserRepository;
+use CurlySanders\JobApplicationTracker\Domain\Shared\Identifier;
 use CurlySanders\JobApplicationTracker\Domain\User\User;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\AsAlias;
-use Symfony\Component\Uid\Uuid;
 
 #[AsAlias(UserRepository::class)]
 final readonly class DoctrineUserRepository implements UserRepository
@@ -26,11 +26,11 @@ final readonly class DoctrineUserRepository implements UserRepository
 
     public function find(string $id): ?User
     {
-        if (!Uuid::isValid($id)) {
+        if (!Identifier::isValid($id)) {
             return null;
         }
 
-        return $this->entityManager->find(User::class, Uuid::fromString($id));
+        return $this->entityManager->find(User::class, Identifier::fromString($id));
     }
 
     public function save(User $user): void

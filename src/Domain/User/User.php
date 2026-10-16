@@ -4,95 +4,65 @@ declare(strict_types=1);
 
 namespace CurlySanders\JobApplicationTracker\Domain\User;
 
-use Brick\Money\Money;
+use CurlySanders\JobApplicationTracker\Domain\Shared\Identifier;
+use CurlySanders\JobApplicationTracker\Domain\Shared\Money;
 use CurlySanders\JobApplicationTracker\Domain\Shared\NormalizesStrings;
 use CurlySanders\JobApplicationTracker\Domain\Shared\RecordsDomainEvents;
-use Doctrine\ORM\Mapping as ORM;
-use Lingoda\DomainEventsBundle\Domain\Model\DomainEventAware;
-use Symfony\Bridge\Doctrine\Types\UuidType;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Uid\Uuid;
-use Symfony\Component\Validator\Constraints as Assert;
+use CurlySanders\JobApplicationTracker\Domain\Shared\RecordsEvents;
 
-#[ORM\Entity]
-#[ORM\Table(name: 'users')]
-final class User implements UserInterface, PasswordAuthenticatedUserInterface, DomainEventAware
+final class User implements RecordsEvents
 {
     use NormalizesStrings;
     use RecordsDomainEvents;
 
-    #[ORM\Id]
-    #[ORM\Column(type: UuidType::NAME, unique: true)]
-    private Uuid $id;
+    private Identifier $id;
 
-    #[ORM\Column(length: 180, unique: true)]
-    #[Assert\NotBlank]
-    #[Assert\Email]
     private string $email = '';
 
     /** @var list<string> */
-    #[ORM\Column]
     private array $roles = [];
 
-    #[ORM\Column]
     private string $password = '';
 
-    #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
-    #[ORM\Column(name: 'min_preferred_salary', type: 'decimal', precision: 10, scale: 2, nullable: true)]
     private ?string $minimumPreferredSalary = null;
 
-    #[ORM\Column(name: 'min_preferred_salary_currency', length: 3)]
     private string $minimumPreferredSalaryCurrency = 'EUR';
 
-    #[ORM\Column(name: 'max_commute_minutes', nullable: true)]
     private ?int $maximumCommuteMinutes = null;
 
-    #[ORM\Column(length: 20, nullable: true, enumType: PreferredTransportMode::class)]
     private ?PreferredTransportMode $preferredTransportMode = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
     private ?string $resumeStoragePath = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
     private ?string $resumeOriginalFilename = null;
 
-    #[ORM\Column(length: 100, nullable: true)]
     private ?string $resumeMimeType = null;
 
-    #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $resumeUploadedAt = null;
 
-    #[ORM\Column(name: 'pending_resume_storage_path', length: 255, nullable: true)]
     private ?string $pendingResumeStoragePath = null;
 
-    #[ORM\Column(name: 'pending_resume_original_filename', length: 255, nullable: true)]
     private ?string $pendingResumeOriginalFilename = null;
 
-    #[ORM\Column(name: 'pending_resume_mime_type', length: 100, nullable: true)]
     private ?string $pendingResumeMimeType = null;
 
-    #[ORM\Column(name: 'pending_resume_uploaded_at', nullable: true)]
     private ?\DateTimeImmutable $pendingResumeUploadedAt = null;
 
-    #[ORM\Column(name: 'resume_validation_id', type: UuidType::NAME, nullable: true)]
-    private ?Uuid $resumeValidationId = null;
+    private ?Identifier $resumeValidationId = null;
 
-    #[ORM\Column(name: 'resume_validation_status', length: 20, nullable: true, enumType: ResumeValidationStatus::class)]
     private ?ResumeValidationStatus $resumeValidationStatus = null;
 
-    #[ORM\Column(name: 'resume_validation_failure', length: 255, nullable: true)]
     private ?string $resumeValidationFailure = null;
 
     public function __construct()
     {
-        $this->id = Uuid::v7();
+        $this->id = Identifier::v7();
         $this->createdAt = new \DateTimeImmutable();
     }
 
-    public function getId(): Uuid
+    public function getId(): Identifier
     {
         return $this->id;
     }
@@ -105,6 +75,9 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface, D
     public function setEmail(#[\SensitiveParameter] string $email): self
     {
         $this->email = self::normalizeEmail($email);
+        if (false === filter_var($this->email, FILTER_VALIDATE_EMAIL)) {
+            throw new \InvalidArgumentException('A valid email address is required.');
+        }
 
         return $this;
     }
@@ -112,15 +85,6 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface, D
     public static function normalizeEmail(#[\SensitiveParameter] string $email): string
     {
         return mb_strtolower(trim($email));
-    }
-
-    public function getUserIdentifier(): string
-    {
-        if ('' === $this->email) {
-            throw new \LogicException('A user must have an email address.');
-        }
-
-        return $this->email;
     }
 
     /** @return list<string> */
@@ -202,6 +166,7 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface, D
         string $mimeType,
         \DateTimeImmutable $uploadedAt,
     ): void {
+        ResumeMetadata::assertValid($storagePath, $originalFilename, $mimeType);
         $this->resumeStoragePath = $storagePath;
         $this->resumeOriginalFilename = $originalFilename;
         $this->resumeMimeType = $mimeType;
@@ -215,12 +180,13 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface, D
         string $mimeType,
         \DateTimeImmutable $uploadedAt,
     ): ?string {
+        ResumeMetadata::assertValid($storagePath, $originalFilename, $mimeType);
         $previousPendingPath = $this->pendingResumeStoragePath;
         $this->pendingResumeStoragePath = $storagePath;
         $this->pendingResumeOriginalFilename = $originalFilename;
         $this->pendingResumeMimeType = $mimeType;
         $this->pendingResumeUploadedAt = $uploadedAt;
-        $this->resumeValidationId = Uuid::v7();
+        $this->resumeValidationId = Identifier::v7();
         $this->resumeValidationStatus = ResumeValidationStatus::Pending;
         $this->resumeValidationFailure = null;
         $this->recordEvent(new ResumeValidationRequested($this->id, [
@@ -252,7 +218,7 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface, D
         );
     }
 
-    public function promotePendingResume(Uuid $validationId): ?string
+    public function promotePendingResume(Identifier $validationId): ?string
     {
         $pendingResume = $this->getPendingResume();
         if (null === $pendingResume || !$pendingResume->validationId->equals($validationId)) {
@@ -271,7 +237,7 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface, D
         return $previousPath;
     }
 
-    public function rejectPendingResume(Uuid $validationId, string $failure): ?string
+    public function rejectPendingResume(Identifier $validationId, string $failure): ?string
     {
         $pendingResume = $this->getPendingResume();
         if (null === $pendingResume || !$pendingResume->validationId->equals($validationId)) {

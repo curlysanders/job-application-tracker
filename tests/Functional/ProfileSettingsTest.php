@@ -27,7 +27,7 @@ final class ProfileSettingsTest extends WebTestCase
     {
         $client = self::createClient();
         $user = $this->createUser('sander@example.com');
-        $client->loginUser($user);
+        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user));
 
         $crawler = $client->request('GET', '/profile');
         $client->submit($crawler->selectButton('Save settings')->form([
@@ -50,7 +50,7 @@ final class ProfileSettingsTest extends WebTestCase
     public function testProfileLinkIsAvailableInTheAuthenticatedHeader(): void
     {
         $client = self::createClient();
-        $client->loginUser($this->createUser('header-profile@example.com'));
+        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($this->createUser('header-profile@example.com')));
 
         $client->request('GET', '/profile');
 
@@ -69,7 +69,7 @@ final class ProfileSettingsTest extends WebTestCase
     public function testProfileRejectsNonPositivePreferences(): void
     {
         $client = self::createClient();
-        $client->loginUser($this->createUser('sander@example.com'));
+        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($this->createUser('sander@example.com')));
         $crawler = $client->request('GET', '/profile');
         $client->submit($crawler->selectButton('Save settings')->form([
             'profile_settings[minimumPreferredSalary]' => '0.00',
@@ -85,7 +85,7 @@ final class ProfileSettingsTest extends WebTestCase
     {
         $client = self::createClient();
         $user = $this->createUser('sander@example.com');
-        $client->loginUser($user);
+        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user));
 
         $firstFile = $this->createPdf('First resume');
         $crawler = $client->request('GET', '/profile');
@@ -133,7 +133,7 @@ final class ProfileSettingsTest extends WebTestCase
         $invalidFile = tempnam(sys_get_temp_dir(), 'resume-invalid-');
         self::assertNotFalse($invalidFile);
         file_put_contents($invalidFile, 'not a resume');
-        $client->loginUser($user);
+        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user));
         $crawler = $client->request('GET', '/profile');
         $form = $crawler->selectButton('Upload resume')->form();
         $this->attachResume($form, $invalidFile);
@@ -158,7 +158,7 @@ final class ProfileSettingsTest extends WebTestCase
     private function createUser(string $email): User
     {
         $user = new User()->setEmail($email);
-        $user->setPassword($this->passwordHasher()->hashPassword($user, 'SecurePassword1!'));
+        $user->setPassword($this->passwordHasher()->hashPassword(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user), 'SecurePassword1!'));
         $this->entityManager()->persist($user);
         $this->entityManager()->flush();
 

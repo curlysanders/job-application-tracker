@@ -4,17 +4,16 @@ declare(strict_types=1);
 
 namespace CurlySanders\JobApplicationTracker\Domain\User;
 
-use Brick\Math\RoundingMode;
-use Brick\Money\Currency;
-use Brick\Money\Money;
+use CurlySanders\JobApplicationTracker\Domain\Shared\Money;
 
 final readonly class PreferredSalary
 {
     private function __construct(private string $currencyCode, private ?Money $minimum)
     {
-        Currency::of($currencyCode);
-
-        if (null !== $minimum && $currencyCode !== $minimum->getCurrency()->getCurrencyCode()) {
+        if (1 !== preg_match('/^[A-Z]{3}$/', $currencyCode)) {
+            throw new \InvalidArgumentException('The currency code must be ISO 4217.');
+        }
+        if (null !== $minimum && $currencyCode !== $minimum->currencyCode()) {
             throw new \InvalidArgumentException('The preferred salary currency must match the salary amount.');
         }
         if (null !== $minimum && !$minimum->isPositive()) {
@@ -24,9 +23,7 @@ final readonly class PreferredSalary
 
     public static function fromDecimal(?string $minimum, string $currencyCode): self
     {
-        $currency = Currency::of($currencyCode);
-
-        return new self($currency->getCurrencyCode(), null === $minimum ? null : Money::of($minimum, $currency));
+        return new self($currencyCode, null === $minimum ? null : Money::of($minimum, $currencyCode));
     }
 
     public function getCurrencyCode(): string
@@ -41,7 +38,7 @@ final readonly class PreferredSalary
 
     public function getMinimumDecimal(): ?string
     {
-        return null === $this->minimum ? null : (string) $this->minimum->getAmount();
+        return $this->minimum?->amount();
     }
 
     public function evaluate(Money $grossSalary, ?CurrencyConversionRate $conversionRate = null): SalaryFitStatus
@@ -49,22 +46,21 @@ final readonly class PreferredSalary
         if (null === $this->minimum) {
             return SalaryFitStatus::NotConfigured;
         }
-        if ($grossSalary->getCurrency()->getCurrencyCode() !== $this->currencyCode) {
+        if ($grossSalary->currencyCode() !== $this->currencyCode) {
             if (
                 null === $conversionRate
                 || $conversionRate->targetCurrency !== $this->currencyCode
-                || $conversionRate->sourceCurrency !== $grossSalary->getCurrency()->getCurrencyCode()
+                || $conversionRate->sourceCurrency !== $grossSalary->currencyCode()
             ) {
                 return SalaryFitStatus::ConversionUnavailable;
             }
-            $currency = Currency::of($this->currencyCode);
-            $grossSalary = Money::of(
-                $grossSalary->getAmount()->multipliedBy($conversionRate->rate)->toScale($currency->getDefaultFractionDigits(), RoundingMode::HalfUp),
-                $currency,
-            );
+            /** @phpstan-ignore-next-line Both value objects validate decimal strings at construction. */
+            $grossSalary = bcmul($grossSalary->amount(), $conversionRate->rate, 12)
+                    |> (fn ($x) => bcround($x, 2))
+                    |> (fn ($x) => Money::of($x, $this->currencyCode));
         }
 
-        return $grossSalary->isGreaterThanOrEqualTo($this->minimum)
+        return $grossSalary->compare($this->minimum) >= 0
             ? SalaryFitStatus::MeetsTarget
             : SalaryFitStatus::BelowTarget;
     }

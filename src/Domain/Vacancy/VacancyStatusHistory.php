@@ -5,40 +5,21 @@ declare(strict_types=1);
 namespace CurlySanders\JobApplicationTracker\Domain\Vacancy;
 
 use CurlySanders\JobApplicationTracker\Domain\Shared\NormalizesStrings;
-use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
-#[ORM\Table(name: 'vacancy_status_history')]
-#[ORM\UniqueConstraint(name: 'UNIQ_VACANCY_STATUS_HISTORY_OUTBOX_RECORD', columns: ['outbox_record_id'])]
-#[ORM\Index(name: 'IDX_VACANCY_STATUS_HISTORY_VACANCY_AT', columns: ['vacancy_id', 'transitioned_at'])]
 final class VacancyStatusHistory
 {
     use NormalizesStrings;
 
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
+    /** @phpstan-ignore-next-line Doctrine assigns this generated identifier. */
     private ?int $id = null;
 
-    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $notes;
 
-    #[ORM\Column(name: 'transitioned_at')]
     private \DateTimeImmutable $transitionedAt;
 
-    public function __construct(#[ORM\ManyToOne]
-        #[ORM\JoinColumn(name: 'vacancy_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE', foreignKeyName: 'FK_VACANCY_STATUS_HISTORY_VACANCY')]
-        private Vacancy $vacancy,
-
-        #[ORM\Column(name: 'from_status', length: 20, enumType: VacancyStatus::class)]
-        private VacancyStatus $fromStatus,
-
-        #[ORM\Column(name: 'to_status', length: 20, enumType: VacancyStatus::class)]
-        private VacancyStatus $toStatus,
-
+    public function __construct(private Vacancy $vacancy, private VacancyStatus $fromStatus, private VacancyStatus $toStatus,
         ?string $notes,
         ?\DateTimeImmutable $transitionedAt = null,
-        #[ORM\Column(name: 'outbox_record_id', nullable: true)]
         private ?int $outboxRecordId = null,
     ) {
         $this->notes = self::optional($notes);

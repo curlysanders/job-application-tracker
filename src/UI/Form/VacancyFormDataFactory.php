@@ -31,13 +31,13 @@ final class VacancyFormDataFactory
         $data->aboutJob = $vacancy->getAboutJob();
         $data->aboutCompany = $vacancy->getAboutCompany();
         $data->compensationBenefits = $vacancy->getCompensationBenefits();
-        $data->minimumSalary = $vacancy->getSalaryRange()?->getMinimum()?->getAmount()->toString();
-        $data->maximumSalary = $vacancy->getSalaryRange()?->getMaximum()?->getAmount()->toString();
+        $data->minimumSalary = $vacancy->getSalaryRange()?->getMinimum()?->amount();
+        $data->maximumSalary = $vacancy->getSalaryRange()?->getMaximum()?->amount();
         $data->currencyCode = $vacancy->getSalaryRange()?->getCurrencyCode() ?? 'EUR';
         $data->workMode = $vacancy->getWorkMode();
         $data->hybridDetails = $vacancy->getHybridDetails();
         $data->excitement = $vacancy->getExcitement();
-        $data->techStacks->existingTags = implode(',', $vacancy->getTechStacks()->map(static fn ($techStack): string => $techStack->getSlug())->toArray());
+        $data->techStacks->existingTags = implode(',', array_map(static fn ($techStack): string => $techStack->getSlug(), iterator_to_array($vacancy->getTechStacks())));
 
         return $data;
     }

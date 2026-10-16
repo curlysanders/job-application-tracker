@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use Carbon\Doctrine\CarbonImmutableType;
+use CurlySanders\JobApplicationTracker\Infrastructure\Persistence\Doctrine\IdentifierType;
 use CurlySanders\JobApplicationTracker\Infrastructure\Persistence\Doctrine\JsonDomainEventType;
-use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
 return static function (ContainerConfigurator $containerConfigurator): void {
@@ -15,20 +15,18 @@ return static function (ContainerConfigurator $containerConfigurator): void {
             'types' => [
                 'carbon_immutable' => CarbonImmutableType::class,
                 'byte_object' => JsonDomainEventType::class,
+                IdentifierType::NAME => IdentifierType::class,
             ],
         ],
         'orm' => [
             'validate_xml_mapping' => true,
             'naming_strategy' => 'doctrine.orm.naming_strategy.underscore',
-            'identity_generation_preferences' => [
-                PostgreSQLPlatform::class => 'identity',
-            ],
             'auto_mapping' => true,
             'mappings' => [
                 'JobApplicationTracker' => [
-                    'type' => 'attribute',
+                    'type' => 'php',
                     'is_bundle' => false,
-                    'dir' => '%kernel.project_dir%/src/Domain',
+                    'dir' => '%kernel.project_dir%/src/Infrastructure/Persistence/Doctrine/Mapping',
                     'prefix' => 'CurlySanders\JobApplicationTracker\Domain',
                     'alias' => 'JobApplicationTracker',
                 ],

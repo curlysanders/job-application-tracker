@@ -9,10 +9,10 @@ use CurlySanders\JobApplicationTracker\Application\UserProfile\ResumeFileValidat
 use CurlySanders\JobApplicationTracker\Application\UserProfile\ResumeUploaderService;
 use CurlySanders\JobApplicationTracker\Application\UserProfile\ResumeValidationOutcome;
 use CurlySanders\JobApplicationTracker\Application\UserProfile\ValidatePendingResume;
+use CurlySanders\JobApplicationTracker\Domain\Shared\Identifier;
 use CurlySanders\JobApplicationTracker\Domain\User\PendingResume;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Uid\Uuid;
 
 final class ValidatePendingResumeTest extends TestCase
 {
@@ -21,7 +21,7 @@ final class ValidatePendingResumeTest extends TestCase
 
     public function testValidatesAndPromotesTheCurrentCandidate(): void
     {
-        $pending = new PendingResume(Uuid::fromString(self::VALIDATION_ID), 'resumes/user/pending/resume.pdf', 'resume.pdf', 'application/pdf', new \DateTimeImmutable());
+        $pending = new PendingResume(Identifier::fromString(self::VALIDATION_ID), 'resumes/user/pending/resume.pdf', 'resume.pdf', 'application/pdf', new \DateTimeImmutable());
         $repository = $this->createMock(PendingResumeValidationRepository::class);
         $repository->expects(self::once())->method('findPendingResume')->with(self::USER_ID, self::VALIDATION_ID)->willReturn($pending);
         $repository->expects(self::once())->method('completePendingResumeValidation')->with(

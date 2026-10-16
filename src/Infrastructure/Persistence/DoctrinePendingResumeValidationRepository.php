@@ -6,12 +6,12 @@ namespace CurlySanders\JobApplicationTracker\Infrastructure\Persistence;
 
 use CurlySanders\JobApplicationTracker\Application\UserProfile\PendingResumeValidationRepository;
 use CurlySanders\JobApplicationTracker\Application\UserProfile\ResumeValidationOutcome;
+use CurlySanders\JobApplicationTracker\Domain\Shared\Identifier;
 use CurlySanders\JobApplicationTracker\Domain\User\PendingResume;
 use CurlySanders\JobApplicationTracker\Domain\User\User;
 use Doctrine\DBAL\LockMode;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\AsAlias;
-use Symfony\Component\Uid\Uuid;
 
 #[AsAlias(PendingResumeValidationRepository::class)]
 final readonly class DoctrinePendingResumeValidationRepository implements PendingResumeValidationRepository
@@ -22,24 +22,24 @@ final readonly class DoctrinePendingResumeValidationRepository implements Pendin
 
     public function findPendingResume(string $userId, string $validationId): ?PendingResume
     {
-        if (!Uuid::isValid($userId) || !Uuid::isValid($validationId)) {
+        if (!Identifier::isValid($userId) || !Identifier::isValid($validationId)) {
             return null;
         }
 
-        $user = $this->entityManager->find(User::class, Uuid::fromString($userId));
+        $user = $this->entityManager->find(User::class, Identifier::fromString($userId));
         $pending = $user instanceof User ? $user->getPendingResume() : null;
 
-        return null !== $pending && $pending->validationId->equals(Uuid::fromString($validationId)) ? $pending : null;
+        return null !== $pending && $pending->validationId->equals(Identifier::fromString($validationId)) ? $pending : null;
     }
 
     public function completePendingResumeValidation(string $userId, string $validationId, ResumeValidationOutcome $outcome): ?string
     {
-        if (!Uuid::isValid($userId) || !Uuid::isValid($validationId)) {
+        if (!Identifier::isValid($userId) || !Identifier::isValid($validationId)) {
             return null;
         }
 
-        $userId = Uuid::fromString($userId);
-        $validationId = Uuid::fromString($validationId);
+        $userId = Identifier::fromString($userId);
+        $validationId = Identifier::fromString($validationId);
 
         return $this->entityManager->wrapInTransaction(function () use ($userId, $validationId, $outcome): ?string {
             $user = $this->entityManager->find(User::class, $userId, LockMode::PESSIMISTIC_WRITE);

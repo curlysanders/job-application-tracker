@@ -11,6 +11,7 @@ use CurlySanders\JobApplicationTracker\Application\UserProfile\ValidatePendingRe
 use CurlySanders\JobApplicationTracker\Application\Vacancy\RecordVacancyStatusHistory;
 use CurlySanders\JobApplicationTracker\Application\Vacancy\VacancyRepository;
 use CurlySanders\JobApplicationTracker\Application\Vacancy\VacancyStatusHistoryRepository;
+use CurlySanders\JobApplicationTracker\Domain\Shared\Identifier;
 use CurlySanders\JobApplicationTracker\Domain\User\ResumeValidationRequested;
 use CurlySanders\JobApplicationTracker\Domain\User\User;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\Vacancy;
@@ -31,7 +32,6 @@ use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Middleware\MiddlewareInterface;
 use Symfony\Component\Messenger\Middleware\StackInterface;
 use Symfony\Component\Messenger\Stamp\HandledStamp;
-use Symfony\Component\Uid\Uuid;
 
 final class MessagingAdaptersTest extends TestCase
 {
@@ -120,8 +120,8 @@ final class MessagingAdaptersTest extends TestCase
 
     public function testResumeValidationHandlerDelegatesAValidRequestAndRejectsInvalidMetadata(): void
     {
-        $userId = Uuid::v7();
-        $validationId = Uuid::v7();
+        $userId = Identifier::v7();
+        $validationId = Identifier::v7();
         $repository = $this->createMock(PendingResumeValidationRepository::class);
         $repository->expects(self::once())->method('findPendingResume')->with($userId->toRfc4122(), $validationId->toRfc4122())->willReturn(null);
         $service = new ValidatePendingResume($repository, self::createStub(ResumeUploaderService::class), self::createStub(ResumeFileValidator::class), new NullLogger());

@@ -16,8 +16,8 @@ final class SalaryRangeTest extends TestCase
         self::assertNotNull($salaryRange);
 
         self::assertSame('USD', $salaryRange->getCurrencyCode());
-        self::assertSame('4500.10', (string) $salaryRange->getMinimum()?->getAmount());
-        self::assertSame('6000.99', (string) $salaryRange->getMaximum()?->getAmount());
+        self::assertSame('4500.10', $salaryRange->getMinimum()?->amount());
+        self::assertSame('6000.99', $salaryRange->getMaximum()?->amount());
     }
 
     public function testAllowsAnOpenEndedSalaryRange(): void
@@ -25,7 +25,7 @@ final class SalaryRangeTest extends TestCase
         $salaryRange = SalaryRange::fromDecimals(null, '5000.00');
 
         self::assertNull($salaryRange?->getMinimum());
-        self::assertSame('5000.00', (string) $salaryRange?->getMaximum()?->getAmount());
+        self::assertSame('5000.00', $salaryRange?->getMaximum()?->amount());
     }
 
     public function testReturnsNullWhenNoSalaryWasProvided(): void

@@ -23,6 +23,8 @@ final readonly class LocalOllamaCandidateFitProvider implements CandidateFitProv
             CandidateFitReport::class,
         );
 
+        $result->assertValid();
+
         return $result;
     }
 }

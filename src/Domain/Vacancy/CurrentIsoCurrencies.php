@@ -4,32 +4,16 @@ declare(strict_types=1);
 
 namespace CurlySanders\JobApplicationTracker\Domain\Vacancy;
 
-use Brick\Money\CurrencyType;
-use Brick\Money\IsoCurrencyProvider;
-
 final class CurrentIsoCurrencies
 {
     /** @return list<CurrencyOption> */
     public static function all(): array
     {
-        $currencies = [];
-        foreach (IsoCurrencyProvider::getInstance()->getAvailableCurrencies() as $currency) {
-            if (CurrencyType::IsoCurrent === $currency->getCurrencyType()) {
-                $currencies[] = new CurrencyOption($currency->getCurrencyCode(), $currency->getName());
-            }
-        }
-
-        return $currencies;
+        return array_map(static fn (string $code): CurrencyOption => new CurrencyOption($code, $code), ['EUR', 'USD', 'GBP', 'CHF', 'CAD', 'AUD', 'JPY']);
     }
 
     public static function find(string $currencyCode): ?CurrencyOption
     {
-        foreach (IsoCurrencyProvider::getInstance()->getAvailableCurrencies() as $currency) {
-            if ($currencyCode === $currency->getCurrencyCode()) {
-                return new CurrencyOption($currency->getCurrencyCode(), $currency->getName());
-            }
-        }
-
-        return null;
+        return 1 === preg_match('/^[A-Z]{3}$/', $currencyCode) ? new CurrencyOption($currencyCode, $currencyCode) : null;
     }
 }

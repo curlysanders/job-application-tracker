@@ -43,8 +43,10 @@ final class VacancyTest extends TestCase
         $vacancy->replaceTechStacks($php, $symfony);
         $vacancy->replaceTechStacks($symfony);
 
-        self::assertSame('4500.00', (string) $vacancy->getSalaryRange()?->getMinimum()?->getAmount());
-        self::assertSame([$symfony], $vacancy->getTechStacks()->toArray());
+        self::assertSame('4500.00', $vacancy->getSalaryRange()?->getMinimum()?->amount());
+        $vacancy->getTechStacks()
+            |> iterator_to_array(...)
+            |> (static fn ($x) => self::assertSame([$symfony], $x));
     }
 
     public function testRejectsBlankTitlesAndOutOfRangeExcitement(): void

@@ -47,7 +47,7 @@ final class VacancyStatusWorkflowTest extends WebTestCase
         $vacancy = new Vacancy($user, 'Senior PHP Developer');
         $this->entityManager()->persist($vacancy);
         $this->entityManager()->flush();
-        $client->loginUser($user);
+        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user));
 
         $crawler = $client->request('GET', sprintf('/vacancies/%s/edit', $vacancy->getId()->toRfc4122()));
         self::assertSelectorTextContains('.vacancy-status-panel', 'Current status: Bookmarked');
@@ -84,7 +84,7 @@ final class VacancyStatusWorkflowTest extends WebTestCase
         $this->entityManager()->persist($ownedVacancy);
         $this->entityManager()->persist($vacancy);
         $this->entityManager()->flush();
-        $client->loginUser($user);
+        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user));
 
         $client->request('POST', sprintf('/vacancies/%s/status', $ownedVacancy->getId()->toRfc4122()), ['_token' => 'invalid', 'transition' => 'start_applying']);
         self::assertResponseStatusCodeSame(403);
@@ -122,7 +122,7 @@ final class VacancyStatusWorkflowTest extends WebTestCase
     private function createUser(string $email): User
     {
         $user = new User()->setEmail($email);
-        $user->setPassword($this->passwordHasher()->hashPassword($user, 'SecurePassword1!'));
+        $user->setPassword($this->passwordHasher()->hashPassword(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user), 'SecurePassword1!'));
         $this->entityManager()->persist($user);
         $this->entityManager()->flush();
 

@@ -6,6 +6,7 @@ namespace CurlySanders\JobApplicationTracker\Infrastructure\Persistence\Doctrine
 
 use Carbon\CarbonImmutable;
 use CurlySanders\JobApplicationTracker\Domain\Shared\NamedDomainEvent;
+use CurlySanders\JobApplicationTracker\Infrastructure\Messaging\LingodaDomainEvent;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Exception\ValueNotConvertible;
 use Doctrine\DBAL\Types\JsonType;
@@ -18,9 +19,11 @@ final class JsonDomainEventType extends JsonType
             return null;
         }
 
-        if (!$value instanceof NamedDomainEvent) {
+        if (!$value instanceof LingodaDomainEvent || !$value->event() instanceof NamedDomainEvent) {
             throw ValueNotConvertible::new($value, 'byte_object', 'Only named domain events can be stored in the outbox.');
         }
+
+        $value = $value->event();
 
         return parent::convertToDatabaseValue([
             'eventType' => $value::class,
@@ -31,7 +34,7 @@ final class JsonDomainEventType extends JsonType
         ], $platform);
     }
 
-    public function convertToPHPValue(mixed $value, AbstractPlatform $platform): ?NamedDomainEvent
+    public function convertToPHPValue(mixed $value, AbstractPlatform $platform): ?LingodaDomainEvent
     {
         if (null === $value || '' === $value) {
             return null;
@@ -68,7 +71,7 @@ final class JsonDomainEventType extends JsonType
         }
 
         try {
-            return $eventType::reconstitute($entityId, CarbonImmutable::parse($occurredAt), $validatedChangedProperties);
+            return new LingodaDomainEvent($eventType::reconstitute($entityId, CarbonImmutable::parse($occurredAt), $validatedChangedProperties));
         } catch (\Throwable $exception) {
             throw ValueNotConvertible::new($value, 'byte_object', $exception->getMessage(), $exception);
         }

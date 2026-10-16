@@ -7,44 +7,25 @@ namespace CurlySanders\JobApplicationTracker\Domain\Contact;
 use CurlySanders\JobApplicationTracker\Domain\Company\Company;
 use CurlySanders\JobApplicationTracker\Domain\Recruiter\Recruiter;
 use CurlySanders\JobApplicationTracker\Domain\Shared\NormalizesStrings;
-use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
+use CurlySanders\JobApplicationTracker\Domain\Shared\WebAddress;
 
-#[ORM\Entity]
-#[ORM\Table(name: 'direct_contacts')]
-#[ORM\Index(name: 'IDX_DIRECT_CONTACT_COMPANY', columns: ['company_id'])]
-#[ORM\Index(name: 'IDX_DIRECT_CONTACT_RECRUITER', columns: ['recruiter_id'])]
-#[ORM\Index(name: 'IDX_DIRECT_CONTACT_NAME', fields: ['name'])]
 final class DirectContact
 {
     use NormalizesStrings;
 
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
+    /** @phpstan-ignore-next-line Doctrine assigns this generated identifier. */
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'directContacts')]
-    #[ORM\JoinColumn(name: 'company_id', nullable: true, onDelete: 'CASCADE')]
     private ?Company $company = null;
 
-    #[ORM\ManyToOne(inversedBy: 'directContacts')]
-    #[ORM\JoinColumn(name: 'recruiter_id', nullable: true, onDelete: 'CASCADE')]
     private ?Recruiter $recruiter = null;
 
-    #[ORM\Column(length: 255)]
-    #[Assert\NotBlank]
     private string $name;
 
-    #[ORM\Column(length: 180, nullable: true)]
-    #[Assert\Email]
     private ?string $email;
 
-    #[ORM\Column(length: 50, nullable: true)]
     private ?string $phone;
 
-    #[ORM\Column(length: 2048, nullable: true)]
-    #[Assert\Url]
     private ?string $linkedinUrl;
 
     public function __construct(string $name, ?string $email, ?string $phone, ?string $linkedinUrl)
@@ -52,7 +33,10 @@ final class DirectContact
         $this->name = self::required($name, 'A contact name is required.');
         $this->email = self::optional($email);
         $this->phone = self::optional($phone);
-        $this->linkedinUrl = self::optional($linkedinUrl);
+        $this->linkedinUrl = WebAddress::optionalHttpUrl($linkedinUrl, 'A contact LinkedIn URL');
+        if (null !== $this->email && false === filter_var($this->email, FILTER_VALIDATE_EMAIL)) {
+            throw new \InvalidArgumentException('A contact email address must be valid.');
+        }
     }
 
     public function assignToCompany(Company $company): void

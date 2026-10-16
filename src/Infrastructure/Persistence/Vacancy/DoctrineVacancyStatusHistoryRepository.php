@@ -7,8 +7,8 @@ namespace CurlySanders\JobApplicationTracker\Infrastructure\Persistence\Vacancy;
 use CurlySanders\JobApplicationTracker\Application\Vacancy\VacancyStatusHistoryRepository;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\Vacancy;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\VacancyStatusHistory;
+use CurlySanders\JobApplicationTracker\Infrastructure\Persistence\Doctrine\IdentifierType;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\DependencyInjection\Attribute\AsAlias;
 
 #[AsAlias(VacancyStatusHistoryRepository::class)]
@@ -36,7 +36,7 @@ final readonly class DoctrineVacancyStatusHistoryRepository implements VacancySt
             ->select('history')
             ->from(VacancyStatusHistory::class, 'history')
             ->where('IDENTITY(history.vacancy) = :vacancyId')
-            ->setParameter('vacancyId', $vacancy->getId(), UuidType::NAME)
+            ->setParameter('vacancyId', $vacancy->getId(), IdentifierType::NAME)
             ->orderBy('history.transitionedAt', 'DESC')
             ->addOrderBy('history.id', 'DESC')
             ->getQuery()

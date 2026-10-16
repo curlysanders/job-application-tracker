@@ -6,6 +6,7 @@ namespace CurlySanders\JobApplicationTracker\Tests\Infrastructure\Persistence\Do
 
 use CurlySanders\JobApplicationTracker\Domain\User\User;
 use CurlySanders\JobApplicationTracker\Domain\User\UserRegistered;
+use CurlySanders\JobApplicationTracker\Infrastructure\Messaging\LingodaDomainEvent;
 use CurlySanders\JobApplicationTracker\Infrastructure\Persistence\Doctrine\JsonDomainEventType;
 use Doctrine\DBAL\Platforms\MariaDBPlatform;
 use Doctrine\DBAL\Types\Exception\ValueNotConvertible;
@@ -20,22 +21,24 @@ final class JsonDomainEventTypeTest extends TestCase
         $event = $user->getRecordedEvents()[0];
         $type = new JsonDomainEventType();
 
-        $json = $type->convertToDatabaseValue($event, new MariaDBPlatform());
+        $json = $type->convertToDatabaseValue(new LingodaDomainEvent($event), new MariaDBPlatform());
 
         self::assertSame([
             'eventType' => UserRegistered::class,
             'eventVersion' => 1,
             'entityId' => $user->getId()->toRfc4122(),
-            'occurredAt' => $event->getOccurredAt()->format('Y-m-d\\TH:i:s.uP'),
+            'occurredAt' => $event->occurredAt()->format('Y-m-d\\TH:i:s.uP'),
             'changedProperties' => [],
         ], json_decode($json, true, flags: JSON_THROW_ON_ERROR));
 
         $restored = $type->convertToPHPValue($json, new MariaDBPlatform());
 
-        self::assertInstanceOf(UserRegistered::class, $restored);
-        self::assertSame($event->getEntityId(), $restored->getEntityId());
-        self::assertSame($event->getOccurredAt()->format('Y-m-d\\TH:i:s.uP'), $restored->getOccurredAt()->format('Y-m-d\\TH:i:s.uP'));
-        self::assertSame([], $restored->changedProperties);
+        self::assertInstanceOf(LingodaDomainEvent::class, $restored);
+        $restoredEvent = $restored->event();
+        self::assertInstanceOf(UserRegistered::class, $restoredEvent);
+        self::assertSame($event->aggregateId()->toRfc4122(), $restoredEvent->aggregateId()->toRfc4122());
+        self::assertSame($event->occurredAt()->format('Y-m-d\\TH:i:s.uP'), $restoredEvent->occurredAt()->format('Y-m-d\\TH:i:s.uP'));
+        self::assertSame([], $restoredEvent->changedProperties);
     }
 
     public function testRejectsNonEventsAndMalformedPayloads(): void

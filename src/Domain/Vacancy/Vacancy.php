@@ -6,147 +6,93 @@ namespace CurlySanders\JobApplicationTracker\Domain\Vacancy;
 
 use CurlySanders\JobApplicationTracker\Domain\Company\Company;
 use CurlySanders\JobApplicationTracker\Domain\Recruiter\Recruiter;
+use CurlySanders\JobApplicationTracker\Domain\Shared\Identifier;
 use CurlySanders\JobApplicationTracker\Domain\Shared\NormalizesStrings;
 use CurlySanders\JobApplicationTracker\Domain\Shared\RecordsDomainEvents;
+use CurlySanders\JobApplicationTracker\Domain\Shared\RecordsEvents;
 use CurlySanders\JobApplicationTracker\Domain\TechStack\TechStack;
 use CurlySanders\JobApplicationTracker\Domain\User\User;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping as ORM;
-use Lingoda\DomainEventsBundle\Domain\Model\DomainEventAware;
-use Symfony\Bridge\Doctrine\Types\UuidType;
-use Symfony\Component\Uid\Uuid;
 
-#[ORM\Entity]
-#[ORM\Table(name: 'vacancies')]
-#[ORM\Index(name: 'IDX_VACANCIES_DASHBOARD', columns: ['user_id', 'archived', 'date_added'])]
-#[ORM\Index(name: 'IDX_VACANCIES_DASHBOARD_STATUS', columns: ['user_id', 'archived', 'status', 'date_added'])]
-#[ORM\Index(name: 'IDX_VACANCIES_REMINDERS', columns: ['user_id', 'archived', 'next_action_at'])]
-#[ORM\Index(name: 'IDX_VACANCIES_COMPANY', columns: ['company_id'])]
-#[ORM\Index(name: 'IDX_VACANCIES_RECRUITER', columns: ['recruiter_id'])]
-final class Vacancy implements DomainEventAware
+final class Vacancy implements RecordsEvents
 {
     use NormalizesStrings;
     use RecordsDomainEvents;
 
-    #[ORM\Id]
-    #[ORM\Column(type: UuidType::NAME, unique: true)]
-    private Uuid $id;
+    private Identifier $id;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?Company $company = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?Recruiter $recruiter = null;
 
-    /** @var Collection<int, TechStack> */
-    #[ORM\ManyToMany(targetEntity: TechStack::class)]
-    #[ORM\JoinTable(
-        name: 'vacancy_tech_stacks',
-        foreignKeyName: 'FK_VACANCY_TECH_STACKS_VACANCY',
-        inverseForeignKeyName: 'FK_VACANCY_TECH_STACKS_TECH_STACK',
-    )]
-    private Collection $techStacks;
+    /** @var list<TechStack>|(\ArrayAccess<int, TechStack>&\Traversable<int, TechStack>) */
+    private array|(\ArrayAccess&\Traversable) $techStacks;
 
-    #[ORM\Column(length: 255)]
     private string $title;
 
-    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $fullText = null;
 
-    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $requirements = null;
 
-    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $responsibilities = null;
 
-    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $preferredQualifications = null;
 
-    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $aboutJob = null;
 
-    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $aboutCompany = null;
 
-    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $compensationBenefits = null;
 
     /** @var list<string> */
-    #[ORM\Column]
     private array $sourceUrls = [];
 
-    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $howToApply = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
     private ?string $location = null;
 
-    #[ORM\Column(name: 'min_salary', type: 'decimal', precision: 12, scale: 2, nullable: true)]
     private ?string $minimumSalary = null;
 
-    #[ORM\Column(name: 'max_salary', type: 'decimal', precision: 12, scale: 2, nullable: true)]
     private ?string $maximumSalary = null;
 
-    #[ORM\Column(length: 3)]
     private string $currencyCode = 'EUR';
 
-    #[ORM\Column(length: 20, nullable: true, enumType: WorkMode::class)]
     private ?WorkMode $workMode = null;
 
-    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $hybridDetails = null;
 
-    #[ORM\Column]
     private \DateTimeImmutable $dateAdded;
 
-    #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $datePosted = null;
 
-    #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $deadline = null;
 
-    #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $dateApplied = null;
 
-    #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $nextActionAt = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
     private ?string $nextActionTitle = null;
 
-    #[ORM\Column(length: 20, enumType: VacancyStatus::class)]
     private VacancyStatus $status = VacancyStatus::Bookmarked;
 
-    #[ORM\Column]
     private bool $archived = false;
 
-    #[ORM\Column(nullable: true)]
     private ?int $excitement = null;
 
-    #[ORM\Column(length: 20, nullable: true, enumType: ContractType::class)]
     private ?ContractType $contractType = null;
 
-    #[ORM\Column(length: 20, nullable: true, enumType: ApplicationSource::class)]
     private ?ApplicationSource $applicationSource = null;
 
-    #[ORM\Column(type: 'text', nullable: true)]
+    /** @phpstan-ignore-next-line Persisted terminal state is populated by workflow infrastructure. */
     private ?string $terminalReason = null;
 
-    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $scratchpadNotes = null;
 
-    public function __construct(
-        #[ORM\ManyToOne]
-        #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
-        private User $user, string $title)
+    public function __construct(private User $user, string $title)
     {
-        $this->id = Uuid::v7();
+        $this->id = Identifier::v7();
         $this->title = self::required($title, 'A vacancy title is required.');
         $this->dateAdded = new \DateTimeImmutable();
-        $this->techStacks = new ArrayCollection();
+        $this->techStacks = [];
     }
 
     public function updateTitle(string $title): void
@@ -209,16 +155,24 @@ final class Vacancy implements DomainEventAware
             return;
         }
 
-        $this->minimumSalary = $salaryRange->getMinimum()?->getAmount()->toString();
-        $this->maximumSalary = (string) $salaryRange->getMaximum()?->getAmount()->toString();
+        $this->minimumSalary = $salaryRange->getMinimum()?->amount();
+        $this->maximumSalary = $salaryRange->getMaximum()?->amount();
         $this->currencyCode = $salaryRange->getCurrencyCode();
     }
 
     public function replaceTechStacks(TechStack ...$techStacks): void
     {
-        $this->techStacks->clear();
+        if (is_array($this->techStacks)) {
+            $this->techStacks = array_values($techStacks);
+
+            return;
+        }
+
+        foreach ($this->techStacks as $key => $techStack) {
+            unset($this->techStacks[$key]);
+        }
         foreach ($techStacks as $techStack) {
-            $this->techStacks->add($techStack);
+            $this->techStacks[] = $techStack;
         }
     }
 
@@ -249,7 +203,7 @@ final class Vacancy implements DomainEventAware
         $this->recordEvent(new VacancyNextActionUpdated($this->id, []));
     }
 
-    public function getId(): Uuid
+    public function getId(): Identifier
     {
         return $this->id;
     }
@@ -298,6 +252,11 @@ final class Vacancy implements DomainEventAware
     public function getTitle(): string
     {
         return $this->title;
+    }
+
+    public function getTerminalReason(): ?string
+    {
+        return $this->terminalReason;
     }
 
     public function getCompany(): ?Company
@@ -433,8 +392,8 @@ final class Vacancy implements DomainEventAware
         return SalaryRange::fromDecimals($this->minimumSalary, $this->maximumSalary, $this->currencyCode);
     }
 
-    /** @return Collection<int, TechStack> */
-    public function getTechStacks(): Collection
+    /** @return iterable<int, TechStack> */
+    public function getTechStacks(): iterable
     {
         return $this->techStacks;
     }

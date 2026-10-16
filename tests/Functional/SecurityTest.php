@@ -82,7 +82,7 @@ final class SecurityTest extends WebTestCase
         self::assertInstanceOf(User::class, $user);
         self::assertSame('sander@example.com', $user->getEmail());
         self::assertNotSame('SecurePassword1!', $user->getPassword());
-        self::assertTrue($this->passwordHasher()->isPasswordValid($user, 'SecurePassword1!'));
+        self::assertTrue($this->passwordHasher()->isPasswordValid(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user), 'SecurePassword1!'));
     }
 
     public function testRegistrationRejectsPasswordThatDoesNotMeetPolicy(): void
@@ -169,7 +169,7 @@ final class SecurityTest extends WebTestCase
     public function testAuthenticatedUserIsRedirectedAwayFromLogin(): void
     {
         $client = self::createClient();
-        $client->loginUser($this->createUser('already-authenticated@example.com'));
+        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($this->createUser('already-authenticated@example.com')));
 
         $client->request('GET', '/login');
 
@@ -180,7 +180,7 @@ final class SecurityTest extends WebTestCase
     {
         $user = new User()->setEmail($email);
         $passwordHasher = $this->passwordHasher();
-        $user->setPassword($passwordHasher->hashPassword($user, 'SecurePassword1!'));
+        $user->setPassword($passwordHasher->hashPassword(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user), 'SecurePassword1!'));
 
         $entityManager = $this->entityManager();
         $entityManager->persist($user);

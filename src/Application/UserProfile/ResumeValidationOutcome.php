@@ -17,6 +17,10 @@ final readonly class ResumeValidationOutcome
 
     public static function invalid(string $failure): self
     {
+        if ('' === trim($failure)) {
+            throw new \InvalidArgumentException('An invalid resume outcome requires a failure message.');
+        }
+
         return new self(false, $failure);
     }
 }

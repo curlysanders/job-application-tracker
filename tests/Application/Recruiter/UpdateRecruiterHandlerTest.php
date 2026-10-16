@@ -34,7 +34,7 @@ final class UpdateRecruiterHandlerTest extends TestCase
         self::assertSame('Talent Europe', $recruiter->getAgencyName());
         self::assertSame('https://talent-europe.example', $recruiter->getWebsite());
         self::assertCount(1, $recruiter->getDirectContacts());
-        $contact = $recruiter->getDirectContacts()->first();
+        $contact = iterator_to_array($recruiter->getDirectContacts())[0] ?? null;
         self::assertInstanceOf(DirectContact::class, $contact);
         self::assertSame('Ada Recruiter', $contact->getName());
     }
