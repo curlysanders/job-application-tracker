@@ -9,16 +9,16 @@ use CurlySanders\JobApplicationTracker\Application\Vacancy\Overview\VacancyOverv
 use CurlySanders\JobApplicationTracker\Application\Vacancy\Overview\VacancyOverviewFilter;
 use CurlySanders\JobApplicationTracker\Application\Vacancy\Overview\VacancyOverviewRepository;
 use CurlySanders\JobApplicationTracker\Application\Vacancy\Overview\VacancyOverviewVacancy;
+use CurlySanders\JobApplicationTracker\Domain\Shared\Identifier;
 use CurlySanders\JobApplicationTracker\Domain\User\PreferredSalary;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\SalaryRange;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\Vacancy;
+use CurlySanders\JobApplicationTracker\Infrastructure\Persistence\Doctrine\IdentifierType;
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
-use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\DependencyInjection\Attribute\AsAlias;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Workflow\WorkflowInterface;
 
 #[AsAlias(VacancyOverviewRepository::class)]
@@ -49,7 +49,7 @@ final readonly class DoctrineVacancyOverviewRepository implements VacancyOvervie
             ->setMaxResults(VacancyOverviewFilter::PAGE_SIZE)
             ->getQuery()
             ->getScalarResult();
-        $ids = array_map(static fn (array $row): string => Uuid::fromBinary($row['id'])->toRfc4122(), $rows);
+        $ids = array_map(static fn (array $row): string => Identifier::fromBinary($row['id'])->toRfc4122(), $rows);
 
         if ([] === $ids) {
             return new VacancyOverview([], $total, $page, VacancyOverviewFilter::PAGE_SIZE);
@@ -63,7 +63,7 @@ final readonly class DoctrineVacancyOverviewRepository implements VacancyOvervie
             ->leftJoin('vacancy.recruiter', 'recruiter')
             ->leftJoin('vacancy.techStacks', 'techStack')
             ->where('vacancy.id IN (:ids)')
-            ->setParameter('ids', array_map(static fn (string $id): string => Uuid::fromString($id)->toBinary(), $ids), ArrayParameterType::BINARY)
+            ->setParameter('ids', array_map(static fn (string $id): string => Identifier::fromString($id)->toBinary(), $ids), ArrayParameterType::BINARY)
             ->getQuery()
             ->getResult();
         $byId = [];
@@ -86,7 +86,7 @@ final readonly class DoctrineVacancyOverviewRepository implements VacancyOvervie
             ->leftJoin('vacancy.techStacks', 'techStack')
             ->where('IDENTITY(vacancy.user) = :userId')
             ->andWhere('vacancy.archived = :archived')
-            ->setParameter('userId', Uuid::fromString($userId), UuidType::NAME)
+            ->setParameter('userId', Identifier::fromString($userId), IdentifierType::NAME)
             ->setParameter('archived', $filter->archived);
 
         if (null !== $filter->query) {
@@ -143,7 +143,7 @@ final readonly class DoctrineVacancyOverviewRepository implements VacancyOvervie
             $vacancy->getCompany()?->getName(),
             $vacancy->getRecruiter()?->getAgencyName(),
             $vacancy->getWorkMode(),
-            array_values($vacancy->getTechStacks()->map(static fn ($techStack): string => $techStack->getName())->toArray()),
+            array_values(array_map(static fn ($techStack): string => $techStack->getName(), iterator_to_array($vacancy->getTechStacks()))),
             $vacancy->getExcitement(),
             $this->salaryLabel($range),
             $vacancy->getNextActionTitle(),
@@ -162,10 +162,10 @@ final readonly class DoctrineVacancyOverviewRepository implements VacancyOvervie
             return SalaryFit::Unknown;
         }
         $maximum = $range->getMaximum();
-        if (null !== $maximum && $maximum->isLessThan($target)) {
+        if (null !== $maximum && $maximum->compare($target) < 0) {
             return SalaryFit::BelowTarget;
         }
-        if ((null !== $maximum && $maximum->isGreaterThanOrEqualTo($target)) || (null === $maximum && null !== $range->getMinimum() && $range->getMinimum()->isGreaterThanOrEqualTo($target))) {
+        if ((null !== $maximum && $maximum->compare($target) >= 0) || (null === $maximum && null !== $range->getMinimum() && $range->getMinimum()->compare($target) >= 0)) {
             return SalaryFit::MeetsTarget;
         }
 
@@ -177,8 +177,8 @@ final readonly class DoctrineVacancyOverviewRepository implements VacancyOvervie
         if (null === $range) {
             return null;
         }
-        $minimum = $range->getMinimum()?->getAmount()->toString();
-        $maximum = $range->getMaximum()?->getAmount()->toString();
+        $minimum = $range->getMinimum()?->amount();
+        $maximum = $range->getMaximum()?->amount();
 
         return $range->getCurrencyCode().' '.($minimum ?? '—').(null === $maximum ? '' : ' – '.$maximum);
     }

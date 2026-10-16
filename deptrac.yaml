@@ -95,11 +95,6 @@ deptrac:
             - Psr
             - PHP
         Domain:
-            - Symfony
-            - Doctrine
-            - Brick
-            - Carbon
-            - Lingoda
             - PHP
         Infrastructure:
             - Application

@@ -20,5 +20,11 @@ final readonly class VacancyOverviewFilter
         public bool $archived,
         public int $page,
     ) {
+        if ($page < 1) {
+            throw new \InvalidArgumentException('The page must be at least 1.');
+        }
+        if (null !== $excitement && ($excitement < 0 || $excitement > 5)) {
+            throw new \InvalidArgumentException('Excitement must be between 0 and 5.');
+        }
     }
 }

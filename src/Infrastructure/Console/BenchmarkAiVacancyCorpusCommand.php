@@ -10,6 +10,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 #[AsCommand(name: 'app:ai:benchmark-vacancy-corpus', description: 'Evaluate the selected vacancy extraction provider against the curated corpus.')]
 final readonly class BenchmarkAiVacancyCorpusCommand
@@ -17,6 +18,7 @@ final readonly class BenchmarkAiVacancyCorpusCommand
     public function __construct(
         private VacancyExtractionProvider $provider,
         private VacancyCorpusEvaluator $evaluator,
+        #[Autowire(param: 'kernel.project_dir')]
         private string $projectDir,
     ) {
     }

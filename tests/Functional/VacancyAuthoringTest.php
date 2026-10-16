@@ -39,7 +39,7 @@ final class VacancyAuthoringTest extends WebTestCase
         $this->entityManager()->persist($recruiter);
         $this->entityManager()->persist($php);
         $this->entityManager()->flush();
-        $client->loginUser($user);
+        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user));
 
         $crawler = $client->request('GET', '/vacancies/new');
         self::assertResponseIsSuccessful();
@@ -59,10 +59,10 @@ final class VacancyAuthoringTest extends WebTestCase
         self::assertSame('Build reliable APIs.', $vacancy->getRequirements());
         $salaryRange = $vacancy->getSalaryRange();
         self::assertNotNull($salaryRange);
-        self::assertSame('4500.00', $salaryRange->getMinimum()?->getAmount()->toString());
-        self::assertSame('5500.00', $salaryRange->getMaximum()?->getAmount()->toString());
+        self::assertSame('4500.00', $salaryRange->getMinimum()?->amount());
+        self::assertSame('5500.00', $salaryRange->getMaximum()?->amount());
         self::assertSame(WorkMode::Hybrid, $vacancy->getWorkMode());
-        self::assertSame(['php', 'symfony'], $vacancy->getTechStacks()->map(static fn (TechStack $tag): string => $tag->getSlug())->toArray());
+        self::assertSame(['php', 'symfony'], array_map(static fn (TechStack $tag): string => $tag->getSlug(), iterator_to_array($vacancy->getTechStacks())));
         self::assertInstanceOf(TechStack::class, $this->entityManager()->getRepository(TechStack::class)->findOneBy(['slug' => 'symfony']));
 
         $crawler = $client->request('GET', sprintf('/vacancies/%s/edit', $vacancy->getId()->toRfc4122()));
@@ -84,7 +84,7 @@ final class VacancyAuthoringTest extends WebTestCase
     {
         $client = self::createClient();
         $user = $this->createUser('vacancy-validation@example.com');
-        $client->loginUser($user);
+        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user));
         $crawler = $client->request('GET', '/vacancies/new');
         self::assertResponseIsSuccessful();
         $data = $this->formData($crawler, null, null, null, 'Invalid salary');
@@ -112,7 +112,7 @@ final class VacancyAuthoringTest extends WebTestCase
         $this->entityManager()->persist($company);
         $this->entityManager()->persist($recruiter);
         $this->entityManager()->flush();
-        $client->loginUser($user);
+        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user));
 
         $client->request('GET', '/vacancies/new');
 
@@ -145,7 +145,7 @@ final class VacancyAuthoringTest extends WebTestCase
     private function createUser(string $email): User
     {
         $user = new User()->setEmail($email);
-        $user->setPassword($this->passwordHasher()->hashPassword($user, 'SecurePassword1!'));
+        $user->setPassword($this->passwordHasher()->hashPassword(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user), 'SecurePassword1!'));
         $this->entityManager()->persist($user);
         $this->entityManager()->flush();
 

@@ -26,7 +26,7 @@ final class TechStackAutocompleteTest extends WebTestCase
     public function testAutocompleteReturnsMatchingTagsAndCategories(): void
     {
         $client = self::createClient();
-        $client->loginUser($this->createUser('tech-stack@example.com'));
+        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($this->createUser('tech-stack@example.com')));
         $this->entityManager()->persist(new TechStack('PHP', 'Backend'));
         $this->entityManager()->persist(new TechStack('PHPUnit', 'Testing'));
         $this->entityManager()->flush();
@@ -47,7 +47,7 @@ final class TechStackAutocompleteTest extends WebTestCase
     public function testAutocompletePaginatesTechnologiesAndCategories(): void
     {
         $client = self::createClient();
-        $client->loginUser($this->createUser('paginated-tech-stack@example.com'));
+        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($this->createUser('paginated-tech-stack@example.com')));
 
         for ($number = 1; $number <= 21; ++$number) {
             $this->entityManager()->persist(new TechStack(
@@ -101,7 +101,7 @@ final class TechStackAutocompleteTest extends WebTestCase
     private function createUser(string $email): User
     {
         $user = new User()->setEmail($email);
-        $user->setPassword($this->passwordHasher()->hashPassword($user, 'SecurePassword1!'));
+        $user->setPassword($this->passwordHasher()->hashPassword(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user), 'SecurePassword1!'));
         $this->entityManager()->persist($user);
         $this->entityManager()->flush();
 

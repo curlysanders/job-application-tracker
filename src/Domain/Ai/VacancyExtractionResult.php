@@ -4,15 +4,23 @@ declare(strict_types=1);
 
 namespace CurlySanders\JobApplicationTracker\Domain\Ai;
 
-use Symfony\Component\Validator\Constraints as Assert;
-
 final class VacancyExtractionResult
 {
     /** @var list<VacancyFieldProposal> */
-    #[Assert\Valid]
     public array $proposals = [];
 
     /** @var list<TechStackSuggestion> */
-    #[Assert\Valid]
     public array $techStacks = [];
+
+    public function assertValid(): void
+    {
+        AiValidation::listOf($this->proposals, VacancyFieldProposal::class, 'Proposals');
+        AiValidation::listOf($this->techStacks, TechStackSuggestion::class, 'Technology suggestions');
+        foreach ($this->proposals as $proposal) {
+            $proposal->assertValid();
+        }
+        foreach ($this->techStacks as $suggestion) {
+            $suggestion->assertValid();
+        }
+    }
 }

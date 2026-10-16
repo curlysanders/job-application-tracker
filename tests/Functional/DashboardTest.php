@@ -11,9 +11,9 @@ use CurlySanders\JobApplicationTracker\Domain\Vacancy\SalaryRange;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\Vacancy;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\VacancyArchived;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\VacancyStatus;
+use CurlySanders\JobApplicationTracker\Infrastructure\Persistence\Doctrine\IdentifierType;
 use Doctrine\ORM\EntityManagerInterface;
 use Lingoda\DomainEventsBundle\Infra\Doctrine\Entity\OutboxRecord;
-use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
@@ -39,11 +39,11 @@ final class DashboardTest extends WebTestCase
         $this->entityManager()->getConnection()->executeStatement(
             'UPDATE vacancies SET archived = 1 WHERE id = :id',
             ['id' => $archived->getId()],
-            ['id' => UuidType::NAME],
+            ['id' => IdentifierType::NAME],
         );
         $this->createVacancy($this->createUser('other-dashboard@example.com'), 'Private vacancy', VacancyStatus::Applying);
 
-        $client->loginUser($user);
+        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user));
         $crawler = $client->request('GET', '/');
 
         self::assertResponseIsSuccessful();
@@ -85,7 +85,7 @@ final class DashboardTest extends WebTestCase
     {
         $client = self::createClient();
         $user = $this->createUser('invalid-dashboard@example.com');
-        $client->loginUser($user);
+        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user));
 
         $client->request('GET', '/?status=I_WITHDREW');
         self::assertResponseIsSuccessful();
@@ -102,7 +102,7 @@ final class DashboardTest extends WebTestCase
             $this->createVacancy($user, sprintf('Pagination vacancy %02d', $number), VacancyStatus::Bookmarked);
         }
 
-        $client->loginUser($user);
+        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user));
         $client->request('GET', '/');
 
         self::assertResponseIsSuccessful();
@@ -134,10 +134,10 @@ final class DashboardTest extends WebTestCase
         $this->entityManager()->getConnection()->executeStatement(
             'UPDATE vacancies SET work_mode = :mode WHERE id = :id',
             ['mode' => 'REMOTE', 'id' => $meetsTarget->getId()],
-            ['id' => UuidType::NAME],
+            ['id' => IdentifierType::NAME],
         );
 
-        $client->loginUser($user);
+        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user));
         $client->request('GET', '/?q=symfony&excitement=4&work_mode=REMOTE&salary_fit=MEETS_TARGET');
 
         self::assertResponseIsSuccessful();
@@ -157,7 +157,7 @@ final class DashboardTest extends WebTestCase
         $client = self::createClient();
         $user = $this->createUser('actions-dashboard@example.com');
         $vacancy = $this->createVacancy($user, 'Action vacancy', VacancyStatus::Bookmarked);
-        $client->loginUser($user);
+        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user));
         $crawler = $client->request('GET', '/');
         $archiveToken = $crawler->filter('form[action$="/archive"] input[name="_token"]')->attr('value');
         self::assertNotNull($archiveToken);
@@ -226,7 +226,7 @@ final class DashboardTest extends WebTestCase
     private function createUser(string $email): User
     {
         $user = new User()->setEmail($email);
-        $user->setPassword($this->passwordHasher()->hashPassword($user, 'SecurePassword1!'));
+        $user->setPassword($this->passwordHasher()->hashPassword(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user), 'SecurePassword1!'));
         $this->entityManager()->persist($user);
         $this->entityManager()->flush();
 

@@ -6,10 +6,10 @@ namespace CurlySanders\JobApplicationTracker\Infrastructure\Persistence\Company;
 
 use CurlySanders\JobApplicationTracker\Application\Company\CompanyRepository;
 use CurlySanders\JobApplicationTracker\Domain\Company\Company;
+use CurlySanders\JobApplicationTracker\Domain\Shared\Identifier;
+use CurlySanders\JobApplicationTracker\Infrastructure\Persistence\Doctrine\IdentifierType;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\DependencyInjection\Attribute\AsAlias;
-use Symfony\Component\Uid\Uuid;
 
 #[AsAlias(CompanyRepository::class)]
 final readonly class DoctrineCompanyRepository implements CompanyRepository
@@ -20,19 +20,19 @@ final readonly class DoctrineCompanyRepository implements CompanyRepository
 
     public function findOwnedBy(string $companyId, string $userId): ?Company
     {
-        if (!Uuid::isValid($companyId) || !Uuid::isValid($userId)) {
+        if (!Identifier::isValid($companyId) || !Identifier::isValid($userId)) {
             return null;
         }
 
         return $this->entityManager->getRepository(Company::class)->findOneBy([
-            'id' => Uuid::fromString($companyId),
-            'user' => Uuid::fromString($userId),
+            'id' => Identifier::fromString($companyId),
+            'user' => Identifier::fromString($userId),
         ]);
     }
 
     public function searchOwnedBy(string $userId, string $query): array
     {
-        if (!Uuid::isValid($userId)) {
+        if (!Identifier::isValid($userId)) {
             return [];
         }
 
@@ -41,7 +41,7 @@ final readonly class DoctrineCompanyRepository implements CompanyRepository
             ->from(Company::class, 'company')
             ->leftJoin('company.directContacts', 'contact')
             ->where('IDENTITY(company.user) = :userId')
-            ->setParameter('userId', Uuid::fromString($userId), UuidType::NAME)
+            ->setParameter('userId', Identifier::fromString($userId), IdentifierType::NAME)
             ->orderBy('company.name', 'ASC');
 
         if ('' !== $query) {

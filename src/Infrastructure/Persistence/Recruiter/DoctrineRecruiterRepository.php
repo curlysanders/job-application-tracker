@@ -6,10 +6,10 @@ namespace CurlySanders\JobApplicationTracker\Infrastructure\Persistence\Recruite
 
 use CurlySanders\JobApplicationTracker\Application\Recruiter\RecruiterRepository;
 use CurlySanders\JobApplicationTracker\Domain\Recruiter\Recruiter;
+use CurlySanders\JobApplicationTracker\Domain\Shared\Identifier;
+use CurlySanders\JobApplicationTracker\Infrastructure\Persistence\Doctrine\IdentifierType;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\DependencyInjection\Attribute\AsAlias;
-use Symfony\Component\Uid\Uuid;
 
 #[AsAlias(RecruiterRepository::class)]
 final readonly class DoctrineRecruiterRepository implements RecruiterRepository
@@ -20,19 +20,19 @@ final readonly class DoctrineRecruiterRepository implements RecruiterRepository
 
     public function findOwnedBy(string $recruiterId, string $userId): ?Recruiter
     {
-        if (!Uuid::isValid($recruiterId) || !Uuid::isValid($userId)) {
+        if (!Identifier::isValid($recruiterId) || !Identifier::isValid($userId)) {
             return null;
         }
 
         return $this->entityManager->getRepository(Recruiter::class)->findOneBy([
-            'id' => Uuid::fromString($recruiterId),
-            'user' => Uuid::fromString($userId),
+            'id' => Identifier::fromString($recruiterId),
+            'user' => Identifier::fromString($userId),
         ]);
     }
 
     public function searchOwnedBy(string $userId, string $query): array
     {
-        if (!Uuid::isValid($userId)) {
+        if (!Identifier::isValid($userId)) {
             return [];
         }
 
@@ -41,7 +41,7 @@ final readonly class DoctrineRecruiterRepository implements RecruiterRepository
             ->from(Recruiter::class, 'recruiter')
             ->leftJoin('recruiter.directContacts', 'contact')
             ->where('IDENTITY(recruiter.user) = :userId')
-            ->setParameter('userId', Uuid::fromString($userId), UuidType::NAME)
+            ->setParameter('userId', Identifier::fromString($userId), IdentifierType::NAME)
             ->orderBy('recruiter.agencyName', 'ASC');
 
         if ('' !== $query) {

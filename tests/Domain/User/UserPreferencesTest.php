@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace CurlySanders\JobApplicationTracker\Tests\Domain\User;
 
-use Brick\Money\Money;
+use CurlySanders\JobApplicationTracker\Domain\Shared\Money;
 use CurlySanders\JobApplicationTracker\Domain\User\CurrencyConversionRate;
 use CurlySanders\JobApplicationTracker\Domain\User\PreferredSalary;
 use CurlySanders\JobApplicationTracker\Domain\User\PreferredTransportMode;
@@ -54,6 +54,17 @@ final class UserPreferencesTest extends TestCase
         self::assertSame(
             SalaryFitStatus::ConversionUnavailable,
             $user->evaluatesSalary(Money::of('4600.00', 'EUR')),
+        );
+    }
+
+    public function testConversionRoundsWithExactDecimalArithmetic(): void
+    {
+        $user = new User();
+        $user->updatePreferences(PreferredSalary::fromDecimal('0.02', 'USD'), null, null);
+
+        self::assertSame(
+            SalaryFitStatus::MeetsTarget,
+            $user->evaluatesSalary(Money::of('0.01', 'EUR'), new CurrencyConversionRate('EUR', 'USD', '1.5')),
         );
     }
 

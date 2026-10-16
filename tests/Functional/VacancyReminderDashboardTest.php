@@ -6,9 +6,9 @@ namespace CurlySanders\JobApplicationTracker\Tests\Functional;
 
 use CurlySanders\JobApplicationTracker\Domain\User\User;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\Vacancy;
+use CurlySanders\JobApplicationTracker\Infrastructure\Persistence\Doctrine\IdentifierType;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
@@ -25,11 +25,11 @@ final class VacancyReminderDashboardTest extends WebTestCase
         $this->entityManager()->getConnection()->executeStatement(
             'UPDATE vacancies SET archived = 1 WHERE id = :id',
             ['id' => $archived->getId()],
-            ['id' => UuidType::NAME],
+            ['id' => IdentifierType::NAME],
         );
         $this->vacancy($this->createUser('other-reminders@example.com'), 'Private vacancy', 'Private', new \DateTimeImmutable('yesterday 09:00'));
         $this->entityManager()->clear();
-        $client->loginUser($user);
+        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user));
 
         $client->request('GET', '/');
         self::assertResponseIsSuccessful();
@@ -50,7 +50,7 @@ final class VacancyReminderDashboardTest extends WebTestCase
         $this->entityManager()->getConnection()->executeStatement(
             'UPDATE vacancies SET next_action_title = :title, next_action_at = :at WHERE id = :id',
             ['title' => $nextActionTitle, 'at' => $nextActionAt, 'id' => $vacancy->getId()],
-            ['at' => Types::DATETIME_IMMUTABLE, 'id' => UuidType::NAME],
+            ['at' => Types::DATETIME_IMMUTABLE, 'id' => IdentifierType::NAME],
         );
 
         return $vacancy;
@@ -59,7 +59,7 @@ final class VacancyReminderDashboardTest extends WebTestCase
     private function createUser(string $email): User
     {
         $user = new User()->setEmail($email);
-        $user->setPassword($this->passwordHasher()->hashPassword($user, 'SecurePassword1!'));
+        $user->setPassword($this->passwordHasher()->hashPassword(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user), 'SecurePassword1!'));
         $this->entityManager()->persist($user);
         $this->entityManager()->flush();
 

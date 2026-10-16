@@ -8,12 +8,12 @@ use CurlySanders\JobApplicationTracker\Application\Vacancy\Pipeline\PipelineStat
 use CurlySanders\JobApplicationTracker\Application\Vacancy\Pipeline\VacancyPipeline;
 use CurlySanders\JobApplicationTracker\Application\Vacancy\Pipeline\VacancyPipelineRepository;
 use CurlySanders\JobApplicationTracker\Application\Vacancy\Pipeline\VacancyPipelineVacancy;
+use CurlySanders\JobApplicationTracker\Domain\Shared\Identifier;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\Vacancy;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\VacancyStatus;
+use CurlySanders\JobApplicationTracker\Infrastructure\Persistence\Doctrine\IdentifierType;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\DependencyInjection\Attribute\AsAlias;
-use Symfony\Component\Uid\Uuid;
 
 #[AsAlias(VacancyPipelineRepository::class)]
 final readonly class DoctrineVacancyPipelineRepository implements VacancyPipelineRepository
@@ -32,7 +32,7 @@ final readonly class DoctrineVacancyPipelineRepository implements VacancyPipelin
             ->where('IDENTITY(vacancy.user) = :userId')
             ->andWhere('vacancy.archived = false')
             ->andWhere('vacancy.status IN (:statuses)')
-            ->setParameter('userId', Uuid::fromString($userId), UuidType::NAME)
+            ->setParameter('userId', Identifier::fromString($userId), IdentifierType::NAME)
             ->setParameter('statuses', PipelineStatuses::all())
             ->groupBy('vacancy.status')
             ->getQuery()
@@ -54,7 +54,7 @@ final readonly class DoctrineVacancyPipelineRepository implements VacancyPipelin
             ->where('IDENTITY(vacancy.user) = :userId')
             ->andWhere('vacancy.archived = false')
             ->andWhere('vacancy.status IN (:statuses)')
-            ->setParameter('userId', Uuid::fromString($userId), UuidType::NAME)
+            ->setParameter('userId', Identifier::fromString($userId), IdentifierType::NAME)
             ->setParameter('statuses', PipelineStatuses::all())
             ->orderBy('vacancy.dateAdded', 'DESC')
             ->addOrderBy('vacancy.id', 'DESC');

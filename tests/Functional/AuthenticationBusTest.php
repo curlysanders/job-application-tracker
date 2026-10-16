@@ -33,6 +33,8 @@ final class AuthenticationBusTest extends KernelTestCase
         ]);
         self::assertInstanceOf(OutboxRecord::class, $outboxRecord);
         $event = $outboxRecord->getDomainEvent();
+        self::assertInstanceOf(\CurlySanders\JobApplicationTracker\Infrastructure\Messaging\LingodaDomainEvent::class, $event);
+        $event = $event->event();
         self::assertInstanceOf(UserRegistered::class, $event);
         self::assertSame([], $event->changedProperties);
     }

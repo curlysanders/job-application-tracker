@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace CurlySanders\JobApplicationTracker\UI\Controller;
 
+use CurlySanders\JobApplicationTracker\Application\Authentication\AuthenticatedUserFactory;
 use CurlySanders\JobApplicationTracker\Application\Authentication\Command\RegisterUser;
 use CurlySanders\JobApplicationTracker\Application\Authentication\Exception\UserAlreadyExists;
 use CurlySanders\JobApplicationTracker\Application\Shared\Bus\CommandBus;
@@ -23,6 +24,7 @@ use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Twig\Environment;
 
 final readonly class RegistrationController
@@ -31,6 +33,7 @@ final readonly class RegistrationController
 
     public function __construct(
         private CommandBus $commandBus,
+        private AuthenticatedUserFactory $authenticatedUserFactory,
         private Security $security,
         private FormFactoryInterface $formFactory,
         private Environment $twig,
@@ -77,7 +80,12 @@ final readonly class RegistrationController
             }
             $session->getFlashBag()->add('success', 'Your account has been created.');
 
-            return $this->security->login($user, 'form_login', 'main') ?? new RedirectResponse($this->urlGenerator->generate('app_dashboard'));
+            $authenticatedUser = $this->authenticatedUserFactory->create($user);
+            if (!$authenticatedUser instanceof UserInterface) {
+                throw new \LogicException('The security adapter must return a Symfony user.');
+            }
+
+            return $this->security->login($authenticatedUser, 'form_login', 'main') ?? new RedirectResponse($this->urlGenerator->generate('app_dashboard'));
         }
 
         return $this->renderRegistrationForm($form, $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK);

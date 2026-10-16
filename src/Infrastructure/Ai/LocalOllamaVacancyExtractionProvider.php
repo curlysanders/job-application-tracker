@@ -23,6 +23,8 @@ final readonly class LocalOllamaVacancyExtractionProvider implements VacancyExtr
             VacancyExtractionResult::class,
         );
 
+        $result->assertValid();
+
         return $result;
     }
 }

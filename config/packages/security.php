@@ -2,21 +2,18 @@
 
 declare(strict_types=1);
 
-use CurlySanders\JobApplicationTracker\Domain\User\User;
+use CurlySanders\JobApplicationTracker\Infrastructure\Security\DoctrineSecurityUserProvider;
+use CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 return static function (ContainerConfigurator $containerConfigurator): void {
     $containerConfigurator->extension('security', [
         'password_hashers' => [
-            PasswordAuthenticatedUserInterface::class => 'auto',
+            SecurityUser::class => 'auto',
         ],
         'providers' => [
             'app_user_provider' => [
-                'entity' => [
-                    'class' => User::class,
-                    'property' => 'email',
-                ],
+                'id' => DoctrineSecurityUserProvider::class,
             ],
         ],
         'firewalls' => [
@@ -63,7 +60,7 @@ return static function (ContainerConfigurator $containerConfigurator): void {
     if ('test' === $containerConfigurator->env()) {
         $containerConfigurator->extension('security', [
             'password_hashers' => [
-                PasswordAuthenticatedUserInterface::class => [
+                SecurityUser::class => [
                     'algorithm' => 'auto',
                     'cost' => 4,
                     'time_cost' => 3,

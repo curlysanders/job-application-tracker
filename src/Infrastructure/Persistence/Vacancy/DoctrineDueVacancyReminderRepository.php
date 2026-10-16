@@ -6,11 +6,11 @@ namespace CurlySanders\JobApplicationTracker\Infrastructure\Persistence\Vacancy;
 
 use CurlySanders\JobApplicationTracker\Application\Vacancy\Reminder\DueVacancyReminder;
 use CurlySanders\JobApplicationTracker\Application\Vacancy\Reminder\DueVacancyReminderRepository;
+use CurlySanders\JobApplicationTracker\Domain\Shared\Identifier;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\Vacancy;
+use CurlySanders\JobApplicationTracker\Infrastructure\Persistence\Doctrine\IdentifierType;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\DependencyInjection\Attribute\AsAlias;
-use Symfony\Component\Uid\Uuid;
 
 #[AsAlias(DueVacancyReminderRepository::class)]
 final readonly class DoctrineDueVacancyReminderRepository implements DueVacancyReminderRepository
@@ -31,7 +31,7 @@ final readonly class DoctrineDueVacancyReminderRepository implements DueVacancyR
             ->andWhere('vacancy.nextActionAt < :endExclusive')
             ->orderBy('vacancy.nextActionAt', 'ASC')
             ->addOrderBy('vacancy.id', 'ASC')
-            ->setParameter('userId', Uuid::fromString($userId), UuidType::NAME)
+            ->setParameter('userId', Identifier::fromString($userId), IdentifierType::NAME)
             ->setParameter('endExclusive', $endExclusive)
             ->getQuery()
             ->getResult();
