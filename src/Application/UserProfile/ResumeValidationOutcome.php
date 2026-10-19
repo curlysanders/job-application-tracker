@@ -6,8 +6,10 @@ namespace CurlySanders\JobApplicationTracker\Application\UserProfile;
 
 final readonly class ResumeValidationOutcome
 {
-    private function __construct(public bool $valid, public ?string $failure)
-    {
+    private function __construct(
+        public bool $valid,
+        public ?string $failure,
+    ) {
     }
 
     public static function valid(): self

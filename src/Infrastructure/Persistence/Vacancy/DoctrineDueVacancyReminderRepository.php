@@ -19,8 +19,10 @@ final readonly class DoctrineDueVacancyReminderRepository implements DueVacancyR
     {
     }
 
-    public function forUserDueBefore(string $userId, \DateTimeImmutable $endExclusive): array
-    {
+    public function forUserDueBefore(
+        string $userId,
+        \DateTimeImmutable $endExclusive,
+    ): array {
         /** @var list<Vacancy> $vacancies */
         $vacancies = $this->entityManager->createQueryBuilder()
             ->select('vacancy')
@@ -37,10 +39,10 @@ final readonly class DoctrineDueVacancyReminderRepository implements DueVacancyR
             ->getResult();
 
         return array_map(static function (Vacancy $vacancy): DueVacancyReminder {
-            $id = $vacancy->getId();
-            $nextActionAt = $vacancy->getNextActionAt() ?? throw new \LogicException('Due reminders need a date and time.');
+            $id = $vacancy->id;
+            $nextActionAt = $vacancy->nextActionAt ?? throw new \LogicException('Due reminders need a date and time.');
 
-            return new DueVacancyReminder($id->toRfc4122(), $vacancy->getTitle(), $vacancy->getNextActionTitle(), $nextActionAt);
+            return new DueVacancyReminder($id->toRfc4122(), $vacancy->title, $vacancy->nextActionTitle, $nextActionAt);
         }, $vacancies);
     }
 }

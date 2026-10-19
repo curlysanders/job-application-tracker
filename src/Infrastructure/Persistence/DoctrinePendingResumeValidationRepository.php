@@ -20,8 +20,10 @@ final readonly class DoctrinePendingResumeValidationRepository implements Pendin
     {
     }
 
-    public function findPendingResume(string $userId, string $validationId): ?PendingResume
-    {
+    public function findPendingResume(
+        string $userId,
+        string $validationId,
+    ): ?PendingResume {
         if (!Identifier::isValid($userId) || !Identifier::isValid($validationId)) {
             return null;
         }
@@ -32,8 +34,11 @@ final readonly class DoctrinePendingResumeValidationRepository implements Pendin
         return null !== $pending && $pending->validationId->equals(Identifier::fromString($validationId)) ? $pending : null;
     }
 
-    public function completePendingResumeValidation(string $userId, string $validationId, ResumeValidationOutcome $outcome): ?string
-    {
+    public function completePendingResumeValidation(
+        string $userId,
+        string $validationId,
+        ResumeValidationOutcome $outcome,
+    ): ?string {
         if (!Identifier::isValid($userId) || !Identifier::isValid($validationId)) {
             return null;
         }

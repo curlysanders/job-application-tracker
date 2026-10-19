@@ -6,8 +6,11 @@ namespace CurlySanders\JobApplicationTracker\Domain\User;
 
 final readonly class CurrencyConversionRate
 {
-    public function __construct(public string $sourceCurrency, public string $targetCurrency, public string $rate)
-    {
+    public function __construct(
+        public string $sourceCurrency,
+        public string $targetCurrency,
+        public string $rate,
+    ) {
         if (
             1 !== preg_match('/^[A-Z]{3}$/', $sourceCurrency)
             || 1 !== preg_match('/^[A-Z]{3}$/', $targetCurrency)

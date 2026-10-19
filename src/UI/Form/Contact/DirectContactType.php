@@ -16,8 +16,10 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 /** @extends AbstractType<DirectContactData> */
 final class DirectContactType extends AbstractType
 {
-    public function buildForm(FormBuilderInterface $builder, array $options): void
-    {
+    public function buildForm(
+        FormBuilderInterface $builder,
+        array $options,
+    ): void {
         $builder->add('name', TextType::class, ['label' => 'Name'])->add('email', EmailType::class, ['required' => false, 'label' => 'Email'])->add('phone', TelType::class, ['required' => false, 'label' => 'Phone'])->add('linkedinUrl', UrlType::class, ['required' => false, 'label' => 'LinkedIn URL']);
     }
 

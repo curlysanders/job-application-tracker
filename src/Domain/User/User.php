@@ -15,32 +15,32 @@ final class User implements RecordsEvents
     use NormalizesStrings;
     use RecordsDomainEvents;
 
-    private Identifier $id;
+    private(set) Identifier $id;
 
-    private string $email = '';
+    private(set) string $email = '';
 
     /** @var list<string> */
     private array $roles = [];
 
-    private string $password = '';
+    private(set) string $password = '';
 
-    private \DateTimeImmutable $createdAt;
+    private(set) \DateTimeImmutable $createdAt;
 
-    private ?string $minimumPreferredSalary = null;
+    private(set) ?string $minimumPreferredSalary = null;
 
-    private string $minimumPreferredSalaryCurrency = 'EUR';
+    private(set) string $minimumPreferredSalaryCurrency = 'EUR';
 
-    private ?int $maximumCommuteMinutes = null;
+    private(set) ?int $maximumCommuteMinutes = null;
 
-    private ?PreferredTransportMode $preferredTransportMode = null;
+    private(set) ?PreferredTransportMode $preferredTransportMode = null;
 
-    private ?string $resumeStoragePath = null;
+    private(set) ?string $resumeStoragePath = null;
 
-    private ?string $resumeOriginalFilename = null;
+    private(set) ?string $resumeOriginalFilename = null;
 
-    private ?string $resumeMimeType = null;
+    private(set) ?string $resumeMimeType = null;
 
-    private ?\DateTimeImmutable $resumeUploadedAt = null;
+    private(set) ?\DateTimeImmutable $resumeUploadedAt = null;
 
     private ?string $pendingResumeStoragePath = null;
 
@@ -52,9 +52,9 @@ final class User implements RecordsEvents
 
     private ?Identifier $resumeValidationId = null;
 
-    private ?ResumeValidationStatus $resumeValidationStatus = null;
+    private(set) ?ResumeValidationStatus $resumeValidationStatus = null;
 
-    private ?string $resumeValidationFailure = null;
+    private(set) ?string $resumeValidationFailure = null;
 
     public function __construct()
     {
@@ -62,18 +62,10 @@ final class User implements RecordsEvents
         $this->createdAt = new \DateTimeImmutable();
     }
 
-    public function getId(): Identifier
-    {
-        return $this->id;
-    }
-
-    public function getEmail(): string
-    {
-        return $this->email;
-    }
-
-    public function setEmail(#[\SensitiveParameter] string $email): self
-    {
+    public function setEmail(
+        #[\SensitiveParameter]
+        string $email,
+    ): self {
         $this->email = self::normalizeEmail($email);
         if (false === filter_var($this->email, FILTER_VALIDATE_EMAIL)) {
             throw new \InvalidArgumentException('A valid email address is required.');
@@ -82,8 +74,10 @@ final class User implements RecordsEvents
         return $this;
     }
 
-    public static function normalizeEmail(#[\SensitiveParameter] string $email): string
-    {
+    public static function normalizeEmail(
+        #[\SensitiveParameter]
+        string $email,
+    ): string {
         return mb_strtolower(trim($email));
     }
 
@@ -109,16 +103,13 @@ final class User implements RecordsEvents
         return $this->password;
     }
 
-    public function setPassword(#[\SensitiveParameter] string $password): self
-    {
+    public function setPassword(
+        #[\SensitiveParameter]
+        string $password,
+    ): self {
         $this->password = $password;
 
         return $this;
-    }
-
-    public function getCreatedAt(): \DateTimeImmutable
-    {
-        return $this->createdAt;
     }
 
     public function updatePreferences(
@@ -131,7 +122,7 @@ final class User implements RecordsEvents
         }
 
         $this->minimumPreferredSalary = $preferredSalary->getMinimumDecimal();
-        $this->minimumPreferredSalaryCurrency = $preferredSalary->getCurrencyCode();
+        $this->minimumPreferredSalaryCurrency = $preferredSalary->currencyCode;
         $this->maximumCommuteMinutes = $maximumCommuteMinutes;
         $this->preferredTransportMode = $preferredTransportMode;
         $this->recordEvent(new UserPreferencesUpdated($this->id, []));
@@ -145,18 +136,10 @@ final class User implements RecordsEvents
         );
     }
 
-    public function getMaximumCommuteMinutes(): ?int
-    {
-        return $this->maximumCommuteMinutes;
-    }
-
-    public function getPreferredTransportMode(): ?PreferredTransportMode
-    {
-        return $this->preferredTransportMode;
-    }
-
-    public function evaluatesSalary(Money $grossSalary, ?CurrencyConversionRate $conversionRate = null): SalaryFitStatus
-    {
+    public function evaluatesSalary(
+        Money $grossSalary,
+        ?CurrencyConversionRate $conversionRate = null,
+    ): SalaryFitStatus {
         return $this->getPreferredSalary()->evaluate($grossSalary, $conversionRate);
     }
 
@@ -237,8 +220,10 @@ final class User implements RecordsEvents
         return $previousPath;
     }
 
-    public function rejectPendingResume(Identifier $validationId, string $failure): ?string
-    {
+    public function rejectPendingResume(
+        Identifier $validationId,
+        string $failure,
+    ): ?string {
         $pendingResume = $this->getPendingResume();
         if (null === $pendingResume || !$pendingResume->validationId->equals($validationId)) {
             return null;
@@ -256,36 +241,6 @@ final class User implements RecordsEvents
     public function recordRegistered(): void
     {
         $this->recordEvent(new UserRegistered($this->id, []));
-    }
-
-    public function getResumeStoragePath(): ?string
-    {
-        return $this->resumeStoragePath;
-    }
-
-    public function getResumeOriginalFilename(): ?string
-    {
-        return $this->resumeOriginalFilename;
-    }
-
-    public function getResumeMimeType(): ?string
-    {
-        return $this->resumeMimeType;
-    }
-
-    public function getResumeUploadedAt(): ?\DateTimeImmutable
-    {
-        return $this->resumeUploadedAt;
-    }
-
-    public function getResumeValidationStatus(): ?ResumeValidationStatus
-    {
-        return $this->resumeValidationStatus;
-    }
-
-    public function getResumeValidationFailure(): ?string
-    {
-        return $this->resumeValidationFailure;
     }
 
     private function clearPendingResume(): void

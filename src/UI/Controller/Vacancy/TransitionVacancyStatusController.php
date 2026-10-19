@@ -35,10 +35,12 @@ final readonly class TransitionVacancyStatusController
     }
 
     #[Route('/vacancies/{id}/status', name: 'app_vacancy_transition_status', methods: ['POST'])]
-    public function __invoke(string $id, Request $request): Response
-    {
+    public function __invoke(
+        string $id,
+        Request $request,
+    ): Response {
         $user = $this->requireAuthenticatedUser('Vacancy status changes require an authenticated user.');
-        $userId = $user->getId()->toRfc4122();
+        $userId = $user->id->toRfc4122();
         $this->vacancies->findOwnedBy($id, $userId) ?? throw new NotFoundHttpException('Vacancy not found.');
         $token = $request->request->getString('_token');
         if (!$this->csrfTokenManager->isTokenValid(new CsrfToken(sprintf('vacancy_status_transition_%s', $id), $token))) {
@@ -60,8 +62,11 @@ final readonly class TransitionVacancyStatusController
         return new RedirectResponse($this->returnUrl($request, $id));
     }
 
-    private function flash(Request $request, string $type, string $message): void
-    {
+    private function flash(
+        Request $request,
+        string $type,
+        string $message,
+    ): void {
         $session = $request->getSession();
         if (!$session instanceof FlashBagAwareSessionInterface) {
             throw new \LogicException('Vacancy status changes require a flash-aware session.');
@@ -70,8 +75,10 @@ final readonly class TransitionVacancyStatusController
         $session->getFlashBag()->add($type, $message);
     }
 
-    private function returnUrl(Request $request, string $id): string
-    {
+    private function returnUrl(
+        Request $request,
+        string $id,
+    ): string {
         $return = $request->request->getString('return');
         $path = parse_url($return, PHP_URL_PATH);
         if ('/' === $path || $this->urls->generate('app_vacancy_show', ['id' => $id]) === $path || $this->urls->generate('app_vacancy_edit', ['id' => $id]) === $path) {

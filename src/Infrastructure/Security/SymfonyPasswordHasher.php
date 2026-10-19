@@ -16,8 +16,12 @@ final readonly class SymfonyPasswordHasher implements PasswordHasher
     {
     }
 
-    public function hash(User $user, #[\SensitiveParameter] string $plainPassword): string
-    {
+    public function hash(
+        User $user,
+
+        #[\SensitiveParameter]
+        string $plainPassword,
+    ): string {
         return $this->passwordHasher->hashPassword(new SecurityUser($user), $plainPassword);
     }
 }

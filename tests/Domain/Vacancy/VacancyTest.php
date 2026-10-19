@@ -25,12 +25,12 @@ final class VacancyTest extends TestCase
         $user = new User();
         $vacancy = new Vacancy($user, '  Senior PHP Developer  ');
 
-        self::assertSame($user, $vacancy->getUser());
-        self::assertSame('Senior PHP Developer', $vacancy->getTitle());
-        self::assertSame(VacancyStatus::Bookmarked, $vacancy->getStatus());
-        self::assertFalse($vacancy->isArchived());
+        self::assertSame($user, $vacancy->user);
+        self::assertSame('Senior PHP Developer', $vacancy->title);
+        self::assertSame(VacancyStatus::Bookmarked, $vacancy->status);
+        self::assertFalse($vacancy->archived);
         self::assertNull($vacancy->getSalaryRange());
-        self::assertNull($vacancy->getExcitement());
+        self::assertNull($vacancy->excitement);
     }
 
     public function testReplacesTheSalaryRangeAndTechnologyTags(): void
@@ -43,8 +43,8 @@ final class VacancyTest extends TestCase
         $vacancy->replaceTechStacks($php, $symfony);
         $vacancy->replaceTechStacks($symfony);
 
-        self::assertSame('4500.00', $vacancy->getSalaryRange()?->getMinimum()?->amount());
-        $vacancy->getTechStacks()
+        self::assertSame('4500.00', $vacancy->getSalaryRange()?->minimum?->amount());
+        $vacancy->techStacks
             |> iterator_to_array(...)
             |> (static fn ($x) => self::assertSame([$symfony], $x));
     }
@@ -72,13 +72,13 @@ final class VacancyTest extends TestCase
         $vacancy->updateScratchpadNotes("  # Prepare\n\nAsk about the team.  ");
         $vacancy->updateNextAction('  Prepare interview  ', $nextActionAt);
 
-        self::assertSame("# Prepare\n\nAsk about the team.", $vacancy->getScratchpadNotes());
-        self::assertSame('Prepare interview', $vacancy->getNextActionTitle());
-        self::assertSame($nextActionAt, $vacancy->getNextActionAt());
+        self::assertSame("# Prepare\n\nAsk about the team.", $vacancy->scratchpadNotes);
+        self::assertSame('Prepare interview', $vacancy->nextActionTitle);
+        self::assertSame($nextActionAt, $vacancy->nextActionAt);
 
         $vacancy->updateNextAction(null, null);
-        self::assertNull($vacancy->getNextActionTitle());
-        self::assertNull($vacancy->getNextActionAt());
+        self::assertNull($vacancy->nextActionTitle);
+        self::assertNull($vacancy->nextActionAt);
     }
 
     public function testStateMachineStoresTransitionsThroughTheBackedStatusEnum(): void
@@ -92,7 +92,7 @@ final class VacancyTest extends TestCase
 
         $stateMachine->apply($vacancy, 'start_applying');
 
-        self::assertSame(VacancyStatus::Applying, $vacancy->getStatus());
+        self::assertSame(VacancyStatus::Applying, $vacancy->status);
     }
 
     public function testVacancyFactsRetainLifecycleMetadataAndExcludePrivateContent(): void

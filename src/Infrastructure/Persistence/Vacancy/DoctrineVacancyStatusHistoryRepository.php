@@ -36,7 +36,7 @@ final readonly class DoctrineVacancyStatusHistoryRepository implements VacancySt
             ->select('history')
             ->from(VacancyStatusHistory::class, 'history')
             ->where('IDENTITY(history.vacancy) = :vacancyId')
-            ->setParameter('vacancyId', $vacancy->getId(), IdentifierType::NAME)
+            ->setParameter('vacancyId', $vacancy->id, IdentifierType::NAME)
             ->orderBy('history.transitionedAt', 'DESC')
             ->addOrderBy('history.id', 'DESC')
             ->getQuery()

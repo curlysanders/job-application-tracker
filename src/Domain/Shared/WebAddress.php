@@ -6,8 +6,10 @@ namespace CurlySanders\JobApplicationTracker\Domain\Shared;
 
 final class WebAddress
 {
-    public static function optionalHttpUrl(?string $value, string $label): ?string
-    {
+    public static function optionalHttpUrl(
+        ?string $value,
+        string $label,
+    ): ?string {
         $value = null === $value ? null : trim($value);
         if (null === $value || '' === $value) {
             return null;

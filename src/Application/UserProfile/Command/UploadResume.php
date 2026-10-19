@@ -8,7 +8,9 @@ use CurlySanders\JobApplicationTracker\Application\UserProfile\ResumeUpload;
 
 final readonly class UploadResume
 {
-    public function __construct(public string $userId, public ResumeUpload $upload)
-    {
+    public function __construct(
+        public string $userId,
+        public ResumeUpload $upload,
+    ) {
     }
 }

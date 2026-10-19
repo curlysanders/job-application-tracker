@@ -22,7 +22,7 @@ final readonly class SecurityUser implements UserInterface, PasswordAuthenticate
 
     public function getUserIdentifier(): string
     {
-        $email = $this->user->getEmail();
+        $email = $this->user->email;
         if ('' === $email) {
             throw new \LogicException('Authenticated users must have an email address.');
         }

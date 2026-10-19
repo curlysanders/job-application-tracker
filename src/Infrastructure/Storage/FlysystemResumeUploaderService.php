@@ -22,9 +22,11 @@ final readonly class FlysystemResumeUploaderService implements ResumeUploaderSer
     ) {
     }
 
-    public function uploadResume(User $user, ResumeUpload $upload): UploadedResume
-    {
-        $storagePath = sprintf('resumes/%s/pending/%s.%s', $user->getId()->toRfc4122(), Uuid::v7()->toRfc4122(), $upload->extension());
+    public function uploadResume(
+        User $user,
+        ResumeUpload $upload,
+    ): UploadedResume {
+        $storagePath = sprintf('resumes/%s/pending/%s.%s', $user->id->toRfc4122(), Uuid::v7()->toRfc4122(), $upload->extension());
         $this->storage->writeStream($storagePath, $upload->stream);
 
         return new UploadedResume(

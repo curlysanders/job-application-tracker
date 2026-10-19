@@ -37,7 +37,7 @@ final readonly class DashboardController
         if (null === $user) {
             return new Response($this->twig->render('home/index.html.twig'));
         }
-        $userId = $user->getId()->toRfc4122();
+        $userId = $user->id->toRfc4122();
         $overviewRequest = VacancyOverviewRequest::fromRequest($request);
         $tomorrow = $this->clock->now()->setTime(0, 0)->modify('+1 day');
 

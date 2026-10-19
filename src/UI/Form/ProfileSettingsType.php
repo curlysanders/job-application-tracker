@@ -23,8 +23,10 @@ final class ProfileSettingsType extends AbstractType
     {
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options): void
-    {
+    public function buildForm(
+        FormBuilderInterface $builder,
+        array $options,
+    ): void {
         $builder
             ->add('minimumPreferredSalary', TextType::class, [
                 'required' => false,

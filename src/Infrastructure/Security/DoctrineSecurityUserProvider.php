@@ -45,8 +45,10 @@ final readonly class DoctrineSecurityUserProvider implements UserProviderInterfa
         return SecurityUser::class === $class;
     }
 
-    public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
-    {
+    public function upgradePassword(
+        PasswordAuthenticatedUserInterface $user,
+        string $newHashedPassword,
+    ): void {
         if (!$user instanceof SecurityUser) {
             throw new UnsupportedUserException();
         }

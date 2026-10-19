@@ -10,7 +10,10 @@ interface UserRepository
 {
     public function find(string $id): ?User;
 
-    public function findByEmail(#[\SensitiveParameter] string $email): ?User;
+    public function findByEmail(
+        #[\SensitiveParameter]
+        string $email,
+    ): ?User;
 
     public function save(User $user): void;
 }

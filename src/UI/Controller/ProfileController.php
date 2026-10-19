@@ -98,20 +98,22 @@ final readonly class ProfileController
         $profile = new ProfileSettingsData();
         $preferredSalary = $user->getPreferredSalary();
         $profile->minimumPreferredSalary = $preferredSalary->getMinimumDecimal();
-        $profile->minimumPreferredSalaryCurrency = $preferredSalary->getCurrencyCode();
-        $profile->maximumCommuteMinutes = $user->getMaximumCommuteMinutes();
-        $profile->preferredTransportMode = $user->getPreferredTransportMode();
+        $profile->minimumPreferredSalaryCurrency = $preferredSalary->currencyCode;
+        $profile->maximumCommuteMinutes = $user->maximumCommuteMinutes;
+        $profile->preferredTransportMode = $user->preferredTransportMode;
 
         return $profile;
     }
 
     private function authenticatedUserId(User $user): string
     {
-        return $user->getId()->toRfc4122();
+        return $user->id->toRfc4122();
     }
 
-    private function redirectWithSuccessMessage(Request $request, string $message): RedirectResponse
-    {
+    private function redirectWithSuccessMessage(
+        Request $request,
+        string $message,
+    ): RedirectResponse {
         $session = $request->getSession();
         if (!$session instanceof FlashBagAwareSessionInterface) {
             throw new \LogicException('Profile updates require a flash-aware session.');

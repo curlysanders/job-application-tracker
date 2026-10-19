@@ -69,13 +69,17 @@ final readonly class SaveVacancyHandler implements CommandHandler
         return $vacancy;
     }
 
-    private function optionalCompany(?string $id, string $userId): ?Company
-    {
+    private function optionalCompany(
+        ?string $id,
+        string $userId,
+    ): ?Company {
         return null === $id ? null : ($this->companies->findOwnedBy($id, $userId) ?? throw new \LogicException('The selected company no longer exists.'));
     }
 
-    private function optionalRecruiter(?string $id, string $userId): ?Recruiter
-    {
+    private function optionalRecruiter(
+        ?string $id,
+        string $userId,
+    ): ?Recruiter {
         return null === $id ? null : ($this->recruiters->findOwnedBy($id, $userId) ?? throw new \LogicException('The selected recruiter no longer exists.'));
     }
 
@@ -85,7 +89,7 @@ final readonly class SaveVacancyHandler implements CommandHandler
         $resolved = [];
         foreach ($command->existingTechStackSlugs as $slug) {
             $techStack = $this->techStacks->findBySlug($slug) ?? throw new \LogicException('A selected technology no longer exists.');
-            $resolved[$techStack->getSlug()] = $techStack;
+            $resolved[$techStack->slug] = $techStack;
         }
         foreach ($command->newTechStacks as $newTechStack) {
             $slug = TechStack::slug($newTechStack['name']);

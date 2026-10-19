@@ -19,8 +19,10 @@ final class SeedTechStacksCommand extends Command
         parent::__construct();
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    protected function execute(
+        InputInterface $input,
+        OutputInterface $output,
+    ): int {
         $created = $this->commandBus->dispatch(new SeedStandardTechStacks());
         if (!is_int($created)) {
             throw new \LogicException('The technology seed command must return the number of created tags.');

@@ -18,8 +18,10 @@ use Symfony\Component\Validator\Constraints\Regex;
 /** @extends AbstractType<RegistrationData> */
 final class RegistrationType extends AbstractType
 {
-    public function buildForm(FormBuilderInterface $builder, array $options): void
-    {
+    public function buildForm(
+        FormBuilderInterface $builder,
+        array $options,
+    ): void {
         $builder
             ->add('email', EmailType::class, [
                 'attr' => ['autocomplete' => 'email'],

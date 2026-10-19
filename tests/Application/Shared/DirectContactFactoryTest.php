@@ -17,9 +17,9 @@ final class DirectContactFactoryTest extends TestCase
         ]);
 
         self::assertCount(1, $contacts);
-        self::assertSame('Ada Lovelace', $contacts[0]->getName());
-        self::assertSame('ada@example.com', $contacts[0]->getEmail());
-        self::assertSame('+31 6 12345678', $contacts[0]->getPhone());
-        self::assertSame('https://www.linkedin.com/in/ada', $contacts[0]->getLinkedinUrl());
+        self::assertSame('Ada Lovelace', $contacts[0]->name);
+        self::assertSame('ada@example.com', $contacts[0]->email);
+        self::assertSame('+31 6 12345678', $contacts[0]->phone);
+        self::assertSame('https://www.linkedin.com/in/ada', $contacts[0]->linkedinUrl);
     }
 }

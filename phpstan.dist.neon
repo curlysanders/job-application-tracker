@@ -8,3 +8,5 @@ parameters:
         - scripts/benchmark-vacancy-status.php
         - src/
         - tests/
+    scanFiles:
+        - tools/PhpCsFixer/ParameterLayoutFixer.php

@@ -18,8 +18,10 @@ final class NewTechStackType extends AbstractType
     {
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options): void
-    {
+    public function buildForm(
+        FormBuilderInterface $builder,
+        array $options,
+    ): void {
         $builder
             ->add('name', TextType::class, ['label' => 'Technology name'])
             ->add('category', TextType::class, [

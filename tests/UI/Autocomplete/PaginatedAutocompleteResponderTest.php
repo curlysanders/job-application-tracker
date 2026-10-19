@@ -26,7 +26,10 @@ final class PaginatedAutocompleteResponderTest extends TestCase
         $response = $responder->respond(
             Request::create('/tech-stacks/autocomplete?query=%20PHP%20&page=0'),
             'app_tech_stack_autocomplete',
-            static function (string $query, int $page) use (&$requestedQuery, &$requestedPage): PaginatedResults {
+            static function (
+                string $query,
+                int $page,
+            ) use (&$requestedQuery, &$requestedPage): PaginatedResults {
                 $requestedQuery = $query;
                 $requestedPage = $page;
 
@@ -52,7 +55,10 @@ final class PaginatedAutocompleteResponderTest extends TestCase
         $response = $responder->respond(
             Request::create('/tech-stack-categories/autocomplete?query=back&page=2'),
             'app_tech_stack_category_autocomplete',
-            static fn (string $query, int $page): PaginatedResults => new PaginatedResults([$query.$page], false),
+            static fn (
+                string $query,
+                int $page,
+            ): PaginatedResults => new PaginatedResults([$query.$page], false),
             static fn (string $category): array => ['value' => $category, 'text' => $category],
         );
 

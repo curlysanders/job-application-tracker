@@ -31,12 +31,12 @@ final class UpdateRecruiterHandlerTest extends TestCase
         $result = new UpdateRecruiterHandler($repository)($command);
 
         self::assertSame($recruiter, $result);
-        self::assertSame('Talent Europe', $recruiter->getAgencyName());
-        self::assertSame('https://talent-europe.example', $recruiter->getWebsite());
-        self::assertCount(1, $recruiter->getDirectContacts());
-        $contact = iterator_to_array($recruiter->getDirectContacts())[0] ?? null;
+        self::assertSame('Talent Europe', $recruiter->agencyName);
+        self::assertSame('https://talent-europe.example', $recruiter->website);
+        self::assertCount(1, $recruiter->directContacts);
+        $contact = iterator_to_array($recruiter->directContacts)[0] ?? null;
         self::assertInstanceOf(DirectContact::class, $contact);
-        self::assertSame('Ada Recruiter', $contact->getName());
+        self::assertSame('Ada Recruiter', $contact->name);
     }
 
     public function testRejectsUpdatesForADeletedRecruiter(): void

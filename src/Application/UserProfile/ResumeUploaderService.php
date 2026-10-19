@@ -8,7 +8,10 @@ use CurlySanders\JobApplicationTracker\Domain\User\User;
 
 interface ResumeUploaderService
 {
-    public function uploadResume(User $user, ResumeUpload $upload): UploadedResume;
+    public function uploadResume(
+        User $user,
+        ResumeUpload $upload,
+    ): UploadedResume;
 
     /** @return resource */
     public function readResume(string $storagePath): mixed;

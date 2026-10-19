@@ -12,8 +12,11 @@ final class ResumeMetadata
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => true,
     ];
 
-    public static function assertValid(string $storagePath, string $originalFilename, string $mimeType): void
-    {
+    public static function assertValid(
+        string $storagePath,
+        string $originalFilename,
+        string $mimeType,
+    ): void {
         if ('' === trim($storagePath) || '' === trim($originalFilename) || $originalFilename !== basename($originalFilename)) {
             throw new \InvalidArgumentException('Resume storage metadata must contain a path and a filename without directory components.');
         }

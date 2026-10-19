@@ -50,7 +50,7 @@ final class UploadResumeHandlerTest extends TestCase
 
         new UploadResumeHandler($users, $uploader, $logger)(new UploadResume(self::USER_ID, $upload));
 
-        self::assertSame(self::OLD_RESUME_PATH, $user->getResumeStoragePath());
+        self::assertSame(self::OLD_RESUME_PATH, $user->resumeStoragePath);
         self::assertSame(self::NEW_RESUME_PATH, $user->getPendingResume()?->storagePath);
     }
 

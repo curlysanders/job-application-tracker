@@ -14,8 +14,10 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 final readonly class VacancyOverviewRequest
 {
     /** @param array<string, string> $query */
-    private function __construct(public VacancyOverviewFilter $filter, public array $query)
-    {
+    private function __construct(
+        public VacancyOverviewFilter $filter,
+        public array $query,
+    ) {
     }
 
     public static function fromRequest(Request $request): self
@@ -58,8 +60,10 @@ final readonly class VacancyOverviewRequest
         return new self($filter, $parameters);
     }
 
-    private static function optionalString(Request $request, string $name): ?string
-    {
+    private static function optionalString(
+        Request $request,
+        string $name,
+    ): ?string {
         $value = trim($request->query->getString($name));
 
         return '' === $value ? null : $value;
@@ -70,8 +74,11 @@ final readonly class VacancyOverviewRequest
      *
      * @return ?T
      */
-    private static function enum(Request $request, string $name, string $enum): ?\BackedEnum
-    {
+    private static function enum(
+        Request $request,
+        string $name,
+        string $enum,
+    ): ?\BackedEnum {
         $value = self::optionalString($request, $name);
         if (null === $value) {
             return null;

@@ -15,8 +15,10 @@ final class VacancyCorpusEvaluator
     /** @param list<array{id: string, text: string, expected: array<string, string|list<string>>}> $cases
      * @return array{cases: int, valid: int, precision: float, recall: float, f1: float, medianLatencyMs: float, p95LatencyMs: float, maxLatencyMs: float, passed: bool}
      */
-    public function evaluate(array $cases, VacancyExtractionProvider $provider): array
-    {
+    public function evaluate(
+        array $cases,
+        VacancyExtractionProvider $provider,
+    ): array {
         $truePositives = 0;
         $falsePositives = 0;
         $falseNegatives = 0;

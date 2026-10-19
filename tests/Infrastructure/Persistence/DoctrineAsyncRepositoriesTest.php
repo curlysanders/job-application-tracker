@@ -32,22 +32,22 @@ final class DoctrineAsyncRepositoriesTest extends KernelTestCase
         $repository = new DoctrinePendingResumeValidationRepository($entityManager);
 
         self::assertNull($repository->findPendingResume('not-a-uuid', $pending->validationId->toRfc4122()));
-        self::assertSame($pending->storagePath, $repository->findPendingResume($user->getId()->toRfc4122(), $pending->validationId->toRfc4122())?->storagePath);
-        self::assertSame('resumes/current.pdf', $repository->completePendingResumeValidation($user->getId()->toRfc4122(), $pending->validationId->toRfc4122(), ResumeValidationOutcome::valid()));
-        self::assertNull($repository->completePendingResumeValidation($user->getId()->toRfc4122(), $pending->validationId->toRfc4122(), ResumeValidationOutcome::valid()));
+        self::assertSame($pending->storagePath, $repository->findPendingResume($user->id->toRfc4122(), $pending->validationId->toRfc4122())?->storagePath);
+        self::assertSame('resumes/current.pdf', $repository->completePendingResumeValidation($user->id->toRfc4122(), $pending->validationId->toRfc4122(), ResumeValidationOutcome::valid()));
+        self::assertNull($repository->completePendingResumeValidation($user->id->toRfc4122(), $pending->validationId->toRfc4122(), ResumeValidationOutcome::valid()));
 
         $entityManager->clear();
-        $saved = $entityManager->find(User::class, $user->getId());
+        $saved = $entityManager->find(User::class, $user->id);
         self::assertInstanceOf(User::class, $saved);
-        self::assertSame('resumes/pending.pdf', $saved->getResumeStoragePath());
-        self::assertSame(ResumeValidationStatus::Validated, $saved->getResumeValidationStatus());
+        self::assertSame('resumes/pending.pdf', $saved->resumeStoragePath);
+        self::assertSame(ResumeValidationStatus::Validated, $saved->resumeValidationStatus);
 
         $saved->stageResume('resumes/rejected.pdf', 'rejected.pdf', 'application/pdf', new \DateTimeImmutable());
         $entityManager->flush();
         $rejected = $saved->getPendingResume();
         self::assertNotNull($rejected);
-        self::assertSame('resumes/rejected.pdf', $repository->completePendingResumeValidation($saved->getId()->toRfc4122(), $rejected->validationId->toRfc4122(), ResumeValidationOutcome::invalid('Invalid document')));
-        self::assertSame(ResumeValidationStatus::Failed, $saved->getResumeValidationStatus());
+        self::assertSame('resumes/rejected.pdf', $repository->completePendingResumeValidation($saved->id->toRfc4122(), $rejected->validationId->toRfc4122(), ResumeValidationOutcome::invalid('Invalid document')));
+        self::assertSame(ResumeValidationStatus::Failed, $saved->resumeValidationStatus);
     }
 
     public function testVacancyRepositoriesPersistFindAndOrderStatusHistory(): void
@@ -62,20 +62,20 @@ final class DoctrineAsyncRepositoriesTest extends KernelTestCase
         $vacancies->save($vacancy);
 
         self::assertNull($vacancies->find('not-a-uuid'));
-        self::assertSame($vacancy->getId()->toRfc4122(), $vacancies->find($vacancy->getId()->toRfc4122())?->getId()->toRfc4122());
-        self::assertSame($vacancy->getId()->toRfc4122(), $vacancies->findOwnedBy($vacancy->getId()->toRfc4122(), $user->getId()->toRfc4122())?->getId()->toRfc4122());
+        self::assertSame($vacancy->id->toRfc4122(), $vacancies->find($vacancy->id->toRfc4122())?->id->toRfc4122());
+        self::assertSame($vacancy->id->toRfc4122(), $vacancies->findOwnedBy($vacancy->id->toRfc4122(), $user->id->toRfc4122())?->id->toRfc4122());
 
         $history = new DoctrineVacancyStatusHistoryRepository($entityManager);
         $older = new VacancyStatusHistory($vacancy, VacancyStatus::Bookmarked, VacancyStatus::Applying, null, new \DateTimeImmutable('-1 hour'), 101);
         $newer = new VacancyStatusHistory($vacancy, VacancyStatus::Applying, VacancyStatus::Applied, 'Applied', new \DateTimeImmutable(), 102);
         $history->save($older);
         $history->save($newer);
-        self::assertSame(102, $history->findByOutboxRecordId(102)?->getOutboxRecordId());
+        self::assertSame(102, $history->findByOutboxRecordId(102)?->outboxRecordId);
         self::assertNull($history->findByOutboxRecordId(999));
-        self::assertSame([102, 101], array_map(static fn (VacancyStatusHistory $entry): ?int => $entry->getOutboxRecordId(), $history->findForVacancy($vacancy)));
+        self::assertSame([102, 101], array_map(static fn (VacancyStatusHistory $entry): ?int => $entry->outboxRecordId, $history->findForVacancy($vacancy)));
 
         $vacancies->remove($vacancy);
-        self::assertNull($vacancies->find($vacancy->getId()->toRfc4122()));
+        self::assertNull($vacancies->find($vacancy->id->toRfc4122()));
     }
 
     private function entityManager(): EntityManagerInterface

@@ -17,8 +17,11 @@ abstract class NamedDomainEvent implements DomainEvent
     }
 
     /** @param array<string, mixed> $changedProperties */
-    final public static function reconstitute(string $entityId, \DateTimeImmutable $occurredAt, array $changedProperties): static
-    {
+    final public static function reconstitute(
+        string $entityId,
+        \DateTimeImmutable $occurredAt,
+        array $changedProperties,
+    ): static {
         $event = new static(Identifier::fromString($entityId), $changedProperties);
         $event->occurredAt = $occurredAt;
 

@@ -13,9 +13,9 @@ final class TechStackTest extends TestCase
     {
         $techStack = new TechStack('  Node.js  ', '  Backend  ');
 
-        self::assertSame('Node.js', $techStack->getName());
-        self::assertSame('node-js', $techStack->getSlug());
-        self::assertSame('Backend', $techStack->getCategory());
+        self::assertSame('Node.js', $techStack->name);
+        self::assertSame('node-js', $techStack->slug);
+        self::assertSame('Backend', $techStack->category);
     }
 
     public function testRejectsBlankValuesAndNamesWithoutSlugCharacters(): void

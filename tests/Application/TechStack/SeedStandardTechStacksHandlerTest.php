@@ -22,15 +22,15 @@ final class SeedStandardTechStacksHandlerTest extends TestCase
         $created = $handler(new SeedStandardTechStacks());
 
         self::assertSame(81, $created);
-        self::assertSame('Custom category', $repository->findBySlug('php')?->getCategory());
-        self::assertSame('Architecture & Patterns', $repository->findBySlug('domain-driven-design-ddd')?->getCategory());
-        self::assertSame('Architecture & Patterns', $repository->findBySlug('event-driven-architecture-eda')?->getCategory());
-        self::assertSame('Queuing & Messaging', $repository->findBySlug('apache-kafka')?->getCategory());
-        self::assertSame('OS & Platforms', $repository->findBySlug('macos')?->getCategory());
-        self::assertSame('API & Integration', $repository->findBySlug('openapi')?->getCategory());
-        self::assertSame('Relational Databases', $repository->findBySlug('microsoft-sql-server')?->getCategory());
-        self::assertSame('NoSQL Databases', $repository->findBySlug('amazon-dynamodb')?->getCategory());
-        self::assertSame('Search & Caching', $repository->findBySlug('opensearch')?->getCategory());
+        self::assertSame('Custom category', $repository->findBySlug('php')?->category);
+        self::assertSame('Architecture & Patterns', $repository->findBySlug('domain-driven-design-ddd')?->category);
+        self::assertSame('Architecture & Patterns', $repository->findBySlug('event-driven-architecture-eda')?->category);
+        self::assertSame('Queuing & Messaging', $repository->findBySlug('apache-kafka')?->category);
+        self::assertSame('OS & Platforms', $repository->findBySlug('macos')?->category);
+        self::assertSame('API & Integration', $repository->findBySlug('openapi')?->category);
+        self::assertSame('Relational Databases', $repository->findBySlug('microsoft-sql-server')?->category);
+        self::assertSame('NoSQL Databases', $repository->findBySlug('amazon-dynamodb')?->category);
+        self::assertSame('Search & Caching', $repository->findBySlug('opensearch')?->category);
         self::assertSame(0, $handler(new SeedStandardTechStacks()));
         self::assertCount(82, $repository->all());
     }
@@ -46,19 +46,23 @@ final class InMemoryTechStackRepository implements TechStackRepository
         return $this->techStacks[$slug] ?? null;
     }
 
-    public function search(string $query, int $page = 1): PaginatedResults
-    {
+    public function search(
+        string $query,
+        int $page = 1,
+    ): PaginatedResults {
         return new PaginatedResults([], false);
     }
 
-    public function categories(string $query, int $page = 1): PaginatedResults
-    {
+    public function categories(
+        string $query,
+        int $page = 1,
+    ): PaginatedResults {
         return new PaginatedResults([], false);
     }
 
     public function save(TechStack $techStack): void
     {
-        $this->techStacks[$techStack->getSlug()] = $techStack;
+        $this->techStacks[$techStack->slug] = $techStack;
     }
 
     /** @return array<string, TechStack> */

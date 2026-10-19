@@ -13,8 +13,10 @@ use Doctrine\DBAL\Types\JsonType;
 
 final class JsonDomainEventType extends JsonType
 {
-    public function convertToDatabaseValue(mixed $value, AbstractPlatform $platform): ?string
-    {
+    public function convertToDatabaseValue(
+        mixed $value,
+        AbstractPlatform $platform,
+    ): ?string {
         if (null === $value) {
             return null;
         }
@@ -34,8 +36,10 @@ final class JsonDomainEventType extends JsonType
         ], $platform);
     }
 
-    public function convertToPHPValue(mixed $value, AbstractPlatform $platform): ?LingodaDomainEvent
-    {
+    public function convertToPHPValue(
+        mixed $value,
+        AbstractPlatform $platform,
+    ): ?LingodaDomainEvent {
         if (null === $value || '' === $value) {
             return null;
         }

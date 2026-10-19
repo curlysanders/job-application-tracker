@@ -12,8 +12,10 @@ use CurlySanders\JobApplicationTracker\Domain\Recruiter\Recruiter;
 
 final readonly class CreateRecruiterHandler implements CommandHandler
 {
-    public function __construct(private UserRepository $users, private RecruiterRepository $recruiters)
-    {
+    public function __construct(
+        private UserRepository $users,
+        private RecruiterRepository $recruiters,
+    ) {
     }
 
     public function __invoke(CreateRecruiter $command): Recruiter

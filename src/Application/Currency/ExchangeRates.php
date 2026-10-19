@@ -7,8 +7,10 @@ namespace CurlySanders\JobApplicationTracker\Application\Currency;
 final readonly class ExchangeRates
 {
     /** @param array<string, string> $ratesPerEuro */
-    public function __construct(public array $ratesPerEuro, public \DateTimeImmutable $fetchedAt)
-    {
+    public function __construct(
+        public array $ratesPerEuro,
+        public \DateTimeImmutable $fetchedAt,
+    ) {
         foreach ($ratesPerEuro as $currency => $rate) {
             if (1 !== preg_match('/^[A-Z]{3}$/', $currency) || 1 !== preg_match('/^\d+(?:\.\d+)?$/', $rate)) {
                 throw new \InvalidArgumentException('Exchange rates must map ISO 4217 currency codes to positive decimal values.');

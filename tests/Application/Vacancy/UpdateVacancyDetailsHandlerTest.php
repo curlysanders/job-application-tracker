@@ -29,7 +29,7 @@ final class UpdateVacancyDetailsHandlerTest extends TestCase
         new UpdateVacancyNextActionHandler($repository)(new UpdateVacancyNextAction(self::USER_ID, self::VACANCY_ID, 'Screening call', new \DateTimeImmutable('2026-10-01 09:30:00')));
 
         self::assertSame($vacancy, $updated);
-        self::assertSame('# Prepare', $vacancy->getScratchpadNotes());
-        self::assertSame('Screening call', $vacancy->getNextActionTitle());
+        self::assertSame('# Prepare', $vacancy->scratchpadNotes);
+        self::assertSame('Screening call', $vacancy->nextActionTitle);
     }
 }

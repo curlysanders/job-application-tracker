@@ -23,8 +23,13 @@ final readonly class CreateRecruiterController extends AbstractManagementFormCon
 {
     use AuthenticatedUserTrait;
 
-    public function __construct(private Security $security, private CommandBus $commandBus, FormFactoryInterface $forms, Environment $twig, UrlGeneratorInterface $urls)
-    {
+    public function __construct(
+        private Security $security,
+        private CommandBus $commandBus,
+        FormFactoryInterface $forms,
+        Environment $twig,
+        UrlGeneratorInterface $urls,
+    ) {
         parent::__construct($forms, $twig, $urls);
     }
 
@@ -45,6 +50,6 @@ final readonly class CreateRecruiterController extends AbstractManagementFormCon
 
     private function userId(): string
     {
-        return $this->requireAuthenticatedUser('Recruiter management requires an authenticated user.')->getId()->toRfc4122();
+        return $this->requireAuthenticatedUser('Recruiter management requires an authenticated user.')->id->toRfc4122();
     }
 }

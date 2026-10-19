@@ -16,8 +16,11 @@ final readonly class RecruiterListController
 {
     use AuthenticatedUserTrait;
 
-    public function __construct(private Security $security, private RecruiterRepository $recruiters, private Environment $twig)
-    {
+    public function __construct(
+        private Security $security,
+        private RecruiterRepository $recruiters,
+        private Environment $twig,
+    ) {
     }
 
     #[Route('/recruiters', name: 'app_recruiter_list', methods: ['GET'])]
@@ -27,6 +30,6 @@ final readonly class RecruiterListController
 
         $user = $this->requireAuthenticatedUser('Recruiter management requires an authenticated user.');
 
-        return new Response($this->twig->render('recruiter/list.html.twig', ['recruiters' => $this->recruiters->searchOwnedBy($user->getId()->toRfc4122(), $query), 'query' => $query]));
+        return new Response($this->twig->render('recruiter/list.html.twig', ['recruiters' => $this->recruiters->searchOwnedBy($user->id->toRfc4122(), $query), 'query' => $query]));
     }
 }

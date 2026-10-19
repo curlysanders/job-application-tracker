@@ -6,7 +6,9 @@ namespace CurlySanders\JobApplicationTracker\Application\Vacancy\Command;
 
 final readonly class DeleteVacancy
 {
-    public function __construct(public string $userId, public string $vacancyId)
-    {
+    public function __construct(
+        public string $userId,
+        public string $vacancyId,
+    ) {
     }
 }

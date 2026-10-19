@@ -19,7 +19,9 @@ final readonly class EcbExchangeRateProvider implements ExchangeRateProvider
 
     public function __construct(
         private HttpClientInterface $httpClient,
-        #[Autowire(service: 'cache.app')] private CacheItemPoolInterface $cache,
+
+        #[Autowire(service: 'cache.app')]
+        private CacheItemPoolInterface $cache,
     ) {
     }
 

@@ -8,5 +8,10 @@ use CurlySanders\JobApplicationTracker\Domain\User\User;
 
 interface PasswordHasher
 {
-    public function hash(User $user, #[\SensitiveParameter] string $plainPassword): string;
+    public function hash(
+        User $user,
+
+        #[\SensitiveParameter]
+        string $plainPassword,
+    ): string;
 }

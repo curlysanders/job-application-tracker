@@ -27,12 +27,17 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 /** @extends AbstractType<VacancyData> */
 final class VacancyType extends AbstractType
 {
-    public function __construct(private readonly CompanyRepository $companies, private readonly RecruiterRepository $recruiters, private readonly ExchangeRateProvider $exchangeRates)
-    {
+    public function __construct(
+        private readonly CompanyRepository $companies,
+        private readonly RecruiterRepository $recruiters,
+        private readonly ExchangeRateProvider $exchangeRates,
+    ) {
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options): void
-    {
+    public function buildForm(
+        FormBuilderInterface $builder,
+        array $options,
+    ): void {
         /** @var string $userId */
         $userId = $options['user_id'];
 
@@ -73,8 +78,8 @@ final class VacancyType extends AbstractType
     {
         $choices = [];
         foreach ($this->companies->searchOwnedBy($userId, '') as $company) {
-            $id = $company->getId();
-            $choices[$company->getName()] = $id->toRfc4122();
+            $id = $company->id;
+            $choices[$company->name] = $id->toRfc4122();
         }
 
         return $choices;
@@ -85,8 +90,8 @@ final class VacancyType extends AbstractType
     {
         $choices = [];
         foreach ($this->recruiters->searchOwnedBy($userId, '') as $recruiter) {
-            $id = $recruiter->getId();
-            $choices[$recruiter->getAgencyName()] = $id->toRfc4122();
+            $id = $recruiter->id;
+            $choices[$recruiter->agencyName] = $id->toRfc4122();
         }
 
         return $choices;

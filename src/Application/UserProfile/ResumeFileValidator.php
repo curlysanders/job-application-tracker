@@ -7,5 +7,8 @@ namespace CurlySanders\JobApplicationTracker\Application\UserProfile;
 interface ResumeFileValidator
 {
     /** @param resource $stream */
-    public function isValid(mixed $stream, string $mimeType): bool;
+    public function isValid(
+        mixed $stream,
+        string $mimeType,
+    ): bool;
 }

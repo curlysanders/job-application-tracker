@@ -195,15 +195,21 @@ final class Version20260930120000 extends AbstractMigration
         return array_values(array_filter($this->connection->fetchFirstColumn('SELECT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = :table AND REFERENCED_TABLE_NAME IS NOT NULL', ['table' => $table]), 'is_string'));
     }
 
-    private function ensureColumn(string $table, string $column, string $definition): void
-    {
+    private function ensureColumn(
+        string $table,
+        string $column,
+        string $definition,
+    ): void {
         if (!$this->hasColumn($table, $column)) {
             $this->execute(sprintf('ALTER TABLE %s ADD %s %s', $table, $column, $definition));
         }
     }
 
-    private function ensureIndex(string $table, string $index, string $columns): void
-    {
+    private function ensureIndex(
+        string $table,
+        string $index,
+        string $columns,
+    ): void {
         $expectedColumns = array_map('trim', explode(',', $columns));
         $actualColumns = $this->indexColumns($table, $index);
 
@@ -229,18 +235,24 @@ final class Version20260930120000 extends AbstractMigration
     }
 
     /** @return list<string> */
-    private function indexColumns(string $table, string $index): array
-    {
+    private function indexColumns(
+        string $table,
+        string $index,
+    ): array {
         return array_values(array_filter($this->connection->fetchFirstColumn('SELECT COLUMN_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = :table AND INDEX_NAME = :index ORDER BY SEQ_IN_INDEX', ['table' => $table, 'index' => $index]), 'is_string'));
     }
 
-    private function hasColumn(string $table, string $column): bool
-    {
+    private function hasColumn(
+        string $table,
+        string $column,
+    ): bool {
         return false !== $this->connection->fetchOne('SELECT 1 FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = :table AND COLUMN_NAME = :column', ['table' => $table, 'column' => $column]);
     }
 
-    private function isBinaryUuidColumn(string $table, string $column): bool
-    {
+    private function isBinaryUuidColumn(
+        string $table,
+        string $column,
+    ): bool {
         return 'binary(16)' === $this->connection->fetchOne('SELECT COLUMN_TYPE FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = :table AND COLUMN_NAME = :column', ['table' => $table, 'column' => $column]);
     }
 

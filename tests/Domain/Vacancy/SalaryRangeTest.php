@@ -15,17 +15,17 @@ final class SalaryRangeTest extends TestCase
         $salaryRange = SalaryRange::fromDecimals('4500.10', '6000.99', 'USD');
         self::assertNotNull($salaryRange);
 
-        self::assertSame('USD', $salaryRange->getCurrencyCode());
-        self::assertSame('4500.10', $salaryRange->getMinimum()?->amount());
-        self::assertSame('6000.99', $salaryRange->getMaximum()?->amount());
+        self::assertSame('USD', $salaryRange->currencyCode);
+        self::assertSame('4500.10', $salaryRange->minimum?->amount());
+        self::assertSame('6000.99', $salaryRange->maximum?->amount());
     }
 
     public function testAllowsAnOpenEndedSalaryRange(): void
     {
         $salaryRange = SalaryRange::fromDecimals(null, '5000.00');
 
-        self::assertNull($salaryRange?->getMinimum());
-        self::assertSame('5000.00', $salaryRange?->getMaximum()?->amount());
+        self::assertNull($salaryRange?->minimum);
+        self::assertSame('5000.00', $salaryRange?->maximum?->amount());
     }
 
     public function testReturnsNullWhenNoSalaryWasProvided(): void
@@ -34,8 +34,10 @@ final class SalaryRangeTest extends TestCase
     }
 
     #[DataProvider('invalidRanges')]
-    public function testRejectsInvalidRanges(?string $minimum, ?string $maximum): void
-    {
+    public function testRejectsInvalidRanges(
+        ?string $minimum,
+        ?string $maximum,
+    ): void {
         $this->expectException(\InvalidArgumentException::class);
 
         SalaryRange::fromDecimals($minimum, $maximum);

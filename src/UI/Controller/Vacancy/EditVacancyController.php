@@ -39,14 +39,17 @@ final readonly class EditVacancyController
         private ExchangeRateProvider $exchangeRates,
         private Environment $twig,
         private UrlGeneratorInterface $urls,
+
         #[Autowire(service: 'state_machine.vacancy_status')]
         private WorkflowInterface $workflow,
     ) {
     }
 
     #[Route('/vacancies/{id}/edit', name: 'app_vacancy_edit', methods: ['GET', 'POST'])]
-    public function __invoke(string $id, Request $request): Response
-    {
+    public function __invoke(
+        string $id,
+        Request $request,
+    ): Response {
         $user = $this->requireAuthenticatedUser('Vacancy authoring requires an authenticated user.');
         $vacancy = $this->vacancies->findOwnedBy($id, $this->userId($user)) ?? throw new NotFoundHttpException('Vacancy not found.');
         $data = $this->dataFactory->fromVacancy($vacancy);
@@ -68,7 +71,7 @@ final readonly class EditVacancyController
             'pageTitle' => 'Edit vacancy',
             'submitLabel' => 'Save vacancy',
             'minimumPreferredSalary' => $preferredSalary->getMinimumDecimal(),
-            'minimumPreferredSalaryCurrency' => $preferredSalary->getCurrencyCode(),
+            'minimumPreferredSalaryCurrency' => $preferredSalary->currencyCode,
             'exchangeRates' => $rateValues,
             'vacancy' => $vacancy,
             'enabledStatusTransitions' => $this->workflow->getEnabledTransitions($vacancy),
@@ -78,11 +81,13 @@ final readonly class EditVacancyController
 
     private function userId(User $user): string
     {
-        return $user->getId()->toRfc4122();
+        return $user->id->toRfc4122();
     }
 
-    private function redirect(Request $request, string $id): RedirectResponse
-    {
+    private function redirect(
+        Request $request,
+        string $id,
+    ): RedirectResponse {
         $session = $request->getSession();
         if (!$session instanceof FlashBagAwareSessionInterface) {
             throw new \LogicException('Vacancy authoring requires a flash-aware session.');

@@ -28,11 +28,11 @@ final class RecordVacancyStatusTransitionTest extends TestCase
         $historyRepository = $this->createMock(VacancyStatusHistoryRepository::class);
         $historyRepository->expects(self::once())->method('findByOutboxRecordId')->with(42)->willReturn(null);
         $historyRepository->expects(self::once())->method('save')->with(self::callback(static function (VacancyStatusHistory $history) use ($vacancy): bool {
-            self::assertSame($vacancy, $history->getVacancy());
-            self::assertSame(VacancyStatus::Bookmarked, $history->getFromStatus());
-            self::assertSame(VacancyStatus::Applying, $history->getToStatus());
-            self::assertSame('First screening scheduled.', $history->getNotes());
-            self::assertSame(42, $history->getOutboxRecordId());
+            self::assertSame($vacancy, $history->vacancy);
+            self::assertSame(VacancyStatus::Bookmarked, $history->fromStatus);
+            self::assertSame(VacancyStatus::Applying, $history->toStatus);
+            self::assertSame('First screening scheduled.', $history->notes);
+            self::assertSame(42, $history->outboxRecordId);
 
             return true;
         }));

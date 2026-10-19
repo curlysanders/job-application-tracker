@@ -23,12 +23,12 @@ final class AuthenticationBusTest extends KernelTestCase
         $user = $commandBus->dispatch(new RegisterUser('  Sander@example.com ', 'SecurePassword1!'));
 
         self::assertInstanceOf(User::class, $user);
-        self::assertSame('sander@example.com', $user->getEmail());
+        self::assertSame('sander@example.com', $user->email);
 
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
         self::assertInstanceOf(EntityManagerInterface::class, $entityManager);
         $outboxRecord = $entityManager->getRepository(OutboxRecord::class)->findOneBy([
-            'entityId' => $user->getId()->toRfc4122(),
+            'entityId' => $user->id->toRfc4122(),
             'eventType' => UserRegistered::class,
         ]);
         self::assertInstanceOf(OutboxRecord::class, $outboxRecord);

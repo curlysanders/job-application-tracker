@@ -16,8 +16,10 @@ final readonly class ConfiguredVacancyExtractionProvider implements VacancyExtra
     public function __construct(
         private FakeVacancyExtractionProvider $fake,
         private LocalOllamaVacancyExtractionProvider $local,
+
         #[Autowire('%env(string:AI_PROVIDER)%')]
         private string $provider,
+
         #[Autowire('%env(bool:AI_LOCAL_PROVIDER_ENABLED)%')]
         private bool $localEnabled,
     ) {

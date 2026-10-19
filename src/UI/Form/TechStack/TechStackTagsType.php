@@ -19,8 +19,10 @@ final class TechStackTagsType extends AbstractType
     {
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options): void
-    {
+    public function buildForm(
+        FormBuilderInterface $builder,
+        array $options,
+    ): void {
         $builder
             ->add('existingTags', TextType::class, [
                 'label' => 'Existing technologies',

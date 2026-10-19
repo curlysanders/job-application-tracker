@@ -20,16 +20,16 @@ final class ResumeValidationTest extends TestCase
 
         $pending = $user->getPendingResume();
         self::assertNotNull($pending);
-        self::assertSame('resumes/user/current.pdf', $user->getResumeStoragePath());
-        self::assertSame(ResumeValidationStatus::Pending, $user->getResumeValidationStatus());
+        self::assertSame('resumes/user/current.pdf', $user->resumeStoragePath);
+        self::assertSame(ResumeValidationStatus::Pending, $user->resumeValidationStatus);
         $event = $user->getRecordedEvents()[1];
         self::assertInstanceOf(ResumeValidationRequested::class, $event);
         self::assertSame(['validationId' => $pending->validationId->toRfc4122()], $event->changedProperties);
 
         self::assertSame('resumes/user/current.pdf', $user->promotePendingResume($pending->validationId));
-        self::assertSame('resumes/user/pending/new.docx', $user->getResumeStoragePath());
+        self::assertSame('resumes/user/pending/new.docx', $user->resumeStoragePath);
         self::assertNull($user->getPendingResume());
-        self::assertSame(ResumeValidationStatus::Validated, $user->getResumeValidationStatus());
+        self::assertSame(ResumeValidationStatus::Validated, $user->resumeValidationStatus);
         self::assertInstanceOf(ResumeReplaced::class, $user->getRecordedEvents()[2]);
     }
 
@@ -42,9 +42,9 @@ final class ResumeValidationTest extends TestCase
         self::assertNotNull($pending);
 
         self::assertSame('resumes/user/pending/bad.pdf', $user->rejectPendingResume($pending->validationId, 'The uploaded file is not a valid PDF or DOCX document.'));
-        self::assertSame('resumes/user/current.pdf', $user->getResumeStoragePath());
+        self::assertSame('resumes/user/current.pdf', $user->resumeStoragePath);
         self::assertNull($user->getPendingResume());
-        self::assertSame(ResumeValidationStatus::Failed, $user->getResumeValidationStatus());
-        self::assertSame('The uploaded file is not a valid PDF or DOCX document.', $user->getResumeValidationFailure());
+        self::assertSame(ResumeValidationStatus::Failed, $user->resumeValidationStatus);
+        self::assertSame('The uploaded file is not a valid PDF or DOCX document.', $user->resumeValidationFailure);
     }
 }

@@ -16,15 +16,18 @@ final readonly class DashboardPipelineVacanciesController
 {
     use AuthenticatedUserTrait;
 
-    public function __construct(private Security $security, private VacancyOverviewRepository $overview, private Environment $twig)
-    {
+    public function __construct(
+        private Security $security,
+        private VacancyOverviewRepository $overview,
+        private Environment $twig,
+    ) {
     }
 
     #[Route('/pipeline/vacancies', name: 'app_dashboard_pipeline_vacancies', methods: ['GET'])]
     public function __invoke(Request $request): Response
     {
         $user = $this->requireAuthenticatedUser('The dashboard requires an authenticated user.');
-        $userId = $user->getId()->toRfc4122();
+        $userId = $user->id->toRfc4122();
 
         $overviewRequest = VacancyOverviewRequest::fromRequest($request);
 
