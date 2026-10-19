@@ -37,8 +37,10 @@ final class Version20261002130000 extends AbstractMigration
         throw new \LogicException('Removing Company and Recruiter ownership would reintroduce cross-user data exposure. Restore a backup instead.');
     }
 
-    private function assertEveryRecordHasOneVacancyOwner(string $table, string $vacancyOwnerColumn): void
-    {
+    private function assertEveryRecordHasOneVacancyOwner(
+        string $table,
+        string $vacancyOwnerColumn,
+    ): void {
         $ids = $this->connection->fetchFirstColumn(sprintf(
             'SELECT HEX(aggregate_root.id) FROM %1$s aggregate_root LEFT JOIN vacancies vacancy ON vacancy.%2$s = aggregate_root.id GROUP BY aggregate_root.id HAVING COUNT(DISTINCT vacancy.user_id) <> 1',
             $table,

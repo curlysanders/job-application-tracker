@@ -14,41 +14,23 @@ final class TechStack implements RecordsEvents
     use NormalizesStrings;
     use RecordsDomainEvents;
 
-    private Identifier $id;
+    private(set) Identifier $id;
 
-    private string $name;
+    private(set) string $name;
 
-    private string $slug;
+    private(set) string $slug;
 
-    private string $category;
+    private(set) string $category;
 
-    public function __construct(string $name, string $category)
-    {
+    public function __construct(
+        string $name,
+        string $category,
+    ) {
         $this->id = Identifier::v7();
         $this->name = self::required($name, 'A technology name is required.');
         $this->slug = self::slug($this->name);
         $this->category = self::required($category, 'A technology category is required.');
         $this->recordEvent(new TechStackCreated($this->id, ['name' => $this->name, 'slug' => $this->slug, 'category' => $this->category]));
-    }
-
-    public function getId(): Identifier
-    {
-        return $this->id;
-    }
-
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    public function getSlug(): string
-    {
-        return $this->slug;
-    }
-
-    public function getCategory(): string
-    {
-        return $this->category;
     }
 
     public static function slug(string $name): string

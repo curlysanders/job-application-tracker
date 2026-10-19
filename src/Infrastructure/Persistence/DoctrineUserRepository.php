@@ -19,8 +19,10 @@ final readonly class DoctrineUserRepository implements UserRepository
     {
     }
 
-    public function findByEmail(#[\SensitiveParameter] string $email): ?User
-    {
+    public function findByEmail(
+        #[\SensitiveParameter]
+        string $email,
+    ): ?User {
         return $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
     }
 

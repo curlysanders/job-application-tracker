@@ -13,10 +13,16 @@ interface TechStackRepository
     public function findBySlug(string $slug): ?TechStack;
 
     /** @return PaginatedResults<TechStack> */
-    public function search(string $query, int $page = 1): PaginatedResults;
+    public function search(
+        string $query,
+        int $page = 1,
+    ): PaginatedResults;
 
     /** @return PaginatedResults<string> */
-    public function categories(string $query, int $page = 1): PaginatedResults;
+    public function categories(
+        string $query,
+        int $page = 1,
+    ): PaginatedResults;
 
     public function save(TechStack $techStack): void;
 }

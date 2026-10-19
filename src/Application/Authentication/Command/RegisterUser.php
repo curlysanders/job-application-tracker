@@ -9,6 +9,7 @@ final readonly class RegisterUser
     public function __construct(
         #[\SensitiveParameter]
         public string $email,
+
         #[\SensitiveParameter]
         public string $plainPassword,
     ) {

@@ -95,7 +95,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "CurlySanders\\JobApplicationTracker\\Tests\\": "tests/"
+            "CurlySanders\\JobApplicationTracker\\Tests\\": "tests/",
+            "CurlySanders\\JobApplicationTracker\\PhpCsFixer\\": "tools/PhpCsFixer/"
         }
     },
     "config": {

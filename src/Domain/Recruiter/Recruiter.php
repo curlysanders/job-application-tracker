@@ -17,17 +17,17 @@ final class Recruiter implements RecordsEvents
     use NormalizesStrings;
     use RecordsDomainEvents;
 
-    private Identifier $id;
+    private(set) Identifier $id;
 
-    private string $agencyName;
+    private(set) string $agencyName;
 
-    private ?string $website;
+    private(set) ?string $website;
 
     /** @var list<DirectContact>|(\ArrayAccess<int, DirectContact>&\Traversable<int, DirectContact>) */
-    private array|(\ArrayAccess&\Traversable) $directContacts;
+    private(set) array|(\ArrayAccess&\Traversable) $directContacts;
 
     public function __construct(
-        private readonly User $user,
+        public readonly User $user,
         string $agencyName,
         ?string $website,
     ) {
@@ -36,8 +36,10 @@ final class Recruiter implements RecordsEvents
         $this->update($agencyName, $website);
     }
 
-    public function update(string $agencyName, ?string $website): void
-    {
+    public function update(
+        string $agencyName,
+        ?string $website,
+    ): void {
         $this->agencyName = self::required($agencyName, 'An agency name is required.');
         $this->website = WebAddress::optionalHttpUrl($website, 'A recruiter website');
     }
@@ -63,16 +65,6 @@ final class Recruiter implements RecordsEvents
         }
     }
 
-    public function getId(): Identifier
-    {
-        return $this->id;
-    }
-
-    public function getUser(): User
-    {
-        return $this->user;
-    }
-
     public function recordCreated(): void
     {
         $this->recordEvent(new RecruiterCreated($this->id, $this->properties()));
@@ -87,21 +79,5 @@ final class Recruiter implements RecordsEvents
     private function properties(): array
     {
         return ['agencyName' => $this->agencyName, 'website' => $this->website];
-    }
-
-    public function getAgencyName(): string
-    {
-        return $this->agencyName;
-    }
-
-    public function getWebsite(): ?string
-    {
-        return $this->website;
-    }
-
-    /** @return iterable<int, DirectContact> */
-    public function getDirectContacts(): iterable
-    {
-        return $this->directContacts;
     }
 }

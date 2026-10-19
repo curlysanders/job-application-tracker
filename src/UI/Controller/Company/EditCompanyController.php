@@ -26,14 +26,22 @@ final readonly class EditCompanyController extends AbstractManagementFormControl
 {
     use AuthenticatedUserTrait;
 
-    public function __construct(private Security $security, private CompanyRepository $companies, private CommandBus $commandBus, FormFactoryInterface $forms, Environment $twig, UrlGeneratorInterface $urls)
-    {
+    public function __construct(
+        private Security $security,
+        private CompanyRepository $companies,
+        private CommandBus $commandBus,
+        FormFactoryInterface $forms,
+        Environment $twig,
+        UrlGeneratorInterface $urls,
+    ) {
         parent::__construct($forms, $twig, $urls);
     }
 
     #[Route('/companies/{id}/edit', name: 'app_company_edit', methods: ['GET', 'POST'])]
-    public function __invoke(string $id, Request $request): Response
-    {
+    public function __invoke(
+        string $id,
+        Request $request,
+    ): Response {
         $userId = $this->userId();
         $company = $this->companies->findOwnedBy($id, $userId) ?? throw new NotFoundHttpException('Company not found.');
         $data = $this->dataFrom($company);
@@ -50,16 +58,16 @@ final readonly class EditCompanyController extends AbstractManagementFormControl
 
     private function userId(): string
     {
-        return $this->requireAuthenticatedUser('Company management requires an authenticated user.')->getId()->toRfc4122();
+        return $this->requireAuthenticatedUser('Company management requires an authenticated user.')->id->toRfc4122();
     }
 
     private function dataFrom(Company $company): CompanyData
     {
         $data = new CompanyData();
-        $data->name = $company->getName();
-        $data->website = $company->getWebsite();
-        $data->industry = $company->getIndustry();
-        $data->directContacts = $this->directContactData($company->getDirectContacts());
+        $data->name = $company->name;
+        $data->website = $company->website;
+        $data->industry = $company->industry;
+        $data->directContacts = $this->directContactData($company->directContacts);
 
         return $data;
     }

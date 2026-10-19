@@ -18,13 +18,16 @@ final readonly class BenchmarkAiVacancyCorpusCommand
     public function __construct(
         private VacancyExtractionProvider $provider,
         private VacancyCorpusEvaluator $evaluator,
+
         #[Autowire(param: 'kernel.project_dir')]
         private string $projectDir,
     ) {
     }
 
-    public function __invoke(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        InputInterface $input,
+        OutputInterface $output,
+    ): int {
         $content = file_get_contents($this->projectDir.'/resources/ai/vacancy-corpus.json');
         $cases = is_string($content) ? json_decode($content, true, flags: JSON_THROW_ON_ERROR) : throw new \RuntimeException('The vacancy corpus could not be read.');
         if (!is_array($cases)) {

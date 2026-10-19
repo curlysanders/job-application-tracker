@@ -26,6 +26,7 @@ final readonly class VacancyDetailController
         private VacancyStatusHistoryRepository $statusHistory,
         private MarkdownRenderer $markdown,
         private Environment $twig,
+
         #[Autowire(service: 'state_machine.vacancy_status')]
         private WorkflowInterface $workflow,
     ) {
@@ -35,9 +36,9 @@ final readonly class VacancyDetailController
     public function __invoke(string $id): Response
     {
         $user = $this->requireAuthenticatedUser('Vacancy details require an authenticated user.');
-        $userId = $user->getId()->toRfc4122();
+        $userId = $user->id->toRfc4122();
         $vacancy = $this->vacancies->findOwnedBy($id, $userId) ?? throw new NotFoundHttpException('Vacancy not found.');
-        $notes = $vacancy->getScratchpadNotes();
+        $notes = $vacancy->scratchpadNotes;
 
         return new Response($this->twig->render('vacancy/detail.html.twig', [
             'vacancy' => $vacancy,

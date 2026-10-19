@@ -80,7 +80,7 @@ final class SecurityTest extends WebTestCase
             'email' => 'sander@example.com',
         ]);
         self::assertInstanceOf(User::class, $user);
-        self::assertSame('sander@example.com', $user->getEmail());
+        self::assertSame('sander@example.com', $user->email);
         self::assertNotSame('SecurePassword1!', $user->getPassword());
         self::assertTrue($this->passwordHasher()->isPasswordValid(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user), 'SecurePassword1!'));
     }

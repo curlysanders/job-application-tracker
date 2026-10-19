@@ -49,28 +49,28 @@ final class VacancyStatusWorkflowTest extends WebTestCase
         $this->entityManager()->flush();
         $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user));
 
-        $crawler = $client->request('GET', sprintf('/vacancies/%s/edit', $vacancy->getId()->toRfc4122()));
+        $crawler = $client->request('GET', sprintf('/vacancies/%s/edit', $vacancy->id->toRfc4122()));
         self::assertSelectorTextContains('.vacancy-status-panel', 'Current status: Bookmarked');
         self::assertSelectorExists('input[name="transition"][value="start_applying"]');
         self::assertSelectorNotExists('input[name="transition"][value="accept"]');
         self::assertSelectorExists('#vacancy-status-note-modal textarea[name="note"]');
         self::assertSelectorTextContains('.vacancy-status-history-panel', 'No status changes have been recorded yet.');
-        $client->request('POST', sprintf('/vacancies/%s/status', $vacancy->getId()->toRfc4122()), [
+        $client->request('POST', sprintf('/vacancies/%s/status', $vacancy->id->toRfc4122()), [
             '_token' => $this->statusCsrfToken($crawler, 'start_applying'),
             'transition' => 'start_applying',
             'note' => '  First screening scheduled.  ',
         ]);
-        self::assertResponseRedirects(sprintf('/vacancies/%s/edit', $vacancy->getId()->toRfc4122()));
+        self::assertResponseRedirects(sprintf('/vacancies/%s/edit', $vacancy->id->toRfc4122()));
 
         $this->entityManager()->clear();
-        $updated = $this->entityManager()->find(Vacancy::class, $vacancy->getId());
+        $updated = $this->entityManager()->find(Vacancy::class, $vacancy->id);
         self::assertInstanceOf(Vacancy::class, $updated);
-        self::assertSame(VacancyStatus::Applying, $updated->getStatus());
+        self::assertSame(VacancyStatus::Applying, $updated->status);
 
         $history = $this->entityManager()->getRepository(VacancyStatusHistory::class)->findAll();
         self::assertCount(0, $history);
 
-        $client->request('GET', sprintf('/vacancies/%s/edit', $vacancy->getId()->toRfc4122()));
+        $client->request('GET', sprintf('/vacancies/%s/edit', $vacancy->id->toRfc4122()));
         self::assertSelectorTextContains('.vacancy-status-history-panel', 'No status changes have been recorded yet.');
     }
 
@@ -86,9 +86,9 @@ final class VacancyStatusWorkflowTest extends WebTestCase
         $this->entityManager()->flush();
         $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user));
 
-        $client->request('POST', sprintf('/vacancies/%s/status', $ownedVacancy->getId()->toRfc4122()), ['_token' => 'invalid', 'transition' => 'start_applying']);
+        $client->request('POST', sprintf('/vacancies/%s/status', $ownedVacancy->id->toRfc4122()), ['_token' => 'invalid', 'transition' => 'start_applying']);
         self::assertResponseStatusCodeSame(403);
-        $client->request('POST', sprintf('/vacancies/%s/status', $vacancy->getId()->toRfc4122()), ['_token' => 'invalid', 'transition' => 'start_applying']);
+        $client->request('POST', sprintf('/vacancies/%s/status', $vacancy->id->toRfc4122()), ['_token' => 'invalid', 'transition' => 'start_applying']);
         self::assertResponseStatusCodeSame(404);
     }
 
@@ -108,8 +108,10 @@ final class VacancyStatusWorkflowTest extends WebTestCase
         ];
     }
 
-    private function statusCsrfToken(Crawler $crawler, string $transition): string
-    {
+    private function statusCsrfToken(
+        Crawler $crawler,
+        string $transition,
+    ): string {
         $transitionInput = $crawler->filter(sprintf('input[name="transition"][value="%s"]', $transition))->getNode(0);
         self::assertInstanceOf(\DOMElement::class, $transitionInput);
         self::assertInstanceOf(\DOMElement::class, $transitionInput->parentNode);

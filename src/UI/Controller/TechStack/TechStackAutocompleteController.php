@@ -27,8 +27,8 @@ final readonly class TechStackAutocompleteController
             'app_tech_stack_autocomplete',
             $this->techStacks->search(...),
             static fn (TechStack $techStack): array => [
-                'value' => $techStack->getSlug(),
-                'text' => sprintf('%s (%s)', $techStack->getName(), $techStack->getCategory()),
+                'value' => $techStack->slug,
+                'text' => sprintf('%s (%s)', $techStack->name, $techStack->category),
             ],
         );
     }

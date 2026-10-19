@@ -7,14 +7,21 @@ namespace CurlySanders\JobApplicationTracker\Scripts;
 final readonly class BenchmarkHttpResponse
 {
     /** @param list<string> $headers */
-    public function __construct(public int $statusCode, public array $headers, public string $body)
-    {
+    public function __construct(
+        public int $statusCode,
+        public array $headers,
+        public string $body,
+    ) {
     }
 }
 
 /** @param array<string, string> $cookies */
-function request(string $method, string $url, array &$cookies, ?string $formData = null): BenchmarkHttpResponse
-{
+function request(
+    string $method,
+    string $url,
+    array &$cookies,
+    ?string $formData = null,
+): BenchmarkHttpResponse {
     $headers = ['Connection: close'];
     if ([] !== $cookies) {
         $pairs = [];
@@ -81,8 +88,10 @@ function serverTimingDuration(array $headers): float
     throw new \RuntimeException('Missing valid app Server-Timing; enable APP_REQUEST_TIMING=1.');
 }
 
-function csrfTokenForTransition(string $html, string $transition): string
-{
+function csrfTokenForTransition(
+    string $html,
+    string $transition,
+): string {
     $document = new \DOMDocument();
     $errors = libxml_use_internal_errors(true);
     try {
@@ -154,8 +163,10 @@ function assertSuccessfulLogin(BenchmarkHttpResponse $response): void
     }
 }
 
-function assertVacancyEditPage(BenchmarkHttpResponse $response, string $vacancyId): void
-{
+function assertVacancyEditPage(
+    BenchmarkHttpResponse $response,
+    string $vacancyId,
+): void {
     if (200 === $response->statusCode) {
         return;
     }
@@ -193,14 +204,20 @@ function timingSummary(array $samples): array
  *
  * @return list<array{request: int, transition: string, duration: float}>
  */
-function thresholdViolations(array $samples, float $limit): array
-{
+function thresholdViolations(
+    array $samples,
+    float $limit,
+): array {
     return array_values(array_filter($samples, static fn (array $sample): bool => $sample['duration'] >= $limit));
 }
 
 /** @param array<string, string> $cookies */
-function transition(string $baseUrl, string $vacancyId, string $transition, array &$cookies): float
-{
+function transition(
+    string $baseUrl,
+    string $vacancyId,
+    string $transition,
+    array &$cookies,
+): float {
     $editUrl = sprintf('%s/vacancies/%s/edit', $baseUrl, rawurlencode($vacancyId));
     $edit = request('GET', $editUrl, $cookies);
     assertVacancyEditPage($edit, $vacancyId);

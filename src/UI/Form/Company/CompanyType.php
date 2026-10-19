@@ -13,8 +13,10 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 /** @extends AbstractContactableType<CompanyData|null> */
 final class CompanyType extends AbstractContactableType
 {
-    public function buildForm(FormBuilderInterface $builder, array $options): void
-    {
+    public function buildForm(
+        FormBuilderInterface $builder,
+        array $options,
+    ): void {
         $builder->add('name', TextType::class, ['label' => 'Company name']);
         $this->addWebsite($builder);
         $builder->add('industry', TextType::class, ['required' => false, 'label' => 'Industry']);

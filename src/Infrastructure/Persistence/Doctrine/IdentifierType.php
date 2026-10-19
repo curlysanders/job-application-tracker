@@ -13,13 +13,17 @@ final class IdentifierType extends Type
 {
     public const string NAME = 'identifier';
 
-    public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
-    {
+    public function getSQLDeclaration(
+        array $column,
+        AbstractPlatform $platform,
+    ): string {
         return $platform->getBinaryTypeDeclarationSQL(['length' => 16, 'fixed' => true]);
     }
 
-    public function convertToPHPValue(mixed $value, AbstractPlatform $platform): ?Identifier
-    {
+    public function convertToPHPValue(
+        mixed $value,
+        AbstractPlatform $platform,
+    ): ?Identifier {
         if (null === $value || $value instanceof Identifier) {
             return $value;
         }
@@ -35,8 +39,10 @@ final class IdentifierType extends Type
         }
     }
 
-    public function convertToDatabaseValue(mixed $value, AbstractPlatform $platform): ?string
-    {
+    public function convertToDatabaseValue(
+        mixed $value,
+        AbstractPlatform $platform,
+    ): ?string {
         if (null === $value) {
             return null;
         }

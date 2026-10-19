@@ -13,37 +13,43 @@ final class VacancyFormDataFactory
     public function fromVacancy(Vacancy $vacancy): VacancyData
     {
         $data = new VacancyData();
-        $data->title = $vacancy->getTitle();
-        $data->companyId = $vacancy->getCompany()?->getId()->toRfc4122();
-        $data->recruiterId = $vacancy->getRecruiter()?->getId()->toRfc4122();
-        $data->location = $vacancy->getLocation();
-        $data->applicationSource = $vacancy->getApplicationSource();
-        $data->sourceUrls = $vacancy->getSourceUrls();
-        $data->howToApply = $vacancy->getHowToApply();
-        $data->contractType = $vacancy->getContractType();
-        $data->datePosted = $vacancy->getDatePosted();
-        $data->deadline = $vacancy->getDeadline();
-        $data->dateApplied = $vacancy->getDateApplied();
-        $data->fullText = $vacancy->getFullText();
-        $data->requirements = $vacancy->getRequirements();
-        $data->responsibilities = $vacancy->getResponsibilities();
-        $data->preferredQualifications = $vacancy->getPreferredQualifications();
-        $data->aboutJob = $vacancy->getAboutJob();
-        $data->aboutCompany = $vacancy->getAboutCompany();
-        $data->compensationBenefits = $vacancy->getCompensationBenefits();
-        $data->minimumSalary = $vacancy->getSalaryRange()?->getMinimum()?->amount();
-        $data->maximumSalary = $vacancy->getSalaryRange()?->getMaximum()?->amount();
-        $data->currencyCode = $vacancy->getSalaryRange()?->getCurrencyCode() ?? 'EUR';
-        $data->workMode = $vacancy->getWorkMode();
-        $data->hybridDetails = $vacancy->getHybridDetails();
-        $data->excitement = $vacancy->getExcitement();
-        $data->techStacks->existingTags = implode(',', array_map(static fn ($techStack): string => $techStack->getSlug(), iterator_to_array($vacancy->getTechStacks())));
+        $data->title = $vacancy->title;
+        $data->companyId = $vacancy->company?->id->toRfc4122();
+        $data->recruiterId = $vacancy->recruiter?->id->toRfc4122();
+        $data->location = $vacancy->location;
+        $data->applicationSource = $vacancy->applicationSource;
+        $data->sourceUrls = $vacancy->sourceUrls;
+        $data->howToApply = $vacancy->howToApply;
+        $data->contractType = $vacancy->contractType;
+        $data->datePosted = $vacancy->datePosted;
+        $data->deadline = $vacancy->deadline;
+        $data->dateApplied = $vacancy->dateApplied;
+        $data->fullText = $vacancy->fullText;
+        $data->requirements = $vacancy->requirements;
+        $data->responsibilities = $vacancy->responsibilities;
+        $data->preferredQualifications = $vacancy->preferredQualifications;
+        $data->aboutJob = $vacancy->aboutJob;
+        $data->aboutCompany = $vacancy->aboutCompany;
+        $data->compensationBenefits = $vacancy->compensationBenefits;
+        $data->minimumSalary = $vacancy->getSalaryRange()?->minimum?->amount();
+        $data->maximumSalary = $vacancy->getSalaryRange()?->maximum?->amount();
+        $data->currencyCode = $vacancy->getSalaryRange()->currencyCode ?? 'EUR';
+        $data->workMode = $vacancy->workMode;
+        $data->hybridDetails = $vacancy->hybridDetails;
+        $data->excitement = $vacancy->excitement;
+        $data->techStacks->existingTags = $vacancy->techStacks
+                |> iterator_to_array(...)
+                |> (static fn ($x) => array_map(static fn ($techStack): string => $techStack->slug, $x))
+                |> (static fn ($x) => implode(',', $x));
 
         return $data;
     }
 
-    public function command(string $userId, ?string $vacancyId, VacancyData $data): SaveVacancy
-    {
+    public function command(
+        string $userId,
+        ?string $vacancyId,
+        VacancyData $data,
+    ): SaveVacancy {
         $newTechStacks = [];
         foreach ($data->techStacks->newTags as $newTechStack) {
             if (null === $newTechStack) {
@@ -57,12 +63,34 @@ final class VacancyFormDataFactory
         }
 
         return new SaveVacancy(
-            $userId, $vacancyId, $data->title ?? '', $data->companyId, $data->recruiterId, $data->location,
-            $data->applicationSource, $this->sourceUrls($data), $data->howToApply, $data->contractType,
-            $data->datePosted, $data->deadline, $data->dateApplied, $data->fullText, $data->requirements,
-            $data->responsibilities, $data->preferredQualifications, $data->aboutJob, $data->aboutCompany,
-            $data->compensationBenefits, $data->minimumSalary, $data->maximumSalary, strtoupper(trim($data->currencyCode)),
-            $data->workMode, $data->hybridDetails, $data->excitement, $this->existingSlugs($data), $newTechStacks,
+            $userId,
+            $vacancyId,
+            $data->title ?? '',
+            $data->companyId,
+            $data->recruiterId,
+            $data->location,
+            $data->applicationSource,
+            $this->sourceUrls($data),
+            $data->howToApply,
+            $data->contractType,
+            $data->datePosted,
+            $data->deadline,
+            $data->dateApplied,
+            $data->fullText,
+            $data->requirements,
+            $data->responsibilities,
+            $data->preferredQualifications,
+            $data->aboutJob,
+            $data->aboutCompany,
+            $data->compensationBenefits,
+            $data->minimumSalary,
+            $data->maximumSalary,
+            strtoupper(trim($data->currencyCode)),
+            $data->workMode,
+            $data->hybridDetails,
+            $data->excitement,
+            $this->existingSlugs($data),
+            $newTechStacks,
         );
     }
 

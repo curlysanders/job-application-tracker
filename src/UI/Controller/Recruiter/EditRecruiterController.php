@@ -26,14 +26,22 @@ final readonly class EditRecruiterController extends AbstractManagementFormContr
 {
     use AuthenticatedUserTrait;
 
-    public function __construct(private Security $security, private RecruiterRepository $recruiters, private CommandBus $commandBus, FormFactoryInterface $forms, Environment $twig, UrlGeneratorInterface $urls)
-    {
+    public function __construct(
+        private Security $security,
+        private RecruiterRepository $recruiters,
+        private CommandBus $commandBus,
+        FormFactoryInterface $forms,
+        Environment $twig,
+        UrlGeneratorInterface $urls,
+    ) {
         parent::__construct($forms, $twig, $urls);
     }
 
     #[Route('/recruiters/{id}/edit', name: 'app_recruiter_edit', methods: ['GET', 'POST'])]
-    public function __invoke(string $id, Request $request): Response
-    {
+    public function __invoke(
+        string $id,
+        Request $request,
+    ): Response {
         $userId = $this->userId();
         $recruiter = $this->recruiters->findOwnedBy($id, $userId) ?? throw new NotFoundHttpException('Recruiter not found.');
         $data = $this->dataFrom($recruiter);
@@ -50,15 +58,15 @@ final readonly class EditRecruiterController extends AbstractManagementFormContr
 
     private function userId(): string
     {
-        return $this->requireAuthenticatedUser('Recruiter management requires an authenticated user.')->getId()->toRfc4122();
+        return $this->requireAuthenticatedUser('Recruiter management requires an authenticated user.')->id->toRfc4122();
     }
 
     private function dataFrom(Recruiter $recruiter): RecruiterData
     {
         $data = new RecruiterData();
-        $data->agencyName = $recruiter->getAgencyName();
-        $data->website = $recruiter->getWebsite();
-        $data->directContacts = $this->directContactData($recruiter->getDirectContacts());
+        $data->agencyName = $recruiter->agencyName;
+        $data->website = $recruiter->website;
+        $data->directContacts = $this->directContactData($recruiter->directContacts);
 
         return $data;
     }

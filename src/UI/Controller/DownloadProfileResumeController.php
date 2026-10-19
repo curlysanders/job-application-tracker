@@ -30,9 +30,9 @@ final readonly class DownloadProfileResumeController
             throw new NotFoundHttpException('No active resume was found.');
         }
 
-        $storagePath = $user->getResumeStoragePath();
-        $originalFilename = $user->getResumeOriginalFilename();
-        $mimeType = $user->getResumeMimeType();
+        $storagePath = $user->resumeStoragePath;
+        $originalFilename = $user->resumeOriginalFilename;
+        $mimeType = $user->resumeMimeType;
         if (null === $storagePath || null === $originalFilename || null === $mimeType) {
             throw new NotFoundHttpException('No active resume was found.');
         }

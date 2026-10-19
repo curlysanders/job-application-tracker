@@ -6,8 +6,10 @@ namespace CurlySanders\JobApplicationTracker\Domain\Shared;
 
 trait NormalizesStrings
 {
-    private static function required(string $value, string $message): string
-    {
+    private static function required(
+        string $value,
+        string $message,
+    ): string {
         $value = trim($value);
         if ('' === $value) {
             throw new \InvalidArgumentException($message);

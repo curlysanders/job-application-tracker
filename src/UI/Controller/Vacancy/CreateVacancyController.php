@@ -51,29 +51,37 @@ final readonly class CreateVacancyController
                 throw new \LogicException('A created vacancy must be persisted.');
             }
 
-            return $this->redirect($request, $vacancy->getId()->toRfc4122(), 'Vacancy created.');
+            return $this->redirect($request, $vacancy->id->toRfc4122(), 'Vacancy created.');
         }
 
         return $this->response($form->createView(), $user, 'Add vacancy', 'Create vacancy', $form->isSubmitted());
     }
 
-    private function response(FormView $form, User $user, string $pageTitle, string $submitLabel, bool $submitted): Response
-    {
+    private function response(
+        FormView $form,
+        User $user,
+        string $pageTitle,
+        string $submitLabel,
+        bool $submitted,
+    ): Response {
         $rates = $this->exchangeRates->latestRates();
         $rateValues = $rates->ratesPerEuro ?? [];
 
         $preferredSalary = $user->getPreferredSalary();
 
-        return new Response($this->twig->render('vacancy/form.html.twig', ['form' => $form, 'pageTitle' => $pageTitle, 'submitLabel' => $submitLabel, 'minimumPreferredSalary' => $preferredSalary->getMinimumDecimal(), 'minimumPreferredSalaryCurrency' => $preferredSalary->getCurrencyCode(), 'exchangeRates' => $rateValues]), $submitted ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK);
+        return new Response($this->twig->render('vacancy/form.html.twig', ['form' => $form, 'pageTitle' => $pageTitle, 'submitLabel' => $submitLabel, 'minimumPreferredSalary' => $preferredSalary->getMinimumDecimal(), 'minimumPreferredSalaryCurrency' => $preferredSalary->currencyCode, 'exchangeRates' => $rateValues]), $submitted ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK);
     }
 
     private function userId(User $user): string
     {
-        return $user->getId()->toRfc4122();
+        return $user->id->toRfc4122();
     }
 
-    private function redirect(Request $request, string $id, string $message): RedirectResponse
-    {
+    private function redirect(
+        Request $request,
+        string $id,
+        string $message,
+    ): RedirectResponse {
         $session = $request->getSession();
         if (!$session instanceof FlashBagAwareSessionInterface) {
             throw new \LogicException('Vacancy authoring requires a flash-aware session.');

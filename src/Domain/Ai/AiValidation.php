@@ -6,8 +6,11 @@ namespace CurlySanders\JobApplicationTracker\Domain\Ai;
 
 final class AiValidation
 {
-    public static function requiredText(string $value, string $name, int $maximumLength): void
-    {
+    public static function requiredText(
+        string $value,
+        string $name,
+        int $maximumLength,
+    ): void {
         if ('' === trim($value) || mb_strlen($value) > $maximumLength) {
             throw new \InvalidArgumentException(sprintf('%s must be non-blank and no longer than %d characters.', $name, $maximumLength));
         }
@@ -21,8 +24,11 @@ final class AiValidation
     }
 
     /** @param array<mixed> $values */
-    public static function listOf(array $values, string $type, string $name): void
-    {
+    public static function listOf(
+        array $values,
+        string $type,
+        string $name,
+    ): void {
         if (!array_is_list($values) || [] !== array_filter($values, static fn (mixed $value): bool => !$value instanceof $type)) {
             throw new \InvalidArgumentException(sprintf('%s must be a list of %s objects.', $name, $type));
         }

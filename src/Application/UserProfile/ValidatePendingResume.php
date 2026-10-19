@@ -16,8 +16,10 @@ final readonly class ValidatePendingResume
     ) {
     }
 
-    public function __invoke(string $userId, string $validationId): void
-    {
+    public function __invoke(
+        string $userId,
+        string $validationId,
+    ): void {
         $pending = $this->pendingResumes->findPendingResume($userId, $validationId);
         if (null === $pending) {
             return;

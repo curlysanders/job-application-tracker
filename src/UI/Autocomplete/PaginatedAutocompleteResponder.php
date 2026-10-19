@@ -21,8 +21,12 @@ final readonly class PaginatedAutocompleteResponder
      * @param callable(string, int): PaginatedResults<T>      $fetchResults
      * @param callable(T): array{value: string, text: string} $mapResult
      */
-    public function respond(Request $request, string $routeName, callable $fetchResults, callable $mapResult): JsonResponse
-    {
+    public function respond(
+        Request $request,
+        string $routeName,
+        callable $fetchResults,
+        callable $mapResult,
+    ): JsonResponse {
         $query = trim($request->query->getString('query'));
         $page = max(1, $request->query->getInt('page', 1));
         $results = $fetchResults($query, $page);

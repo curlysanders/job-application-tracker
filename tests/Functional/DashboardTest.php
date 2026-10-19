@@ -38,7 +38,7 @@ final class DashboardTest extends WebTestCase
         $archived = $this->createVacancy($user, 'Archived vacancy', VacancyStatus::Applied);
         $this->entityManager()->getConnection()->executeStatement(
             'UPDATE vacancies SET archived = 1 WHERE id = :id',
-            ['id' => $archived->getId()],
+            ['id' => $archived->id],
             ['id' => IdentifierType::NAME],
         );
         $this->createVacancy($this->createUser('other-dashboard@example.com'), 'Private vacancy', VacancyStatus::Applying);
@@ -133,7 +133,7 @@ final class DashboardTest extends WebTestCase
         $this->entityManager()->flush();
         $this->entityManager()->getConnection()->executeStatement(
             'UPDATE vacancies SET work_mode = :mode WHERE id = :id',
-            ['mode' => 'REMOTE', 'id' => $meetsTarget->getId()],
+            ['mode' => 'REMOTE', 'id' => $meetsTarget->id],
             ['id' => IdentifierType::NAME],
         );
 
@@ -162,18 +162,18 @@ final class DashboardTest extends WebTestCase
         $archiveToken = $crawler->filter('form[action$="/archive"] input[name="_token"]')->attr('value');
         self::assertNotNull($archiveToken);
 
-        $client->request('POST', sprintf('/vacancies/%s/archive', $vacancy->getId()->toRfc4122()), [
+        $client->request('POST', sprintf('/vacancies/%s/archive', $vacancy->id->toRfc4122()), [
             '_token' => $archiveToken,
             'archived' => '1',
             'return' => '/',
         ]);
         self::assertResponseRedirects('/');
         $this->entityManager()->clear();
-        $archivedVacancy = $this->entityManager()->find(Vacancy::class, $vacancy->getId());
+        $archivedVacancy = $this->entityManager()->find(Vacancy::class, $vacancy->id);
         self::assertInstanceOf(Vacancy::class, $archivedVacancy);
-        self::assertTrue($archivedVacancy->isArchived());
+        self::assertTrue($archivedVacancy->archived);
         $outboxRecord = $this->entityManager()->getRepository(OutboxRecord::class)->findOneBy([
-            'entityId' => $vacancy->getId()->toRfc4122(),
+            'entityId' => $vacancy->id->toRfc4122(),
             'eventType' => VacancyArchived::class,
         ]);
         self::assertInstanceOf(OutboxRecord::class, $outboxRecord);
@@ -181,20 +181,20 @@ final class DashboardTest extends WebTestCase
         $crawler = $client->request('GET', '/?archived=1');
         $restoreToken = $crawler->filter('form[action$="/archive"] input[name="_token"]')->attr('value');
         self::assertNotNull($restoreToken);
-        $client->request('POST', sprintf('/vacancies/%s/archive', $vacancy->getId()->toRfc4122()), [
+        $client->request('POST', sprintf('/vacancies/%s/archive', $vacancy->id->toRfc4122()), [
             '_token' => $restoreToken,
             'archived' => '0',
             'return' => '/',
         ]);
         $this->entityManager()->clear();
-        $restoredVacancy = $this->entityManager()->find(Vacancy::class, $vacancy->getId());
+        $restoredVacancy = $this->entityManager()->find(Vacancy::class, $vacancy->id);
         self::assertInstanceOf(Vacancy::class, $restoredVacancy);
-        self::assertFalse($restoredVacancy->isArchived());
+        self::assertFalse($restoredVacancy->archived);
 
         $crawler = $client->request('GET', '/');
         $archiveToken = $crawler->filter('form[action$="/archive"] input[name="_token"]')->attr('value');
         self::assertNotNull($archiveToken);
-        $client->request('POST', sprintf('/vacancies/%s/archive', $vacancy->getId()->toRfc4122()), [
+        $client->request('POST', sprintf('/vacancies/%s/archive', $vacancy->id->toRfc4122()), [
             '_token' => $archiveToken,
             'archived' => '1',
             'return' => '/?archived=1',
@@ -203,18 +203,21 @@ final class DashboardTest extends WebTestCase
         $crawler = $client->request('GET', '/?archived=1');
         $deleteToken = $crawler->filter('form[action$="/delete"] input[name="_token"]')->attr('value');
         self::assertNotNull($deleteToken);
-        $client->request('POST', sprintf('/vacancies/%s/delete', $vacancy->getId()->toRfc4122()), [
+        $client->request('POST', sprintf('/vacancies/%s/delete', $vacancy->id->toRfc4122()), [
             '_token' => $deleteToken,
             'confirm' => 'delete',
             'return' => '/?archived=1',
         ]);
         self::assertResponseRedirects('/?archived=1');
         $this->entityManager()->clear();
-        self::assertNull($this->entityManager()->find(Vacancy::class, $vacancy->getId()));
+        self::assertNull($this->entityManager()->find(Vacancy::class, $vacancy->id));
     }
 
-    private function createVacancy(User $user, string $title, VacancyStatus $status): Vacancy
-    {
+    private function createVacancy(
+        User $user,
+        string $title,
+        VacancyStatus $status,
+    ): Vacancy {
         $vacancy = new Vacancy($user, $title);
         $vacancy->setStatus($status);
         $this->entityManager()->persist($vacancy);

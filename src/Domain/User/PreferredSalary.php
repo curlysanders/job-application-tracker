@@ -8,8 +8,10 @@ use CurlySanders\JobApplicationTracker\Domain\Shared\Money;
 
 final readonly class PreferredSalary
 {
-    private function __construct(private string $currencyCode, private ?Money $minimum)
-    {
+    private function __construct(
+        public string $currencyCode,
+        public ?Money $minimum,
+    ) {
         if (1 !== preg_match('/^[A-Z]{3}$/', $currencyCode)) {
             throw new \InvalidArgumentException('The currency code must be ISO 4217.');
         }
@@ -21,19 +23,11 @@ final readonly class PreferredSalary
         }
     }
 
-    public static function fromDecimal(?string $minimum, string $currencyCode): self
-    {
+    public static function fromDecimal(
+        ?string $minimum,
+        string $currencyCode,
+    ): self {
         return new self($currencyCode, null === $minimum ? null : Money::of($minimum, $currencyCode));
-    }
-
-    public function getCurrencyCode(): string
-    {
-        return $this->currencyCode;
-    }
-
-    public function getMinimum(): ?Money
-    {
-        return $this->minimum;
     }
 
     public function getMinimumDecimal(): ?string
@@ -41,8 +35,10 @@ final readonly class PreferredSalary
         return $this->minimum?->amount();
     }
 
-    public function evaluate(Money $grossSalary, ?CurrencyConversionRate $conversionRate = null): SalaryFitStatus
-    {
+    public function evaluate(
+        Money $grossSalary,
+        ?CurrencyConversionRate $conversionRate = null,
+    ): SalaryFitStatus {
         if (null === $this->minimum) {
             return SalaryFitStatus::NotConfigured;
         }

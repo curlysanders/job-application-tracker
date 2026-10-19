@@ -11,8 +11,10 @@ use Symfony\Component\DependencyInjection\Attribute\AsAlias;
 final class ResumeFileStructureValidator implements ResumeFileValidator
 {
     /** @param resource $stream */
-    public function isValid(mixed $stream, string $mimeType): bool
-    {
+    public function isValid(
+        mixed $stream,
+        string $mimeType,
+    ): bool {
         if (!is_resource($stream)) {
             throw new \InvalidArgumentException('A resume structure check requires a readable stream.');
         }

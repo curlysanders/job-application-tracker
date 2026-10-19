@@ -89,8 +89,11 @@ final class RecordingPlatform implements PlatformInterface
     {
     }
 
-    public function invoke(string|Model $model, array|string|object $input, array $options = []): DeferredResult
-    {
+    public function invoke(
+        string|Model $model,
+        array|string|object $input,
+        array $options = [],
+    ): DeferredResult {
         $this->invocations[] = ['model' => $model instanceof Model ? $model->getName() : $model, 'options' => $options];
         $response = array_shift($this->responses) ?? new \stdClass();
 
@@ -104,8 +107,10 @@ final class RecordingPlatform implements PlatformInterface
                 return true;
             }
 
-            public function convert(RawResultInterface $result, array $options = []): ResultInterface
-            {
+            public function convert(
+                RawResultInterface $result,
+                array $options = [],
+            ): ResultInterface {
                 return new ObjectResult($this->response);
             }
 

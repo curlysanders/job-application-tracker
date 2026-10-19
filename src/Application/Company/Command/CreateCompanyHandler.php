@@ -12,8 +12,10 @@ use CurlySanders\JobApplicationTracker\Domain\Company\Company;
 
 final readonly class CreateCompanyHandler implements CommandHandler
 {
-    public function __construct(private UserRepository $users, private CompanyRepository $companies)
-    {
+    public function __construct(
+        private UserRepository $users,
+        private CompanyRepository $companies,
+    ) {
     }
 
     public function __invoke(CreateCompany $command): Company

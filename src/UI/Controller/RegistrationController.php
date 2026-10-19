@@ -38,6 +38,7 @@ final readonly class RegistrationController
         private FormFactoryInterface $formFactory,
         private Environment $twig,
         private UrlGeneratorInterface $urlGenerator,
+
         #[Target('registration')]
         private RateLimiterFactoryInterface $registrationLimiter,
     ) {
@@ -92,8 +93,10 @@ final readonly class RegistrationController
     }
 
     /** @param FormInterface<RegistrationData> $form */
-    private function renderRegistrationForm(FormInterface $form, int $status = Response::HTTP_OK): Response
-    {
+    private function renderRegistrationForm(
+        FormInterface $form,
+        int $status = Response::HTTP_OK,
+    ): Response {
         return new Response($this->twig->render('security/register.html.twig', [
             'registrationForm' => $form->createView(),
         ]), $status);

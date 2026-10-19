@@ -62,7 +62,10 @@ final class MessagingAdaptersTest extends TestCase
         $stack = $this->createMock(StackInterface::class);
         $next = $this->createMock(MiddlewareInterface::class);
         $stack->expects(self::once())->method('next')->willReturn($next);
-        $next->expects(self::once())->method('handle')->willReturnCallback(static function (Envelope $envelope, StackInterface $stack) use ($context): Envelope {
+        $next->expects(self::once())->method('handle')->willReturnCallback(static function (
+            Envelope $envelope,
+            StackInterface $stack,
+        ) use ($context): Envelope {
             self::assertSame(42, $context->id());
 
             return $envelope;
@@ -77,7 +80,7 @@ final class MessagingAdaptersTest extends TestCase
     {
         $user = new User();
         $vacancy = new Vacancy($user, 'Backend engineer');
-        $event = new VacancyStatusTransitioned($vacancy->getId(), [
+        $event = new VacancyStatusTransitioned($vacancy->id, [
             'fromStatus' => VacancyStatus::Bookmarked->value,
             'toStatus' => VacancyStatus::Applying->value,
             'note' => 'Interview arranged',
@@ -101,7 +104,7 @@ final class MessagingAdaptersTest extends TestCase
         $handler = new RecordVacancyStatusTransition($service, new OutboxRecordIdContext());
 
         $this->expectException(\LogicException::class);
-        $handler(new VacancyStatusTransitioned($vacancy->getId(), ['fromStatus' => VacancyStatus::Bookmarked->value, 'toStatus' => VacancyStatus::Applying->value]));
+        $handler(new VacancyStatusTransitioned($vacancy->id, ['fromStatus' => VacancyStatus::Bookmarked->value, 'toStatus' => VacancyStatus::Applying->value]));
     }
 
     public function testStatusTransitionHandlerRejectsMalformedHistoryValues(): void
@@ -115,7 +118,7 @@ final class MessagingAdaptersTest extends TestCase
         );
 
         $this->expectException(\LogicException::class);
-        $handler(new VacancyStatusTransitioned($vacancy->getId(), ['fromStatus' => VacancyStatus::Bookmarked->value, 'toStatus' => 123]));
+        $handler(new VacancyStatusTransitioned($vacancy->id, ['fromStatus' => VacancyStatus::Bookmarked->value, 'toStatus' => 123]));
     }
 
     public function testResumeValidationHandlerDelegatesAValidRequestAndRejectsInvalidMetadata(): void

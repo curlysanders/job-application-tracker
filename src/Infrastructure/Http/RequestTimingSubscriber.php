@@ -18,6 +18,7 @@ final readonly class RequestTimingSubscriber implements EventSubscriberInterface
     public function __construct(
         #[Autowire(env: 'bool:APP_REQUEST_TIMING')]
         private bool $enabled,
+
         #[Autowire(service: 'monolog.logger.performance')]
         private LoggerInterface $logger,
     ) {

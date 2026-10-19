@@ -33,10 +33,12 @@ final readonly class UpdateVacancyNextActionController
     }
 
     #[Route('/vacancies/{id}/next-action', name: 'app_vacancy_update_next_action', methods: ['POST'])]
-    public function __invoke(string $id, Request $request): RedirectResponse
-    {
+    public function __invoke(
+        string $id,
+        Request $request,
+    ): RedirectResponse {
         $user = $this->requireAuthenticatedUser('Vacancy reminder updates require an authenticated user.');
-        $userId = $user->getId()->toRfc4122();
+        $userId = $user->id->toRfc4122();
         $this->vacancies->findOwnedBy($id, $userId) ?? throw new NotFoundHttpException('Vacancy not found.');
         if (!$this->csrf->isTokenValid(new CsrfToken(sprintf('vacancy_next_action_%s', $id), $request->request->getString('_token')))) {
             throw new AccessDeniedHttpException('Invalid CSRF token.');
@@ -59,8 +61,12 @@ final readonly class UpdateVacancyNextActionController
         return $this->redirectWithWarning($request, $id, null === $at ? 'Next action cleared.' : 'Next action updated.', 'success');
     }
 
-    private function redirectWithWarning(Request $request, string $id, string $message, string $type = 'warning'): RedirectResponse
-    {
+    private function redirectWithWarning(
+        Request $request,
+        string $id,
+        string $message,
+        string $type = 'warning',
+    ): RedirectResponse {
         $session = $request->getSession();
         if (!$session instanceof FlashBagAwareSessionInterface) {
             throw new \LogicException('Vacancy reminder updates require a flash-aware session.');

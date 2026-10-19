@@ -13,8 +13,10 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 /** @extends AbstractContactableType<RecruiterData|null> */
 final class RecruiterType extends AbstractContactableType
 {
-    public function buildForm(FormBuilderInterface $builder, array $options): void
-    {
+    public function buildForm(
+        FormBuilderInterface $builder,
+        array $options,
+    ): void {
         $builder->add('agencyName', TextType::class, ['label' => 'Agency name']);
         $this->addWebsite($builder);
         $this->addDirectContacts($builder);

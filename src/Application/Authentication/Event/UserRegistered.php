@@ -8,6 +8,7 @@ final readonly class UserRegistered
 {
     public function __construct(
         public int $userId,
+
         #[\SensitiveParameter]
         public string $email,
         public \DateTimeImmutable $occurredAt,

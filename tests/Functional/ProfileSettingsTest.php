@@ -6,6 +6,7 @@ namespace CurlySanders\JobApplicationTracker\Tests\Functional;
 
 use CurlySanders\JobApplicationTracker\Domain\User\PreferredTransportMode;
 use CurlySanders\JobApplicationTracker\Domain\User\User;
+use CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser;
 use Doctrine\ORM\EntityManagerInterface;
 use League\Flysystem\FilesystemOperator;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -27,7 +28,7 @@ final class ProfileSettingsTest extends WebTestCase
     {
         $client = self::createClient();
         $user = $this->createUser('sander@example.com');
-        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user));
+        $client->loginUser(new SecurityUser($user));
 
         $crawler = $client->request('GET', '/profile');
         $client->submit($crawler->selectButton('Save settings')->form([
@@ -39,18 +40,18 @@ final class ProfileSettingsTest extends WebTestCase
 
         self::assertResponseRedirects('/profile');
         $this->entityManager()->clear();
-        $savedUser = $this->entityManager()->find(User::class, $user->getId());
+        $savedUser = $this->entityManager()->find(User::class, $user->id);
         self::assertInstanceOf(User::class, $savedUser);
         self::assertSame('4500.00', $savedUser->getPreferredSalary()->getMinimumDecimal());
-        self::assertSame('USD', $savedUser->getPreferredSalary()->getCurrencyCode());
-        self::assertSame(45, $savedUser->getMaximumCommuteMinutes());
-        self::assertSame(PreferredTransportMode::PublicTransport, $savedUser->getPreferredTransportMode());
+        self::assertSame('USD', $savedUser->getPreferredSalary()->currencyCode);
+        self::assertSame(45, $savedUser->maximumCommuteMinutes);
+        self::assertSame(PreferredTransportMode::PublicTransport, $savedUser->preferredTransportMode);
     }
 
     public function testProfileLinkIsAvailableInTheAuthenticatedHeader(): void
     {
         $client = self::createClient();
-        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($this->createUser('header-profile@example.com')));
+        $client->loginUser(new SecurityUser($this->createUser('header-profile@example.com')));
 
         $client->request('GET', '/profile');
 
@@ -69,7 +70,7 @@ final class ProfileSettingsTest extends WebTestCase
     public function testProfileRejectsNonPositivePreferences(): void
     {
         $client = self::createClient();
-        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($this->createUser('sander@example.com')));
+        $client->loginUser(new SecurityUser($this->createUser('sander@example.com')));
         $crawler = $client->request('GET', '/profile');
         $client->submit($crawler->selectButton('Save settings')->form([
             'profile_settings[minimumPreferredSalary]' => '0.00',
@@ -85,7 +86,7 @@ final class ProfileSettingsTest extends WebTestCase
     {
         $client = self::createClient();
         $user = $this->createUser('sander@example.com');
-        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user));
+        $client->loginUser(new SecurityUser($user));
 
         $firstFile = $this->createPdf('First resume');
         $crawler = $client->request('GET', '/profile');
@@ -95,13 +96,13 @@ final class ProfileSettingsTest extends WebTestCase
 
         self::assertResponseRedirects('/profile');
         $this->entityManager()->clear();
-        $savedUser = $this->entityManager()->find(User::class, $user->getId());
+        $savedUser = $this->entityManager()->find(User::class, $user->id);
         self::assertInstanceOf(User::class, $savedUser);
         $firstPath = $savedUser->getPendingResume()?->storagePath;
         self::assertNotNull($firstPath);
-        self::assertStringStartsWith(sprintf('resumes/%s/pending/', $user->getId()->toRfc4122()), $firstPath);
+        self::assertStringStartsWith(sprintf('resumes/%s/pending/', $user->id->toRfc4122()), $firstPath);
         self::assertTrue($this->storage()->fileExists($firstPath));
-        self::assertNull($savedUser->getResumeStoragePath());
+        self::assertNull($savedUser->resumeStoragePath);
 
         $secondFile = $this->createDocx('Second resume');
         $crawler = $client->request('GET', '/profile');
@@ -111,7 +112,7 @@ final class ProfileSettingsTest extends WebTestCase
 
         self::assertResponseRedirects('/profile');
         $this->entityManager()->clear();
-        $savedUser = $this->entityManager()->find(User::class, $user->getId());
+        $savedUser = $this->entityManager()->find(User::class, $user->id);
         self::assertInstanceOf(User::class, $savedUser);
         $pending = $savedUser->getPendingResume();
         self::assertNotNull($pending);
@@ -119,21 +120,21 @@ final class ProfileSettingsTest extends WebTestCase
         self::assertSame('application/vnd.openxmlformats-officedocument.wordprocessingml.document', $pending->mimeType);
         self::assertNotSame($firstPath, $pending->storagePath);
         self::assertFalse($this->storage()->fileExists($firstPath));
-        self::assertNull($savedUser->getResumeStoragePath());
+        self::assertNull($savedUser->resumeStoragePath);
     }
 
     public function testProfileRejectsInvalidResumeWithoutReplacingActiveResume(): void
     {
         $client = self::createClient();
         $user = $this->createUser('sander@example.com');
-        $activeResumePath = sprintf('resumes/%s/active.pdf', $user->getId()->toRfc4122());
+        $activeResumePath = sprintf('resumes/%s/active.pdf', $user->id->toRfc4122());
         $user->replaceResume($activeResumePath, 'active.pdf', 'application/pdf', new \DateTimeImmutable());
         $this->entityManager()->flush();
 
         $invalidFile = tempnam(sys_get_temp_dir(), 'resume-invalid-');
         self::assertNotFalse($invalidFile);
         file_put_contents($invalidFile, 'not a resume');
-        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user));
+        $client->loginUser(new SecurityUser($user));
         $crawler = $client->request('GET', '/profile');
         $form = $crawler->selectButton('Upload resume')->form();
         $this->attachResume($form, $invalidFile);
@@ -142,9 +143,9 @@ final class ProfileSettingsTest extends WebTestCase
         self::assertResponseStatusCodeSame(422);
         self::assertSelectorTextContains('[aria-labelledby="resume-upload-heading"]', 'Upload a PDF or DOCX resume.');
         $this->entityManager()->clear();
-        $savedUser = $this->entityManager()->find(User::class, $user->getId());
+        $savedUser = $this->entityManager()->find(User::class, $user->id);
         self::assertInstanceOf(User::class, $savedUser);
-        self::assertSame($activeResumePath, $savedUser->getResumeStoragePath());
+        self::assertSame($activeResumePath, $savedUser->resumeStoragePath);
     }
 
     public function testAnonymousUsersCannotDownloadAResume(): void
@@ -158,7 +159,7 @@ final class ProfileSettingsTest extends WebTestCase
     private function createUser(string $email): User
     {
         $user = new User()->setEmail($email);
-        $user->setPassword($this->passwordHasher()->hashPassword(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user), 'SecurePassword1!'));
+        $user->setPassword($this->passwordHasher()->hashPassword(new SecurityUser($user), 'SecurePassword1!'));
         $this->entityManager()->persist($user);
         $this->entityManager()->flush();
 
@@ -208,14 +209,18 @@ final class ProfileSettingsTest extends WebTestCase
         self::assertTrue($archive->open($path, \ZipArchive::CREATE));
         $archive->addFromString('[Content_Types].xml', '<?xml version="1.0"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>');
         $archive->addFromString('_rels/.rels', '<?xml version="1.0"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>');
-        $archive->addFromString('word/document.xml', sprintf('<?xml version="1.0"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>%s</w:t></w:r></w:p></w:body></w:document>', htmlspecialchars($contents, ENT_XML1)));
+        htmlspecialchars($contents, ENT_XML1)
+            |> (static fn ($x) => sprintf('<?xml version="1.0"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>%s</w:t></w:r></w:p></w:body></w:document>', $x))
+            |> (static fn ($x) => $archive->addFromString('word/document.xml', $x));
         self::assertTrue($archive->close());
 
         return $path;
     }
 
-    private function attachResume(Form $form, string $path): void
-    {
+    private function attachResume(
+        Form $form,
+        string $path,
+    ): void {
         $field = $form->get('resume_upload[resume]');
         self::assertInstanceOf(FileFormField::class, $field);
         $field->upload($path);

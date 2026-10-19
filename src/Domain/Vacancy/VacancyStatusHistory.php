@@ -10,54 +10,21 @@ final class VacancyStatusHistory
 {
     use NormalizesStrings;
 
-    /** @phpstan-ignore-next-line Doctrine assigns this generated identifier. */
-    private ?int $id = null;
+    private(set) ?int $id = null;
 
-    private ?string $notes;
+    private(set) ?string $notes;
 
-    private \DateTimeImmutable $transitionedAt;
+    private(set) \DateTimeImmutable $transitionedAt;
 
-    public function __construct(private Vacancy $vacancy, private VacancyStatus $fromStatus, private VacancyStatus $toStatus,
+    public function __construct(
+        private(set) Vacancy $vacancy,
+        private(set) VacancyStatus $fromStatus,
+        private(set) VacancyStatus $toStatus,
         ?string $notes,
         ?\DateTimeImmutable $transitionedAt = null,
-        private ?int $outboxRecordId = null,
+        private(set) ?int $outboxRecordId = null,
     ) {
         $this->notes = self::optional($notes);
         $this->transitionedAt = $transitionedAt ?? new \DateTimeImmutable();
-    }
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
-    public function getVacancy(): Vacancy
-    {
-        return $this->vacancy;
-    }
-
-    public function getFromStatus(): VacancyStatus
-    {
-        return $this->fromStatus;
-    }
-
-    public function getToStatus(): VacancyStatus
-    {
-        return $this->toStatus;
-    }
-
-    public function getNotes(): ?string
-    {
-        return $this->notes;
-    }
-
-    public function getTransitionedAt(): \DateTimeImmutable
-    {
-        return $this->transitionedAt;
-    }
-
-    public function getOutboxRecordId(): ?int
-    {
-        return $this->outboxRecordId;
     }
 }

@@ -27,9 +27,9 @@ final class VacancyLifecycleHandlerTest extends TestCase
         $handler = new SetVacancyArchivedHandler($repository);
 
         $handler(new SetVacancyArchived(self::USER_ID, self::VACANCY_ID, true));
-        self::assertTrue($vacancy->isArchived());
+        self::assertTrue($vacancy->archived);
         $handler(new SetVacancyArchived(self::USER_ID, self::VACANCY_ID, false));
-        self::assertFalse($vacancy->isArchived());
+        self::assertFalse($vacancy->archived);
     }
 
     public function testDeletesOnlyAnOwnedVacancy(): void

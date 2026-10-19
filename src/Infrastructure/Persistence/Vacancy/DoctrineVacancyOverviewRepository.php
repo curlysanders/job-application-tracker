@@ -26,13 +26,17 @@ final readonly class DoctrineVacancyOverviewRepository implements VacancyOvervie
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
+
         #[Autowire(service: 'state_machine.vacancy_status')]
         private WorkflowInterface $workflow,
     ) {
     }
 
-    public function forUser(string $userId, PreferredSalary $preferredSalary, VacancyOverviewFilter $filter): VacancyOverview
-    {
+    public function forUser(
+        string $userId,
+        PreferredSalary $preferredSalary,
+        VacancyOverviewFilter $filter,
+    ): VacancyOverview {
         $countBuilder = $this->filteredQuery($userId, $preferredSalary, $filter);
         $total = (int) $countBuilder
             ->select('COUNT(DISTINCT vacancy.id)')
@@ -68,7 +72,7 @@ final readonly class DoctrineVacancyOverviewRepository implements VacancyOvervie
             ->getResult();
         $byId = [];
         foreach ($vacancies as $vacancy) {
-            $id = $vacancy->getId();
+            $id = $vacancy->id;
             $byId[$id->toRfc4122()] = $vacancy;
         }
 
@@ -78,8 +82,11 @@ final readonly class DoctrineVacancyOverviewRepository implements VacancyOvervie
         ), $total, $page, VacancyOverviewFilter::PAGE_SIZE);
     }
 
-    private function filteredQuery(string $userId, PreferredSalary $preferredSalary, VacancyOverviewFilter $filter): QueryBuilder
-    {
+    private function filteredQuery(
+        string $userId,
+        PreferredSalary $preferredSalary,
+        VacancyOverviewFilter $filter,
+    ): QueryBuilder {
         $builder = $this->entityManager->createQueryBuilder()
             ->from(Vacancy::class, 'vacancy')
             ->leftJoin('vacancy.company', 'company')
@@ -108,13 +115,16 @@ final readonly class DoctrineVacancyOverviewRepository implements VacancyOvervie
         return $builder;
     }
 
-    private function applySalaryFit(QueryBuilder $builder, PreferredSalary $preferredSalary, ?SalaryFit $salaryFit): void
-    {
+    private function applySalaryFit(
+        QueryBuilder $builder,
+        PreferredSalary $preferredSalary,
+        ?SalaryFit $salaryFit,
+    ): void {
         if (null === $salaryFit) {
             return;
         }
         $target = $preferredSalary->getMinimumDecimal();
-        if (null === $target || 'EUR' !== $preferredSalary->getCurrencyCode()) {
+        if (null === $target || 'EUR' !== $preferredSalary->currencyCode) {
             $builder->andWhere(SalaryFit::Unknown === $salaryFit ? '1 = 1' : '1 = 0');
 
             return;
@@ -131,41 +141,45 @@ final readonly class DoctrineVacancyOverviewRepository implements VacancyOvervie
         $builder->andWhere('('.$condition.')')->setParameter('salaryTarget', $target);
     }
 
-    private function overviewVacancy(Vacancy $vacancy, PreferredSalary $preferredSalary): VacancyOverviewVacancy
-    {
-        $id = $vacancy->getId()->toRfc4122();
+    private function overviewVacancy(
+        Vacancy $vacancy,
+        PreferredSalary $preferredSalary,
+    ): VacancyOverviewVacancy {
+        $id = $vacancy->id->toRfc4122();
         $range = $vacancy->getSalaryRange();
         $transitions = array_map(static fn ($transition): string => $transition->getName(), $this->workflow->getEnabledTransitions($vacancy));
 
         return new VacancyOverviewVacancy(
             $id,
-            $vacancy->getTitle(),
-            $vacancy->getCompany()?->getName(),
-            $vacancy->getRecruiter()?->getAgencyName(),
-            $vacancy->getWorkMode(),
-            array_values(array_map(static fn ($techStack): string => $techStack->getName(), iterator_to_array($vacancy->getTechStacks()))),
-            $vacancy->getExcitement(),
+            $vacancy->title,
+            $vacancy->company?->name,
+            $vacancy->recruiter?->agencyName,
+            $vacancy->workMode,
+            array_values(array_map(static fn ($techStack): string => $techStack->name, iterator_to_array($vacancy->techStacks))),
+            $vacancy->excitement,
             $this->salaryLabel($range),
-            $vacancy->getNextActionTitle(),
-            $vacancy->getNextActionAt(),
-            $vacancy->getStatus(),
+            $vacancy->nextActionTitle,
+            $vacancy->nextActionAt,
+            $vacancy->status,
             $this->salaryFit($range, $preferredSalary),
-            $vacancy->isArchived(),
+            $vacancy->archived,
             array_values($transitions),
         );
     }
 
-    private function salaryFit(?SalaryRange $range, PreferredSalary $preferredSalary): SalaryFit
-    {
-        $target = $preferredSalary->getMinimum();
-        if (null === $range || null === $target || 'EUR' !== $range->getCurrencyCode() || 'EUR' !== $preferredSalary->getCurrencyCode()) {
+    private function salaryFit(
+        ?SalaryRange $range,
+        PreferredSalary $preferredSalary,
+    ): SalaryFit {
+        $target = $preferredSalary->minimum;
+        if (null === $range || null === $target || 'EUR' !== $range->currencyCode || 'EUR' !== $preferredSalary->currencyCode) {
             return SalaryFit::Unknown;
         }
-        $maximum = $range->getMaximum();
+        $maximum = $range->maximum;
         if (null !== $maximum && $maximum->compare($target) < 0) {
             return SalaryFit::BelowTarget;
         }
-        if ((null !== $maximum && $maximum->compare($target) >= 0) || (null === $maximum && null !== $range->getMinimum() && $range->getMinimum()->compare($target) >= 0)) {
+        if ((null !== $maximum && $maximum->compare($target) >= 0) || (null === $maximum && null !== $range->minimum && $range->minimum->compare($target) >= 0)) {
             return SalaryFit::MeetsTarget;
         }
 
@@ -177,9 +191,9 @@ final readonly class DoctrineVacancyOverviewRepository implements VacancyOvervie
         if (null === $range) {
             return null;
         }
-        $minimum = $range->getMinimum()?->amount();
-        $maximum = $range->getMaximum()?->amount();
+        $minimum = $range->minimum?->amount();
+        $maximum = $range->maximum?->amount();
 
-        return $range->getCurrencyCode().' '.($minimum ?? '—').(null === $maximum ? '' : ' – '.$maximum);
+        return $range->currencyCode.' '.($minimum ?? '—').(null === $maximum ? '' : ' – '.$maximum);
     }
 }

@@ -39,12 +39,12 @@ final class CompanyRecruiterManagementTest extends WebTestCase
         $this->entityManager()->clear();
         $company = $this->entityManager()->getRepository(Company::class)->findOneBy(['name' => 'Acme BV']);
         self::assertInstanceOf(Company::class, $company);
-        self::assertSame($user->getId()->toRfc4122(), $company->getUser()->getId()->toRfc4122());
-        self::assertCount(2, $company->getDirectContacts());
+        self::assertSame($user->id->toRfc4122(), $company->user->id->toRfc4122());
+        self::assertCount(2, $company->directContacts);
 
-        $crawler = $client->request('GET', sprintf('/companies/%s/edit', $company->getId()->toRfc4122()));
+        $crawler = $client->request('GET', sprintf('/companies/%s/edit', $company->id->toRfc4122()));
         self::assertSelectorCount(1, 'input[name="company[directContacts][0][name]"]');
-        $client->request('POST', sprintf('/companies/%s/edit', $company->getId()->toRfc4122()), ['company' => [
+        $client->request('POST', sprintf('/companies/%s/edit', $company->id->toRfc4122()), ['company' => [
             '_token' => $this->csrfToken($crawler), 'name' => 'Acme Europe BV', 'website' => 'https://acme.example', 'industry' => 'Software',
             'directContacts' => [['name' => 'Ada Lovelace', 'email' => 'ada@acme.example', 'phone' => '+31 6 12345678', 'linkedinUrl' => 'https://www.linkedin.com/in/ada']],
         ]]);
@@ -72,8 +72,8 @@ final class CompanyRecruiterManagementTest extends WebTestCase
         $this->entityManager()->clear();
         $recruiter = $this->entityManager()->getRepository(Recruiter::class)->findOneBy(['agencyName' => 'Talent Partners']);
         self::assertInstanceOf(Recruiter::class, $recruiter);
-        self::assertSame($user->getId()->toRfc4122(), $recruiter->getUser()->getId()->toRfc4122());
-        self::assertCount(1, $recruiter->getDirectContacts());
+        self::assertSame($user->id->toRfc4122(), $recruiter->user->id->toRfc4122());
+        self::assertCount(1, $recruiter->directContacts);
         $client->request('GET', '/recruiters?q=lin@talent.example');
         self::assertSelectorTextContains('.management-results', 'Talent Partners');
     }
@@ -89,12 +89,12 @@ final class CompanyRecruiterManagementTest extends WebTestCase
         $this->entityManager()->persist($recruiter);
         $this->entityManager()->flush();
 
-        $crawler = $client->request('GET', sprintf('/recruiters/%s/edit', $recruiter->getId()->toRfc4122()));
+        $crawler = $client->request('GET', sprintf('/recruiters/%s/edit', $recruiter->id->toRfc4122()));
         self::assertResponseIsSuccessful();
         self::assertSame('Talent Partners', $crawler->filter('input[name="recruiter[agencyName]"]')->attr('value'));
         self::assertSame('Lin Recruiter', $crawler->filter('input[name="recruiter[directContacts][0][name]"]')->attr('value'));
 
-        $client->request('POST', sprintf('/recruiters/%s/edit', $recruiter->getId()->toRfc4122()), ['recruiter' => [
+        $client->request('POST', sprintf('/recruiters/%s/edit', $recruiter->id->toRfc4122()), ['recruiter' => [
             '_token' => $this->csrfToken($crawler),
             'agencyName' => 'Talent Europe',
             'website' => 'https://talent-europe.example',
@@ -105,14 +105,14 @@ final class CompanyRecruiterManagementTest extends WebTestCase
 
         self::assertResponseRedirects('/recruiters');
         $this->entityManager()->clear();
-        $savedRecruiter = $this->entityManager()->find(Recruiter::class, $recruiter->getId());
+        $savedRecruiter = $this->entityManager()->find(Recruiter::class, $recruiter->id);
         self::assertInstanceOf(Recruiter::class, $savedRecruiter);
-        self::assertSame('Talent Europe', $savedRecruiter->getAgencyName());
-        self::assertSame('https://talent-europe.example', $savedRecruiter->getWebsite());
-        self::assertCount(1, $savedRecruiter->getDirectContacts());
-        $contact = iterator_to_array($savedRecruiter->getDirectContacts())[0] ?? null;
+        self::assertSame('Talent Europe', $savedRecruiter->agencyName);
+        self::assertSame('https://talent-europe.example', $savedRecruiter->website);
+        self::assertCount(1, $savedRecruiter->directContacts);
+        $contact = iterator_to_array($savedRecruiter->directContacts)[0] ?? null;
         self::assertInstanceOf(\CurlySanders\JobApplicationTracker\Domain\Contact\DirectContact::class, $contact);
-        self::assertSame('Ada Recruiter', $contact->getName());
+        self::assertSame('Ada Recruiter', $contact->name);
     }
 
     public function testEditingAnUnknownRecruiterReturnsNotFound(): void
@@ -143,9 +143,9 @@ final class CompanyRecruiterManagementTest extends WebTestCase
         $client->request('GET', '/recruiters?q=Owner');
         self::assertResponseIsSuccessful();
         self::assertSelectorNotExists('.management-results');
-        $client->request('GET', sprintf('/companies/%s/edit', $company->getId()->toRfc4122()));
+        $client->request('GET', sprintf('/companies/%s/edit', $company->id->toRfc4122()));
         self::assertResponseStatusCodeSame(404);
-        $client->request('GET', sprintf('/recruiters/%s/edit', $recruiter->getId()->toRfc4122()));
+        $client->request('GET', sprintf('/recruiters/%s/edit', $recruiter->id->toRfc4122()));
         self::assertResponseStatusCodeSame(404);
     }
 

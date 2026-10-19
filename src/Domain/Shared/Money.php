@@ -7,12 +7,16 @@ namespace CurlySanders\JobApplicationTracker\Domain\Shared;
 final readonly class Money
 {
     /** @param numeric-string $amount */
-    private function __construct(private string $amount, private string $currencyCode)
-    {
+    private function __construct(
+        private string $amount,
+        private string $currencyCode,
+    ) {
     }
 
-    public static function of(string $amount, string $currencyCode): self
-    {
+    public static function of(
+        string $amount,
+        string $currencyCode,
+    ): self {
         if (1 !== preg_match('/^[A-Z]{3}$/', $currencyCode) || 1 !== preg_match('/^-?\d+(?:\.\d{1,2})?$/', $amount)) {
             throw new \InvalidArgumentException('Invalid money value.');
         }
@@ -50,8 +54,10 @@ final readonly class Money
         return self::compareAmounts($this->amount, $other->amount);
     }
 
-    private static function compareAmounts(string $left, string $right): int
-    {
+    private static function compareAmounts(
+        string $left,
+        string $right,
+    ): int {
         $leftNegative = str_starts_with($left, '-');
         $rightNegative = str_starts_with($right, '-');
         if ($leftNegative !== $rightNegative) {

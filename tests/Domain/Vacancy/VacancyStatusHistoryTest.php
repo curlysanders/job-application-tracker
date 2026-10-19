@@ -18,11 +18,11 @@ final class VacancyStatusHistoryTest extends TestCase
         $transitionedAt = new \DateTimeImmutable('2026-09-28 12:00:00');
         $history = new VacancyStatusHistory($vacancy, VacancyStatus::Bookmarked, VacancyStatus::Applying, '  First screening scheduled.  ', $transitionedAt);
 
-        self::assertSame($vacancy, $history->getVacancy());
-        self::assertSame(VacancyStatus::Bookmarked, $history->getFromStatus());
-        self::assertSame(VacancyStatus::Applying, $history->getToStatus());
-        self::assertSame('First screening scheduled.', $history->getNotes());
-        self::assertSame($transitionedAt, $history->getTransitionedAt());
+        self::assertSame($vacancy, $history->vacancy);
+        self::assertSame(VacancyStatus::Bookmarked, $history->fromStatus);
+        self::assertSame(VacancyStatus::Applying, $history->toStatus);
+        self::assertSame('First screening scheduled.', $history->notes);
+        self::assertSame($transitionedAt, $history->transitionedAt);
     }
 
     public function testConvertsABlankOptionalNoteToNull(): void
@@ -34,6 +34,6 @@ final class VacancyStatusHistoryTest extends TestCase
             ' ',
         );
 
-        self::assertNull($history->getNotes());
+        self::assertNull($history->notes);
     }
 }

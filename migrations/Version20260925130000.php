@@ -31,8 +31,11 @@ final class Version20260925130000 extends AbstractMigration
     }
 
     /** @param non-empty-string $table */
-    private function renameLegacyIndex(string $table, string $legacyName, string $expectedName): void
-    {
+    private function renameLegacyIndex(
+        string $table,
+        string $legacyName,
+        string $expectedName,
+    ): void {
         $indexNames = $this->indexNames($table);
         if (isset($indexNames[strtolower($legacyName)]) && !isset($indexNames[strtolower($expectedName)])) {
             $this->addSql(sprintf('ALTER TABLE %s RENAME INDEX %s TO %s', $table, $legacyName, $expectedName));
@@ -40,8 +43,11 @@ final class Version20260925130000 extends AbstractMigration
     }
 
     /** @param non-empty-string $table */
-    private function renameIndex(string $table, string $generatedName, string $readableName): void
-    {
+    private function renameIndex(
+        string $table,
+        string $generatedName,
+        string $readableName,
+    ): void {
         $indexNames = $this->indexNames($table);
         if (isset($indexNames[strtolower($generatedName)]) && !isset($indexNames[strtolower($readableName)])) {
             $this->addSql(sprintf('ALTER TABLE %s RENAME INDEX %s TO %s', $table, $generatedName, $readableName));
@@ -52,8 +58,12 @@ final class Version20260925130000 extends AbstractMigration
      * @param non-empty-string $column
      * @param non-empty-string $referencedTable
      */
-    private function renameForeignKey(string $generatedName, string $readableName, string $column, string $referencedTable): void
-    {
+    private function renameForeignKey(
+        string $generatedName,
+        string $readableName,
+        string $column,
+        string $referencedTable,
+    ): void {
         $foreignKeyNames = $this->foreignKeyNames('vacancy_tech_stacks');
         if (isset($foreignKeyNames[strtolower($generatedName)]) && !isset($foreignKeyNames[strtolower($readableName)])) {
             $this->addSql(sprintf('ALTER TABLE vacancy_tech_stacks DROP FOREIGN KEY %s', $generatedName));

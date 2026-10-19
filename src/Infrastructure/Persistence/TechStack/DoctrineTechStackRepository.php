@@ -22,8 +22,10 @@ final readonly class DoctrineTechStackRepository implements TechStackRepository
         return $this->entityManager->getRepository(TechStack::class)->findOneBy(['slug' => $slug]);
     }
 
-    public function search(string $query, int $page = 1): PaginatedResults
-    {
+    public function search(
+        string $query,
+        int $page = 1,
+    ): PaginatedResults {
         $page = max(1, $page);
         $builder = $this->entityManager->createQueryBuilder()
             ->select('techStack')
@@ -48,8 +50,10 @@ final readonly class DoctrineTechStackRepository implements TechStackRepository
         );
     }
 
-    public function categories(string $query, int $page = 1): PaginatedResults
-    {
+    public function categories(
+        string $query,
+        int $page = 1,
+    ): PaginatedResults {
         $page = max(1, $page);
         $builder = $this->entityManager->createQueryBuilder()
             ->select('DISTINCT techStack.category')

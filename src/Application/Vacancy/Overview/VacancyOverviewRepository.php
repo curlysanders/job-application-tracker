@@ -8,5 +8,9 @@ use CurlySanders\JobApplicationTracker\Domain\User\PreferredSalary;
 
 interface VacancyOverviewRepository
 {
-    public function forUser(string $userId, PreferredSalary $preferredSalary, VacancyOverviewFilter $filter): VacancyOverview;
+    public function forUser(
+        string $userId,
+        PreferredSalary $preferredSalary,
+        VacancyOverviewFilter $filter,
+    ): VacancyOverview;
 }

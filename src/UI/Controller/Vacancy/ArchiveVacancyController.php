@@ -24,15 +24,22 @@ final readonly class ArchiveVacancyController
 {
     use AuthenticatedUserTrait;
 
-    public function __construct(private Security $security, private VacancyRepository $vacancies, private CommandBus $commandBus, private CsrfTokenManagerInterface $csrf, private UrlGeneratorInterface $urls)
-    {
+    public function __construct(
+        private Security $security,
+        private VacancyRepository $vacancies,
+        private CommandBus $commandBus,
+        private CsrfTokenManagerInterface $csrf,
+        private UrlGeneratorInterface $urls,
+    ) {
     }
 
     #[Route('/vacancies/{id}/archive', name: 'app_vacancy_archive', methods: ['POST'])]
-    public function __invoke(string $id, Request $request): Response
-    {
+    public function __invoke(
+        string $id,
+        Request $request,
+    ): Response {
         $user = $this->requireAuthenticatedUser('Vacancy archiving requires an authenticated user.');
-        $userId = $user->getId()->toRfc4122();
+        $userId = $user->id->toRfc4122();
         $this->vacancies->findOwnedBy($id, $userId) ?? throw new NotFoundHttpException('Vacancy not found.');
         if (!$this->csrf->isTokenValid(new CsrfToken(sprintf('vacancy_archive_%s', $id), $request->request->getString('_token')))) {
             throw new AccessDeniedHttpException('Invalid CSRF token.');

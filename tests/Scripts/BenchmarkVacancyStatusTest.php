@@ -101,8 +101,10 @@ final class BenchmarkVacancyStatusTest extends TestCase
     }
 
     /** @param \Closure(): mixed $callback */
-    private function assertExceptionMessage(string $expectedMessage, \Closure $callback): void
-    {
+    private function assertExceptionMessage(
+        string $expectedMessage,
+        \Closure $callback,
+    ): void {
         try {
             $callback();
             self::fail('Expected an exception.');

@@ -27,6 +27,7 @@ final readonly class CrawlerProtectionSubscriber implements EventSubscriberInter
 
     public function __construct(
         private Security $security,
+
         #[Target('public_navigation')]
         private RateLimiterFactoryInterface $publicNavigationLimiter,
     ) {

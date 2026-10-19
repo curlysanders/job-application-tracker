@@ -18,77 +18,78 @@ final class Vacancy implements RecordsEvents
     use NormalizesStrings;
     use RecordsDomainEvents;
 
-    private Identifier $id;
+    private(set) Identifier $id;
 
-    private ?Company $company = null;
+    private(set) ?Company $company = null;
 
-    private ?Recruiter $recruiter = null;
+    private(set) ?Recruiter $recruiter = null;
 
     /** @var list<TechStack>|(\ArrayAccess<int, TechStack>&\Traversable<int, TechStack>) */
-    private array|(\ArrayAccess&\Traversable) $techStacks;
+    private(set) array|(\ArrayAccess&\Traversable) $techStacks;
 
-    private string $title;
+    private(set) string $title;
 
-    private ?string $fullText = null;
+    private(set) ?string $fullText = null;
 
-    private ?string $requirements = null;
+    private(set) ?string $requirements = null;
 
-    private ?string $responsibilities = null;
+    private(set) ?string $responsibilities = null;
 
-    private ?string $preferredQualifications = null;
+    private(set) ?string $preferredQualifications = null;
 
-    private ?string $aboutJob = null;
+    private(set) ?string $aboutJob = null;
 
-    private ?string $aboutCompany = null;
+    private(set) ?string $aboutCompany = null;
 
-    private ?string $compensationBenefits = null;
+    private(set) ?string $compensationBenefits = null;
 
     /** @var list<string> */
-    private array $sourceUrls = [];
+    private(set) array $sourceUrls = [];
 
-    private ?string $howToApply = null;
+    private(set) ?string $howToApply = null;
 
-    private ?string $location = null;
+    private(set) ?string $location = null;
 
-    private ?string $minimumSalary = null;
+    private(set) ?string $minimumSalary = null;
 
-    private ?string $maximumSalary = null;
+    private(set) ?string $maximumSalary = null;
 
-    private string $currencyCode = 'EUR';
+    private(set) string $currencyCode = 'EUR';
 
-    private ?WorkMode $workMode = null;
+    private(set) ?WorkMode $workMode = null;
 
-    private ?string $hybridDetails = null;
+    private(set) ?string $hybridDetails = null;
 
-    private \DateTimeImmutable $dateAdded;
+    private(set) \DateTimeImmutable $dateAdded;
 
-    private ?\DateTimeImmutable $datePosted = null;
+    private(set) ?\DateTimeImmutable $datePosted = null;
 
-    private ?\DateTimeImmutable $deadline = null;
+    private(set) ?\DateTimeImmutable $deadline = null;
 
-    private ?\DateTimeImmutable $dateApplied = null;
+    private(set) ?\DateTimeImmutable $dateApplied = null;
 
-    private ?\DateTimeImmutable $nextActionAt = null;
+    private(set) ?\DateTimeImmutable $nextActionAt = null;
 
-    private ?string $nextActionTitle = null;
+    private(set) ?string $nextActionTitle = null;
 
-    private VacancyStatus $status = VacancyStatus::Bookmarked;
+    private(set) VacancyStatus $status = VacancyStatus::Bookmarked;
 
-    private bool $archived = false;
+    private(set) bool $archived = false;
 
-    private ?int $excitement = null;
+    private(set) ?int $excitement = null;
 
-    private ?ContractType $contractType = null;
+    private(set) ?ContractType $contractType = null;
 
-    private ?ApplicationSource $applicationSource = null;
+    private(set) ?ApplicationSource $applicationSource = null;
 
-    /** @phpstan-ignore-next-line Persisted terminal state is populated by workflow infrastructure. */
-    private ?string $terminalReason = null;
+    private(set) ?string $terminalReason = null;
 
-    private ?string $scratchpadNotes = null;
+    private(set) ?string $scratchpadNotes = null;
 
-    public function __construct(private User $user, string $title)
-    {
+    public function __construct(
+        public readonly User $user,
+        string $title,
+    ) {
         $this->id = Identifier::v7();
         $this->title = self::required($title, 'A vacancy title is required.');
         $this->dateAdded = new \DateTimeImmutable();
@@ -155,9 +156,9 @@ final class Vacancy implements RecordsEvents
             return;
         }
 
-        $this->minimumSalary = $salaryRange->getMinimum()?->amount();
-        $this->maximumSalary = $salaryRange->getMaximum()?->amount();
-        $this->currencyCode = $salaryRange->getCurrencyCode();
+        $this->minimumSalary = $salaryRange->minimum?->amount();
+        $this->maximumSalary = $salaryRange->maximum?->amount();
+        $this->currencyCode = $salaryRange->currencyCode;
     }
 
     public function replaceTechStacks(TechStack ...$techStacks): void
@@ -191,8 +192,10 @@ final class Vacancy implements RecordsEvents
         $this->recordEvent(new VacancyScratchpadUpdated($this->id, []));
     }
 
-    public function updateNextAction(?string $title, ?\DateTimeImmutable $at): void
-    {
+    public function updateNextAction(
+        ?string $title,
+        ?\DateTimeImmutable $at,
+    ): void {
         $title = self::optional($title);
         if (null === $at && null !== $title) {
             throw new \InvalidArgumentException('A next action title requires a date and time.');
@@ -201,11 +204,6 @@ final class Vacancy implements RecordsEvents
         $this->nextActionTitle = $title;
         $this->nextActionAt = $at;
         $this->recordEvent(new VacancyNextActionUpdated($this->id, []));
-    }
-
-    public function getId(): Identifier
-    {
-        return $this->id;
     }
 
     public function recordCreated(): void
@@ -218,8 +216,11 @@ final class Vacancy implements RecordsEvents
         $this->recordEvent(new VacancyDetailsUpdated($this->id, $this->lifecycleDetails()));
     }
 
-    public function recordStatusTransitioned(VacancyStatus $from, string $transition, ?string $note): void
-    {
+    public function recordStatusTransitioned(
+        VacancyStatus $from,
+        string $transition,
+        ?string $note,
+    ): void {
         $this->recordEvent(new VacancyStatusTransitioned($this->id, [
             'fromStatus' => $from->value,
             'toStatus' => $this->status->value,
@@ -244,135 +245,9 @@ final class Vacancy implements RecordsEvents
         ];
     }
 
-    public function getUser(): User
-    {
-        return $this->user;
-    }
-
-    public function getTitle(): string
-    {
-        return $this->title;
-    }
-
-    public function getTerminalReason(): ?string
-    {
-        return $this->terminalReason;
-    }
-
-    public function getCompany(): ?Company
-    {
-        return $this->company;
-    }
-
-    public function getRecruiter(): ?Recruiter
-    {
-        return $this->recruiter;
-    }
-
-    public function getFullText(): ?string
-    {
-        return $this->fullText;
-    }
-
-    public function getRequirements(): ?string
-    {
-        return $this->requirements;
-    }
-
-    public function getResponsibilities(): ?string
-    {
-        return $this->responsibilities;
-    }
-
-    public function getPreferredQualifications(): ?string
-    {
-        return $this->preferredQualifications;
-    }
-
-    public function getAboutJob(): ?string
-    {
-        return $this->aboutJob;
-    }
-
-    public function getAboutCompany(): ?string
-    {
-        return $this->aboutCompany;
-    }
-
-    public function getCompensationBenefits(): ?string
-    {
-        return $this->compensationBenefits;
-    }
-
-    /** @return list<string> */
-    public function getSourceUrls(): array
-    {
-        return $this->sourceUrls;
-    }
-
-    public function getHowToApply(): ?string
-    {
-        return $this->howToApply;
-    }
-
-    public function getLocation(): ?string
-    {
-        return $this->location;
-    }
-
-    public function getWorkMode(): ?WorkMode
-    {
-        return $this->workMode;
-    }
-
-    public function getHybridDetails(): ?string
-    {
-        return $this->hybridDetails;
-    }
-
-    public function getDatePosted(): ?\DateTimeImmutable
-    {
-        return $this->datePosted;
-    }
-
-    public function getDeadline(): ?\DateTimeImmutable
-    {
-        return $this->deadline;
-    }
-
-    public function getDateApplied(): ?\DateTimeImmutable
-    {
-        return $this->dateApplied;
-    }
-
-    public function getContractType(): ?ContractType
-    {
-        return $this->contractType;
-    }
-
-    public function getApplicationSource(): ?ApplicationSource
-    {
-        return $this->applicationSource;
-    }
-
-    public function getStatus(): VacancyStatus
-    {
-        return $this->status;
-    }
-
     public function setStatus(VacancyStatus $status): void
     {
         $this->status = $status;
-    }
-
-    public function getDateAdded(): \DateTimeImmutable
-    {
-        return $this->dateAdded;
-    }
-
-    public function isArchived(): bool
-    {
-        return $this->archived;
     }
 
     public function archive(): void
@@ -390,31 +265,5 @@ final class Vacancy implements RecordsEvents
     public function getSalaryRange(): ?SalaryRange
     {
         return SalaryRange::fromDecimals($this->minimumSalary, $this->maximumSalary, $this->currencyCode);
-    }
-
-    /** @return iterable<int, TechStack> */
-    public function getTechStacks(): iterable
-    {
-        return $this->techStacks;
-    }
-
-    public function getExcitement(): ?int
-    {
-        return $this->excitement;
-    }
-
-    public function getNextActionAt(): ?\DateTimeImmutable
-    {
-        return $this->nextActionAt;
-    }
-
-    public function getNextActionTitle(): ?string
-    {
-        return $this->nextActionTitle;
-    }
-
-    public function getScratchpadNotes(): ?string
-    {
-        return $this->scratchpadNotes;
     }
 }

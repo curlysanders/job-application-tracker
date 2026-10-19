@@ -16,6 +16,7 @@ final readonly class LocalOllamaInference
         #[Autowire(service: 'ai.platform.ollama')]
         private PlatformInterface $platform,
         private LockFactory $locks,
+
         #[Autowire('%env(string:AI_LOCAL_MODEL)%')]
         private string $model,
     ) {
@@ -26,8 +27,11 @@ final readonly class LocalOllamaInference
      *
      * @return T
      */
-    public function invoke(string $systemPrompt, string $input, string $responseFormat): object
-    {
+    public function invoke(
+        string $systemPrompt,
+        string $input,
+        string $responseFormat,
+    ): object {
         $lock = $this->locks->createLock('ai.local-inference', 180.0);
         if (!$lock->acquire(true)) {
             throw new \RuntimeException('The local AI inference lock could not be acquired.');

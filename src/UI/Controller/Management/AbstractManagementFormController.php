@@ -29,8 +29,12 @@ abstract readonly class AbstractManagementFormController
      *
      * @param FormInterface<TData> $form
      */
-    protected function formResponse(FormInterface $form, string $template, string $pageTitle, string $submitLabel): Response
-    {
+    protected function formResponse(
+        FormInterface $form,
+        string $template,
+        string $pageTitle,
+        string $submitLabel,
+    ): Response {
         return new Response(
             $this->twig->render($template, [
                 'form' => $form->createView(),
@@ -41,8 +45,12 @@ abstract readonly class AbstractManagementFormController
         );
     }
 
-    protected function redirectWithSuccess(Request $request, string $route, string $message, string $managementName): RedirectResponse
-    {
+    protected function redirectWithSuccess(
+        Request $request,
+        string $route,
+        string $message,
+        string $managementName,
+    ): RedirectResponse {
         $session = $request->getSession();
         if (!$session instanceof FlashBagAwareSessionInterface) {
             throw new \LogicException(sprintf('%s management requires a flash-aware session.', $managementName));
@@ -63,10 +71,10 @@ abstract readonly class AbstractManagementFormController
         $rows = [];
         foreach ($contacts as $contact) {
             $row = new DirectContactData();
-            $row->name = $contact->getName();
-            $row->email = $contact->getEmail();
-            $row->phone = $contact->getPhone();
-            $row->linkedinUrl = $contact->getLinkedinUrl();
+            $row->name = $contact->name;
+            $row->email = $contact->email;
+            $row->phone = $contact->phone;
+            $row->linkedinUrl = $contact->linkedinUrl;
             $rows[] = $row;
         }
 

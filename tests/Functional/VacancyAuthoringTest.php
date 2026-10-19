@@ -53,31 +53,31 @@ final class VacancyAuthoringTest extends WebTestCase
         $this->entityManager()->clear();
         $vacancy = $this->entityManager()->getRepository(Vacancy::class)->findOneBy(['title' => 'Senior PHP Developer']);
         self::assertInstanceOf(Vacancy::class, $vacancy);
-        self::assertSame('Rotterdam', $vacancy->getLocation());
-        self::assertSame(ApplicationSource::LinkedIn, $vacancy->getApplicationSource());
-        self::assertSame(['https://jobs.example/vacancy'], $vacancy->getSourceUrls());
-        self::assertSame('Build reliable APIs.', $vacancy->getRequirements());
+        self::assertSame('Rotterdam', $vacancy->location);
+        self::assertSame(ApplicationSource::LinkedIn, $vacancy->applicationSource);
+        self::assertSame(['https://jobs.example/vacancy'], $vacancy->sourceUrls);
+        self::assertSame('Build reliable APIs.', $vacancy->requirements);
         $salaryRange = $vacancy->getSalaryRange();
         self::assertNotNull($salaryRange);
-        self::assertSame('4500.00', $salaryRange->getMinimum()?->amount());
-        self::assertSame('5500.00', $salaryRange->getMaximum()?->amount());
-        self::assertSame(WorkMode::Hybrid, $vacancy->getWorkMode());
-        self::assertSame(['php', 'symfony'], array_map(static fn (TechStack $tag): string => $tag->getSlug(), iterator_to_array($vacancy->getTechStacks())));
+        self::assertSame('4500.00', $salaryRange->minimum?->amount());
+        self::assertSame('5500.00', $salaryRange->maximum?->amount());
+        self::assertSame(WorkMode::Hybrid, $vacancy->workMode);
+        self::assertSame(['php', 'symfony'], array_map(static fn (TechStack $tag): string => $tag->slug, iterator_to_array($vacancy->techStacks)));
         self::assertInstanceOf(TechStack::class, $this->entityManager()->getRepository(TechStack::class)->findOneBy(['slug' => 'symfony']));
 
-        $crawler = $client->request('GET', sprintf('/vacancies/%s/edit', $vacancy->getId()->toRfc4122()));
+        $crawler = $client->request('GET', sprintf('/vacancies/%s/edit', $vacancy->id->toRfc4122()));
         self::assertSame('Senior PHP Developer', $crawler->filter('input[name="vacancy[title]"]')->attr('value'));
         $editData = $this->formData($crawler, $company, $recruiter, $php, 'Lead PHP Developer');
         self::assertIsArray($editData['techStacks']);
         $editData['techStacks']['newTags'] = [['name' => 'Symfony', 'category' => 'Framework']];
-        $client->request('POST', sprintf('/vacancies/%s/edit', $vacancy->getId()->toRfc4122()), ['vacancy' => $editData]);
-        self::assertResponseRedirects(sprintf('/vacancies/%s/edit', $vacancy->getId()->toRfc4122()));
+        $client->request('POST', sprintf('/vacancies/%s/edit', $vacancy->id->toRfc4122()), ['vacancy' => $editData]);
+        self::assertResponseRedirects(sprintf('/vacancies/%s/edit', $vacancy->id->toRfc4122()));
 
         $this->entityManager()->clear();
-        $updated = $this->entityManager()->find(Vacancy::class, $vacancy->getId());
+        $updated = $this->entityManager()->find(Vacancy::class, $vacancy->id);
         self::assertInstanceOf(Vacancy::class, $updated);
-        self::assertSame('Lead PHP Developer', $updated->getTitle());
-        self::assertCount(2, $updated->getTechStacks());
+        self::assertSame('Lead PHP Developer', $updated->title);
+        self::assertCount(2, $updated->techStacks);
     }
 
     public function testInvalidSalaryRangeAndAnotherUsersVacancyAreRejected(): void
@@ -98,7 +98,7 @@ final class VacancyAuthoringTest extends WebTestCase
         $vacancy = new Vacancy($otherUser, 'Private vacancy');
         $this->entityManager()->persist($vacancy);
         $this->entityManager()->flush();
-        $client->request('GET', sprintf('/vacancies/%s/edit', $vacancy->getId()->toRfc4122()));
+        $client->request('GET', sprintf('/vacancies/%s/edit', $vacancy->id->toRfc4122()));
         self::assertResponseStatusCodeSame(404);
     }
 
@@ -116,21 +116,26 @@ final class VacancyAuthoringTest extends WebTestCase
 
         $client->request('GET', '/vacancies/new');
 
-        self::assertSelectorNotExists(sprintf('select[name="vacancy[companyId]"] option[value="%s"]', $company->getId()->toRfc4122()));
-        self::assertSelectorNotExists(sprintf('select[name="vacancy[recruiterId]"] option[value="%s"]', $recruiter->getId()->toRfc4122()));
+        self::assertSelectorNotExists(sprintf('select[name="vacancy[companyId]"] option[value="%s"]', $company->id->toRfc4122()));
+        self::assertSelectorNotExists(sprintf('select[name="vacancy[recruiterId]"] option[value="%s"]', $recruiter->id->toRfc4122()));
     }
 
     /** @return array<string, mixed> */
-    private function formData(Crawler $crawler, ?Company $company, ?Recruiter $recruiter, ?TechStack $php, string $title): array
-    {
+    private function formData(
+        Crawler $crawler,
+        ?Company $company,
+        ?Recruiter $recruiter,
+        ?TechStack $php,
+        string $title,
+    ): array {
         return [
-            '_token' => $this->csrfToken($crawler), 'title' => $title, 'companyId' => $company?->getId()->toRfc4122(), 'recruiterId' => $recruiter?->getId()->toRfc4122(), 'location' => 'Rotterdam',
+            '_token' => $this->csrfToken($crawler), 'title' => $title, 'companyId' => $company?->id->toRfc4122(), 'recruiterId' => $recruiter?->id->toRfc4122(), 'location' => 'Rotterdam',
             'applicationSource' => ApplicationSource::LinkedIn->value, 'sourceUrls' => ['https://jobs.example/vacancy'], 'howToApply' => 'Apply via the company site.',
             'contractType' => 'PERMANENT', 'datePosted' => '2026-09-20', 'deadline' => '2026-10-01', 'dateApplied' => '2026-09-22',
             'fullText' => 'Full vacancy text.', 'requirements' => 'Build reliable APIs.', 'responsibilities' => 'Lead delivery.', 'preferredQualifications' => 'Symfony expertise.',
             'aboutJob' => 'Build products.', 'aboutCompany' => 'A product company.', 'compensationBenefits' => 'Pension.',
             'minimumSalary' => '4500.00', 'maximumSalary' => '5500.00', 'currencyCode' => 'EUR', 'workMode' => WorkMode::Hybrid->value, 'hybridDetails' => 'Two days in Rotterdam.',
-            'techStacks' => ['existingTags' => $php?->getSlug() ?? '', 'newTags' => [['name' => 'Symfony', 'category' => 'Framework']]], 'excitement' => 4,
+            'techStacks' => ['existingTags' => $php?->slug, 'newTags' => [['name' => 'Symfony', 'category' => 'Framework']]], 'excitement' => 4,
         ];
     }
 

@@ -27,12 +27,10 @@ final class TransitionVacancyStatusHandlerTest extends TestCase
         $repository->expects(self::once())->method('findOwnedBy')->with(self::VACANCY_ID, self::USER_ID)->willReturn($vacancy);
         $repository->expects(self::once())->method('save')->with($vacancy);
 
-        $result = new TransitionVacancyStatusHandler($repository, $this->workflow())(
-            new TransitionVacancyStatus(self::USER_ID, self::VACANCY_ID, 'start_applying'),
-        );
+        $result = new TransitionVacancyStatusHandler($repository, $this->workflow())(new TransitionVacancyStatus(self::USER_ID, self::VACANCY_ID, 'start_applying'));
 
         self::assertSame($vacancy, $result);
-        self::assertSame(VacancyStatus::Applying, $vacancy->getStatus());
+        self::assertSame(VacancyStatus::Applying, $vacancy->status);
         $event = $vacancy->getRecordedEvents()[0];
         self::assertInstanceOf(VacancyStatusTransitioned::class, $event);
         self::assertSame([
@@ -51,9 +49,7 @@ final class TransitionVacancyStatusHandlerTest extends TestCase
         $repository->expects(self::never())->method('save');
 
         $this->expectException(VacancyStatusTransitionNotAllowed::class);
-        new TransitionVacancyStatusHandler($repository, $this->workflow())(
-            new TransitionVacancyStatus(self::USER_ID, self::VACANCY_ID, 'mark_applied'),
-        );
+        new TransitionVacancyStatusHandler($repository, $this->workflow())(new TransitionVacancyStatus(self::USER_ID, self::VACANCY_ID, 'mark_applied'));
     }
 
     public function testRejectsTransitionsForAnotherUsersVacancy(): void
@@ -62,17 +58,18 @@ final class TransitionVacancyStatusHandlerTest extends TestCase
         $repository->expects(self::once())->method('findOwnedBy')->with(self::VACANCY_ID, self::USER_ID)->willReturn(null);
 
         $this->expectException(\LogicException::class);
-        new TransitionVacancyStatusHandler($repository, $this->workflow())(
-            new TransitionVacancyStatus(self::USER_ID, self::VACANCY_ID, 'start_applying'),
-        );
+        new TransitionVacancyStatusHandler($repository, $this->workflow())(new TransitionVacancyStatus(self::USER_ID, self::VACANCY_ID, 'start_applying'));
     }
 
     private function workflow(): VacancyStatusWorkflow
     {
         return new class implements VacancyStatusWorkflow {
-            public function apply(Vacancy $vacancy, string $transition, ?string $note = null): void
-            {
-                if ('start_applying' !== $transition || VacancyStatus::Bookmarked !== $vacancy->getStatus()) {
+            public function apply(
+                Vacancy $vacancy,
+                string $transition,
+                ?string $note = null,
+            ): void {
+                if ('start_applying' !== $transition || VacancyStatus::Bookmarked !== $vacancy->status) {
                     throw new VacancyStatusTransitionNotAllowed($transition, new \LogicException());
                 }
 

@@ -16,8 +16,11 @@ final readonly class CompanyListController
 {
     use AuthenticatedUserTrait;
 
-    public function __construct(private Security $security, private CompanyRepository $companies, private Environment $twig)
-    {
+    public function __construct(
+        private Security $security,
+        private CompanyRepository $companies,
+        private Environment $twig,
+    ) {
     }
 
     #[Route('/companies', name: 'app_company_list', methods: ['GET'])]
@@ -27,6 +30,6 @@ final readonly class CompanyListController
 
         $user = $this->requireAuthenticatedUser('Company management requires an authenticated user.');
 
-        return new Response($this->twig->render('company/list.html.twig', ['companies' => $this->companies->searchOwnedBy($user->getId()->toRfc4122(), $query), 'query' => $query]));
+        return new Response($this->twig->render('company/list.html.twig', ['companies' => $this->companies->searchOwnedBy($user->id->toRfc4122(), $query), 'query' => $query]));
     }
 }

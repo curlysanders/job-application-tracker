@@ -26,7 +26,7 @@ final class JsonDomainEventTypeTest extends TestCase
         self::assertSame([
             'eventType' => UserRegistered::class,
             'eventVersion' => 1,
-            'entityId' => $user->getId()->toRfc4122(),
+            'entityId' => $user->id->toRfc4122(),
             'occurredAt' => $event->occurredAt()->format('Y-m-d\\TH:i:s.uP'),
             'changedProperties' => [],
         ], json_decode($json, true, flags: JSON_THROW_ON_ERROR));

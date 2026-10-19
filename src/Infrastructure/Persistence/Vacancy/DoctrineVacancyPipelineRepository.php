@@ -22,8 +22,10 @@ final readonly class DoctrineVacancyPipelineRepository implements VacancyPipelin
     {
     }
 
-    public function forUser(string $userId, ?VacancyStatus $selectedStatus): VacancyPipeline
-    {
+    public function forUser(
+        string $userId,
+        ?VacancyStatus $selectedStatus,
+    ): VacancyPipeline {
         $counts = array_fill_keys(array_map(static fn (VacancyStatus $status): string => $status->value, PipelineStatuses::all()), 0);
         /** @var list<array{status: string, total: string}> $countRows */
         $countRows = $this->entityManager->createQueryBuilder()
@@ -68,10 +70,10 @@ final readonly class DoctrineVacancyPipelineRepository implements VacancyPipelin
 
         return new VacancyPipeline($counts, array_map(
             static fn (Vacancy $vacancy): VacancyPipelineVacancy => new VacancyPipelineVacancy(
-                $vacancy->getTitle(),
-                $vacancy->getCompany()?->getName(),
-                $vacancy->getRecruiter()?->getAgencyName(),
-                $vacancy->getStatus(),
+                $vacancy->title,
+                $vacancy->company?->name,
+                $vacancy->recruiter?->agencyName,
+                $vacancy->status,
             ),
             $vacancies,
         ));

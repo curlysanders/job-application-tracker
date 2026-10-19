@@ -37,8 +37,10 @@ final class PersistRecordedDomainEventsSubscriber
     }
 
     /** @param array<array-key, object> $entities */
-    private function persistEvents(array $entities, UnitOfWork $unitOfWork): void
-    {
+    private function persistEvents(
+        array $entities,
+        UnitOfWork $unitOfWork,
+    ): void {
         foreach ($entities as $entity) {
             if (!$entity instanceof RecordsEvents) {
                 continue;
@@ -54,8 +56,11 @@ final class PersistRecordedDomainEventsSubscriber
     }
 
     /** @param class-string $eventType */
-    private function restoreDomainEventType(UnitOfWork $unitOfWork, LingodaDomainEvent $event, string $eventType): void
-    {
+    private function restoreDomainEventType(
+        UnitOfWork $unitOfWork,
+        LingodaDomainEvent $event,
+        string $eventType,
+    ): void {
         foreach ($unitOfWork->getScheduledEntityInsertions() as $entity) {
             if (!$entity instanceof OutboxRecord || $entity->getDomainEvent() !== $event) {
                 continue;

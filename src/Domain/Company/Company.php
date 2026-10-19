@@ -17,19 +17,19 @@ final class Company implements RecordsEvents
     use NormalizesStrings;
     use RecordsDomainEvents;
 
-    private Identifier $id;
+    private(set) Identifier $id;
 
-    private string $name;
+    private(set) string $name;
 
-    private ?string $website;
+    private(set) ?string $website;
 
-    private ?string $industry;
+    private(set) ?string $industry;
 
     /** @var list<DirectContact>|(\ArrayAccess<int, DirectContact>&\Traversable<int, DirectContact>) */
-    private array|(\ArrayAccess&\Traversable) $directContacts;
+    private(set) array|(\ArrayAccess&\Traversable) $directContacts;
 
     public function __construct(
-        private readonly User $user,
+        public readonly User $user,
         string $name,
         ?string $website,
         ?string $industry,
@@ -39,8 +39,11 @@ final class Company implements RecordsEvents
         $this->update($name, $website, $industry);
     }
 
-    public function update(string $name, ?string $website, ?string $industry): void
-    {
+    public function update(
+        string $name,
+        ?string $website,
+        ?string $industry,
+    ): void {
         $this->name = self::required($name, 'A company name is required.');
         $this->website = WebAddress::optionalHttpUrl($website, 'A company website');
         $this->industry = self::optional($industry);
@@ -67,16 +70,6 @@ final class Company implements RecordsEvents
         }
     }
 
-    public function getId(): Identifier
-    {
-        return $this->id;
-    }
-
-    public function getUser(): User
-    {
-        return $this->user;
-    }
-
     public function recordCreated(): void
     {
         $this->recordEvent(new CompanyCreated($this->id, $this->properties()));
@@ -91,26 +84,5 @@ final class Company implements RecordsEvents
     private function properties(): array
     {
         return ['name' => $this->name, 'website' => $this->website, 'industry' => $this->industry];
-    }
-
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    public function getWebsite(): ?string
-    {
-        return $this->website;
-    }
-
-    public function getIndustry(): ?string
-    {
-        return $this->industry;
-    }
-
-    /** @return iterable<int, DirectContact> */
-    public function getDirectContacts(): iterable
-    {
-        return $this->directContacts;
     }
 }

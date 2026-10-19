@@ -88,9 +88,9 @@ final class UserPreferencesTest extends TestCase
         $user->replaceResume('resumes/1/first.pdf', 'first.pdf', 'application/pdf', $uploadedAt);
         $user->replaceResume('resumes/1/second.docx', 'second.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', $uploadedAt);
 
-        self::assertSame('resumes/1/second.docx', $user->getResumeStoragePath());
-        self::assertSame('second.docx', $user->getResumeOriginalFilename());
-        self::assertSame('application/vnd.openxmlformats-officedocument.wordprocessingml.document', $user->getResumeMimeType());
-        self::assertSame($uploadedAt, $user->getResumeUploadedAt());
+        self::assertSame('resumes/1/second.docx', $user->resumeStoragePath);
+        self::assertSame('second.docx', $user->resumeOriginalFilename);
+        self::assertSame('application/vnd.openxmlformats-officedocument.wordprocessingml.document', $user->resumeMimeType);
+        self::assertSame($uploadedAt, $user->resumeUploadedAt);
     }
 }

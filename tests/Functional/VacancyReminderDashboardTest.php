@@ -24,7 +24,7 @@ final class VacancyReminderDashboardTest extends WebTestCase
         $archived = $this->vacancy($user, 'Archived vacancy', 'Ignore', new \DateTimeImmutable('yesterday 09:00'));
         $this->entityManager()->getConnection()->executeStatement(
             'UPDATE vacancies SET archived = 1 WHERE id = :id',
-            ['id' => $archived->getId()],
+            ['id' => $archived->id],
             ['id' => IdentifierType::NAME],
         );
         $this->vacancy($this->createUser('other-reminders@example.com'), 'Private vacancy', 'Private', new \DateTimeImmutable('yesterday 09:00'));
@@ -38,18 +38,22 @@ final class VacancyReminderDashboardTest extends WebTestCase
         self::assertSelectorTextNotContains('.dashboard-reminders', 'Future vacancy');
         self::assertSelectorTextNotContains('.dashboard-reminders', 'Archived vacancy');
         self::assertSelectorTextNotContains('.dashboard-reminders', 'Private vacancy');
-        self::assertSelectorExists(sprintf('.dashboard-reminders a[href="/vacancies/%s"]', $overdue->getId()->toRfc4122()));
-        self::assertSelectorExists(sprintf('.dashboard-reminders a[href="/vacancies/%s"]', $today->getId()->toRfc4122()));
+        self::assertSelectorExists(sprintf('.dashboard-reminders a[href="/vacancies/%s"]', $overdue->id->toRfc4122()));
+        self::assertSelectorExists(sprintf('.dashboard-reminders a[href="/vacancies/%s"]', $today->id->toRfc4122()));
     }
 
-    private function vacancy(User $user, string $title, ?string $nextActionTitle, \DateTimeImmutable $nextActionAt): Vacancy
-    {
+    private function vacancy(
+        User $user,
+        string $title,
+        ?string $nextActionTitle,
+        \DateTimeImmutable $nextActionAt,
+    ): Vacancy {
         $vacancy = new Vacancy($user, $title);
         $this->entityManager()->persist($vacancy);
         $this->entityManager()->flush();
         $this->entityManager()->getConnection()->executeStatement(
             'UPDATE vacancies SET next_action_title = :title, next_action_at = :at WHERE id = :id',
-            ['title' => $nextActionTitle, 'at' => $nextActionAt, 'id' => $vacancy->getId()],
+            ['title' => $nextActionTitle, 'at' => $nextActionAt, 'id' => $vacancy->id],
             ['at' => Types::DATETIME_IMMUTABLE, 'id' => IdentifierType::NAME],
         );
 

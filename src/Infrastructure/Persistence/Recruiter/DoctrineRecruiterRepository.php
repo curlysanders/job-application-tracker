@@ -18,8 +18,10 @@ final readonly class DoctrineRecruiterRepository implements RecruiterRepository
     {
     }
 
-    public function findOwnedBy(string $recruiterId, string $userId): ?Recruiter
-    {
+    public function findOwnedBy(
+        string $recruiterId,
+        string $userId,
+    ): ?Recruiter {
         if (!Identifier::isValid($recruiterId) || !Identifier::isValid($userId)) {
             return null;
         }
@@ -30,8 +32,10 @@ final readonly class DoctrineRecruiterRepository implements RecruiterRepository
         ]);
     }
 
-    public function searchOwnedBy(string $userId, string $query): array
-    {
+    public function searchOwnedBy(
+        string $userId,
+        string $query,
+    ): array {
         if (!Identifier::isValid($userId)) {
             return [];
         }

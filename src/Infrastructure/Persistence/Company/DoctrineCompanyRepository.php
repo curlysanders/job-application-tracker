@@ -18,8 +18,10 @@ final readonly class DoctrineCompanyRepository implements CompanyRepository
     {
     }
 
-    public function findOwnedBy(string $companyId, string $userId): ?Company
-    {
+    public function findOwnedBy(
+        string $companyId,
+        string $userId,
+    ): ?Company {
         if (!Identifier::isValid($companyId) || !Identifier::isValid($userId)) {
             return null;
         }
@@ -30,8 +32,10 @@ final readonly class DoctrineCompanyRepository implements CompanyRepository
         ]);
     }
 
-    public function searchOwnedBy(string $userId, string $query): array
-    {
+    public function searchOwnedBy(
+        string $userId,
+        string $query,
+    ): array {
         if (!Identifier::isValid($userId)) {
             return [];
         }

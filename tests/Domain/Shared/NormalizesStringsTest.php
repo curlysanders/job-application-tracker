@@ -18,15 +18,15 @@ final class NormalizesStringsTest extends TestCase
         $recruiter = new Recruiter(new User(), '  Talent Partners  ', '  https://talent.example  ');
         $contact = new DirectContact('  Ada Lovelace  ', '  ada@example.com  ', '  +31 6 12345678  ', '  https://www.linkedin.com/in/ada  ');
 
-        self::assertSame('Acme BV', $company->getName());
-        self::assertSame('https://acme.example', $company->getWebsite());
-        self::assertSame('Software', $company->getIndustry());
-        self::assertSame('Talent Partners', $recruiter->getAgencyName());
-        self::assertSame('https://talent.example', $recruiter->getWebsite());
-        self::assertSame('Ada Lovelace', $contact->getName());
-        self::assertSame('ada@example.com', $contact->getEmail());
-        self::assertSame('+31 6 12345678', $contact->getPhone());
-        self::assertSame('https://www.linkedin.com/in/ada', $contact->getLinkedinUrl());
+        self::assertSame('Acme BV', $company->name);
+        self::assertSame('https://acme.example', $company->website);
+        self::assertSame('Software', $company->industry);
+        self::assertSame('Talent Partners', $recruiter->agencyName);
+        self::assertSame('https://talent.example', $recruiter->website);
+        self::assertSame('Ada Lovelace', $contact->name);
+        self::assertSame('ada@example.com', $contact->email);
+        self::assertSame('+31 6 12345678', $contact->phone);
+        self::assertSame('https://www.linkedin.com/in/ada', $contact->linkedinUrl);
     }
 
     public function testEntitiesConvertBlankOptionalStringsToNull(): void
@@ -35,12 +35,12 @@ final class NormalizesStringsTest extends TestCase
         $recruiter = new Recruiter(new User(), 'Talent Partners', "\n");
         $contact = new DirectContact('Ada Lovelace', ' ', '  ', "\t");
 
-        self::assertNull($company->getWebsite());
-        self::assertNull($company->getIndustry());
-        self::assertNull($recruiter->getWebsite());
-        self::assertNull($contact->getEmail());
-        self::assertNull($contact->getPhone());
-        self::assertNull($contact->getLinkedinUrl());
+        self::assertNull($company->website);
+        self::assertNull($company->industry);
+        self::assertNull($recruiter->website);
+        self::assertNull($contact->email);
+        self::assertNull($contact->phone);
+        self::assertNull($contact->linkedinUrl);
     }
 
     public function testEntitiesRejectBlankRequiredStringsWithTheirOwnMessages(): void
