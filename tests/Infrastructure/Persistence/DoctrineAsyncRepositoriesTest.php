@@ -5,11 +5,15 @@ declare(strict_types=1);
 namespace CurlySanders\JobApplicationTracker\Tests\Infrastructure\Persistence;
 
 use CurlySanders\JobApplicationTracker\Application\UserProfile\ResumeValidationOutcome;
+use CurlySanders\JobApplicationTracker\Domain\Ai\AnalysisKind;
+use CurlySanders\JobApplicationTracker\Domain\Ai\AnalysisRequest;
+use CurlySanders\JobApplicationTracker\Domain\Ai\AnalysisState;
 use CurlySanders\JobApplicationTracker\Domain\User\ResumeValidationStatus;
 use CurlySanders\JobApplicationTracker\Domain\User\User;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\Vacancy;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\VacancyStatus;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\VacancyStatusHistory;
+use CurlySanders\JobApplicationTracker\Infrastructure\Persistence\DoctrineAnalysisRequestRepository;
 use CurlySanders\JobApplicationTracker\Infrastructure\Persistence\DoctrinePendingResumeValidationRepository;
 use CurlySanders\JobApplicationTracker\Infrastructure\Persistence\Vacancy\DoctrineVacancyRepository;
 use CurlySanders\JobApplicationTracker\Infrastructure\Persistence\Vacancy\DoctrineVacancyStatusHistoryRepository;
@@ -76,6 +80,35 @@ final class DoctrineAsyncRepositoriesTest extends KernelTestCase
 
         $vacancies->remove($vacancy);
         self::assertNull($vacancies->find($vacancy->id->toRfc4122()));
+    }
+
+    public function testAnalysisRequestsAreOwnerScopedIdempotentAndPurgedAtExpiry(): void
+    {
+        self::bootKernel();
+        $entityManager = $this->entityManager();
+        $owner = new User()->setEmail('analysis-owner@example.com')->setPassword('hashed-password');
+        $other = new User()->setEmail('analysis-other@example.com')->setPassword('hashed-password');
+        $request = new AnalysisRequest($owner, AnalysisKind::VacancyExtraction, 'encrypted-input', str_repeat('a', 64), 'fake', 'fake', new \DateTimeImmutable('+24 hours'));
+        $expired = new AnalysisRequest($owner, AnalysisKind::CandidateFit, 'expired-input', str_repeat('b', 64), 'fake', 'fake', new \DateTimeImmutable('-1 second'));
+        $entityManager->persist($owner);
+        $entityManager->persist($other);
+        $entityManager->persist($request);
+        $entityManager->persist($expired);
+        $entityManager->flush();
+        $repository = new DoctrineAnalysisRequestRepository($entityManager);
+
+        self::assertSame($request->id->toRfc4122(), $repository->findOwnedBy($request->id->toRfc4122(), $owner->id->toRfc4122())?->id->toRfc4122());
+        self::assertNull($repository->findOwnedBy($request->id->toRfc4122(), $other->id->toRfc4122()));
+        self::assertTrue($repository->complete($request->id->toRfc4122(), str_repeat('a', 64), 'encrypted-result', str_repeat('c', 64)));
+        self::assertFalse($repository->complete($request->id->toRfc4122(), str_repeat('a', 64), 'duplicate-result', str_repeat('d', 64)));
+
+        $entityManager->clear();
+        $completed = $repository->find($request->id->toRfc4122());
+        self::assertInstanceOf(AnalysisRequest::class, $completed);
+        self::assertSame(AnalysisState::Completed, $completed->state);
+        self::assertSame('encrypted-result', $completed->result?->ciphertext);
+        self::assertSame(1, $repository->purgeExpired(new \DateTimeImmutable()));
+        self::assertNull($repository->find($expired->id->toRfc4122()));
     }
 
     private function entityManager(): EntityManagerInterface
