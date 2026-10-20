@@ -36,10 +36,11 @@
     - Make redelivery idempotent, replace obsolete results when inputs change,
       and delete discarded or unfinished drafts after 24 hours.
 - **Acceptance Criteria**:
-    - [ ] A user can access only their own analysis requests and results.
-    - [ ] Duplicate outbox delivery produces one result for a request version.
-    - [ ] Events, logs, and failures never contain resume contents, vacancy
+    - [x] A user can access only their own analysis requests and results.
+    - [x] Duplicate outbox delivery produces one result for a request version.
+    - [x] Events, logs, and failures never contain resume contents, vacancy
       text, full addresses, or provider credentials.
+- **Validation**: [Encrypted request storage, expiry sweep, and check commands](tick-502-validation.md).
 
 ---
 

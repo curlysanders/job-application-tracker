@@ -12,6 +12,7 @@
         "ext-ctype": "*",
         "ext-bcmath": "*",
         "ext-iconv": "*",
+        "ext-sodium": "*",
         "brick/money": "^0.15.2",
         "doctrine/doctrine-bundle": "^3.3.2",
         "doctrine/doctrine-migrations-bundle": "^4.0",
