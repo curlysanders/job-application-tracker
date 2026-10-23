@@ -66,7 +66,9 @@ final readonly class ReviewVacancyExtractionController
                 }
                 $selectedTechStacks[] = $key;
             }
-            $draft = $this->drafts->create($user, $this->reviews->vacancyData($review, $selectedFields, $selectedTechStacks));
+            $data = $this->reviews->vacancyData($review, $selectedFields, $selectedTechStacks);
+            $this->reviews->applyOrganizationCandidates($data, $review, $user->id->toRfc4122());
+            $draft = $this->drafts->create($user, $data);
 
             return new RedirectResponse($this->urls->generate('app_vacancy_create', ['draft' => $draft->id->toRfc4122()]));
         }

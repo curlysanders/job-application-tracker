@@ -17,7 +17,7 @@ final class VacancyFieldProposal
 
     public function assertValid(): void
     {
-        $allowedFields = ['title', 'companyName', 'location', 'contractType', 'datePosted', 'deadline', 'minimumSalary', 'maximumSalary', 'currencyCode', 'workMode', 'hybridDetails', 'requirements', 'responsibilities', 'preferredQualifications', 'aboutJob', 'aboutCompany', 'compensationBenefits'];
+        $allowedFields = ['title', 'companyName', 'recruiterAgencyName', 'location', 'contractType', 'datePosted', 'deadline', 'minimumSalary', 'maximumSalary', 'currencyCode', 'workMode', 'hybridDetails', 'requirements', 'responsibilities', 'preferredQualifications', 'aboutJob', 'aboutCompany', 'compensationBenefits'];
         if (!in_array($this->field, $allowedFields, true)) {
             throw new \InvalidArgumentException('The proposed vacancy field is not supported.');
         }

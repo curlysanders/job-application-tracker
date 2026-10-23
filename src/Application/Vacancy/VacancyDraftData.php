@@ -9,6 +9,11 @@ use CurlySanders\JobApplicationTracker\Domain\Vacancy\WorkMode;
 
 final class VacancyDraftData
 {
+    public ?string $companyId = null;
+    public ?string $recruiterId = null;
+    public ?string $proposedCompanyName = null;
+    public ?string $proposedRecruiterAgencyName = null;
+
     public ?string $title = null;
     public ?string $location = null;
     public ?ContractType $contractType = null;

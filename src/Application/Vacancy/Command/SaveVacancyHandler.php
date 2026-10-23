@@ -36,8 +36,8 @@ final readonly class SaveVacancyHandler implements CommandHandler
             : $this->vacancies->findOwnedBy($command->vacancyId, $command->userId) ?? throw new \LogicException('The vacancy no longer exists.');
         $vacancy->updateTitle($command->title);
         $vacancy->updateAuthoringDetails(
-            $this->optionalCompany($command->companyId, $command->userId),
-            $this->optionalRecruiter($command->recruiterId, $command->userId),
+            $this->company($command->companyId, $command->createCompanyName, $command->userId, $user),
+            $this->recruiter($command->recruiterId, $command->createRecruiterAgencyName, $command->userId, $user),
             $command->fullText,
             $command->requirements,
             $command->responsibilities,
@@ -69,18 +69,44 @@ final readonly class SaveVacancyHandler implements CommandHandler
         return $vacancy;
     }
 
-    private function optionalCompany(
+    private function company(
         ?string $id,
+        ?string $createName,
         string $userId,
+        \CurlySanders\JobApplicationTracker\Domain\User\User $user,
     ): ?Company {
-        return null === $id ? null : ($this->companies->findOwnedBy($id, $userId) ?? throw new \LogicException('The selected company no longer exists.'));
+        if (null !== $id) {
+            return $this->companies->findOwnedBy($id, $userId) ?? throw new \LogicException('The selected company no longer exists.');
+        }
+        if (null === $createName) {
+            return null;
+        }
+
+        $company = new Company($user, $createName, null, null);
+        $company->recordCreated();
+        $this->companies->save($company);
+
+        return $company;
     }
 
-    private function optionalRecruiter(
+    private function recruiter(
         ?string $id,
+        ?string $createName,
         string $userId,
+        \CurlySanders\JobApplicationTracker\Domain\User\User $user,
     ): ?Recruiter {
-        return null === $id ? null : ($this->recruiters->findOwnedBy($id, $userId) ?? throw new \LogicException('The selected recruiter no longer exists.'));
+        if (null !== $id) {
+            return $this->recruiters->findOwnedBy($id, $userId) ?? throw new \LogicException('The selected recruiter no longer exists.');
+        }
+        if (null === $createName) {
+            return null;
+        }
+
+        $recruiter = new Recruiter($user, $createName, null);
+        $recruiter->recordCreated();
+        $this->recruiters->save($recruiter);
+
+        return $recruiter;
     }
 
     /** @return list<TechStack> */

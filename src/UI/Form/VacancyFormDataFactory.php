@@ -15,6 +15,10 @@ final class VacancyFormDataFactory
     {
         $data = new VacancyData();
         $data->title = $draft->title;
+        $data->companyId = $draft->companyId;
+        $data->recruiterId = $draft->recruiterId;
+        $data->proposedCompanyName = $draft->proposedCompanyName;
+        $data->proposedRecruiterAgencyName = $draft->proposedRecruiterAgencyName;
         $data->location = $draft->location;
         $data->contractType = $draft->contractType;
         $data->datePosted = $draft->datePosted;
@@ -117,6 +121,8 @@ final class VacancyFormDataFactory
             $data->excitement,
             $this->existingSlugs($data),
             $newTechStacks,
+            $data->createProposedCompany ? $data->proposedCompanyName : null,
+            $data->createProposedRecruiter ? $data->proposedRecruiterAgencyName : null,
         );
     }
 

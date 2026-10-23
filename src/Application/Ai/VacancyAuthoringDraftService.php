@@ -57,6 +57,8 @@ final readonly class VacancyAuthoringDraftService
     private function encode(VacancyDraftData $data): array
     {
         return [
+            'companyId' => $data->companyId, 'recruiterId' => $data->recruiterId,
+            'proposedCompanyName' => $data->proposedCompanyName, 'proposedRecruiterAgencyName' => $data->proposedRecruiterAgencyName,
             'title' => $data->title, 'location' => $data->location, 'contractType' => $data->contractType?->value,
             'datePosted' => $data->datePosted?->format('Y-m-d'), 'deadline' => $data->deadline?->format('Y-m-d'),
             'fullText' => $data->fullText, 'requirements' => $data->requirements, 'responsibilities' => $data->responsibilities,
@@ -72,7 +74,7 @@ final readonly class VacancyAuthoringDraftService
     private function decode(array $payload): VacancyDraftData
     {
         $data = new VacancyDraftData();
-        foreach (['title', 'location', 'fullText', 'requirements', 'responsibilities', 'preferredQualifications', 'aboutJob', 'aboutCompany', 'compensationBenefits', 'minimumSalary', 'maximumSalary', 'hybridDetails'] as $field) {
+        foreach (['companyId', 'recruiterId', 'proposedCompanyName', 'proposedRecruiterAgencyName', 'title', 'location', 'fullText', 'requirements', 'responsibilities', 'preferredQualifications', 'aboutJob', 'aboutCompany', 'compensationBenefits', 'minimumSalary', 'maximumSalary', 'hybridDetails'] as $field) {
             $value = $payload[$field] ?? null;
             if (null !== $value && !is_string($value)) {
                 throw new \LogicException('A vacancy authoring draft contains an invalid text field.');

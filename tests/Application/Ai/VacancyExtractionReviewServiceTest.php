@@ -6,6 +6,8 @@ namespace CurlySanders\JobApplicationTracker\Tests\Application\Ai;
 
 use CurlySanders\JobApplicationTracker\Application\Ai\AnalysisCipher;
 use CurlySanders\JobApplicationTracker\Application\Ai\VacancyExtractionReviewService;
+use CurlySanders\JobApplicationTracker\Application\Company\CompanyRepository;
+use CurlySanders\JobApplicationTracker\Application\Recruiter\RecruiterRepository;
 use CurlySanders\JobApplicationTracker\Application\TechStack\PaginatedResults;
 use CurlySanders\JobApplicationTracker\Application\TechStack\TechStackRepository;
 use CurlySanders\JobApplicationTracker\Domain\Ai\AnalysisKind;
@@ -64,7 +66,7 @@ final class VacancyExtractionReviewServiceTest extends TestCase
             }
         };
 
-        $service = new VacancyExtractionReviewService($cipher, $repository);
+        $service = new VacancyExtractionReviewService($cipher, $repository, self::createStub(CompanyRepository::class), self::createStub(RecruiterRepository::class));
         $review = $service->review($request);
 
         self::assertCount(1, $review->fields['title']);
@@ -88,8 +90,8 @@ final class VacancyExtractionReviewServiceTest extends TestCase
 
     public function testItRejectsForgedProposalSelections(): void
     {
-        $review = new \CurlySanders\JobApplicationTracker\Application\Ai\VacancyExtractionReview('text', [], [], []);
-        $service = new VacancyExtractionReviewService(self::createStub(AnalysisCipher::class), self::createStub(TechStackRepository::class));
+        $review = new \CurlySanders\JobApplicationTracker\Application\Ai\VacancyExtractionReview('text', [], [], [], []);
+        $service = new VacancyExtractionReviewService(self::createStub(AnalysisCipher::class), self::createStub(TechStackRepository::class), self::createStub(CompanyRepository::class), self::createStub(RecruiterRepository::class));
 
         $this->expectException(\InvalidArgumentException::class);
         $service->vacancyData($review, ['title' => 'forged'], []);

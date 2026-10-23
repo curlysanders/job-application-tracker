@@ -44,6 +44,8 @@ final readonly class SaveVacancy
         public ?int $excitement,
         public array $existingTechStackSlugs,
         public array $newTechStacks,
+        public ?string $createCompanyName = null,
+        public ?string $createRecruiterAgencyName = null,
     ) {
     }
 }

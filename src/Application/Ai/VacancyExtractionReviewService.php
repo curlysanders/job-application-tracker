@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace CurlySanders\JobApplicationTracker\Application\Ai;
 
+use CurlySanders\JobApplicationTracker\Application\Company\CompanyRepository;
+use CurlySanders\JobApplicationTracker\Application\Recruiter\RecruiterRepository;
 use CurlySanders\JobApplicationTracker\Application\TechStack\StandardTechStacks;
 use CurlySanders\JobApplicationTracker\Application\TechStack\TechStackRepository;
 use CurlySanders\JobApplicationTracker\Application\Vacancy\VacancyDraftData;
@@ -24,6 +26,8 @@ final readonly class VacancyExtractionReviewService
     public function __construct(
         private AnalysisCipher $cipher,
         private TechStackRepository $techStacks,
+        private CompanyRepository $companies,
+        private RecruiterRepository $recruiters,
     ) {
     }
 
@@ -42,6 +46,7 @@ final readonly class VacancyExtractionReviewService
 
         $fields = [];
         $companyEvidence = [];
+        $recruiterEvidence = [];
         foreach ($this->list($result, 'proposals') as $proposal) {
             $reviewProposal = $this->proposal($proposal, $vacancyText);
             if (null === $reviewProposal) {
@@ -49,6 +54,8 @@ final readonly class VacancyExtractionReviewService
             }
             if ('companyName' === $reviewProposal->field) {
                 $companyEvidence[] = $reviewProposal;
+            } elseif ('recruiterAgencyName' === $reviewProposal->field) {
+                $recruiterEvidence[] = $reviewProposal;
             } elseif (in_array($reviewProposal->field, self::FIELDS, true) && $this->isValidFieldValue($reviewProposal)) {
                 $fields[$reviewProposal->field] ??= [];
                 $fields[$reviewProposal->field][] = $reviewProposal;
@@ -63,7 +70,7 @@ final readonly class VacancyExtractionReviewService
             }
         }
 
-        return new VacancyExtractionReview($vacancyText, $fields, $techStacks, $companyEvidence);
+        return new VacancyExtractionReview($vacancyText, $fields, $techStacks, $companyEvidence, $recruiterEvidence);
     }
 
     /**
@@ -102,6 +109,29 @@ final readonly class VacancyExtractionReviewService
         $data->existingTags = implode(',', array_unique($slugs));
 
         return $data;
+    }
+
+    public function applyOrganizationCandidates(
+        VacancyDraftData $data,
+        VacancyExtractionReview $review,
+        string $userId,
+    ): void {
+        $company = $review->companyEvidence[0] ?? null;
+        if (null !== $company) {
+            $data->proposedCompanyName = $company->value;
+            $matches = array_values(array_filter($this->companies->searchOwnedBy($userId, $company->value), static fn ($item): bool => mb_strtolower(trim($item->name)) === mb_strtolower(trim($company->value))));
+            if (1 === count($matches)) {
+                $data->companyId = $matches[0]->id->toRfc4122();
+            }
+        }
+        $recruiter = $review->recruiterEvidence[0] ?? null;
+        if (null !== $recruiter) {
+            $data->proposedRecruiterAgencyName = $recruiter->value;
+            $matches = array_values(array_filter($this->recruiters->searchOwnedBy($userId, $recruiter->value), static fn ($item): bool => mb_strtolower(trim($item->agencyName)) === mb_strtolower(trim($recruiter->value))));
+            if (1 === count($matches)) {
+                $data->recruiterId = $matches[0]->id->toRfc4122();
+            }
+        }
     }
 
     /** @param array<string, mixed> $proposal */
