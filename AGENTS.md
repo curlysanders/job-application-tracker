@@ -11,7 +11,7 @@ Current core stack:
 
 - PHP 8.5 and Symfony 8.1
 - MariaDB 13.0
-- FrankenPHP 1.13.0 in worker mode
+- FrankenPHP 1.13.2 in worker mode
 - Doctrine ORM, Symfony Messenger, Symfony Workflow, and Flysystem
 - Twig Components, Stimulus, Flowbite, and AssetMapper (no Node.js build step)
 
