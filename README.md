@@ -29,13 +29,15 @@ It helps job seekers track vacancies, record application audit histories, manage
 ## 🛠 Tech Stack & Architecture
 
 - **Backend Framework**: Symfony 8.1 / PHP 8.5
-- **Application Server**: FrankenPHP 1.13.0 / PHP 8.5.11 (Worker Mode enabled)
+- **Application Server**: FrankenPHP 1.13.2 / PHP 8.5.12 (Worker Mode enabled)
 - **Database**: MariaDB 13.0.2
 - **Frontend / Assets**: Symfony UX 3.4 + AssetMapper (Zero Node.js build step required)
 - **Styling & Interactivity**: Flowbite (Tailwind CSS) + Twig Components + Stimulus Controllers
 - **File Storage**: Symfony Flysystem Bundle (`league/flysystem-bundle`)
 - **Messaging & Event Queue**: Symfony Messenger (Outbox Pattern with Doctrine Transport)
 - **State Machine**: Symfony Workflow Component
+
+The pinned PHP 8.5.12 runtime includes upstream fixes for the critical remote code execution vulnerabilities [CVE-2026-109618 and CVE-2026-109619](https://www.php.net/releases/8_5_12.php). Development and production images built from the Dockerfiles use this patched runtime.
 
 ### Architecture Highlights
 - **Pragmatic Clean Architecture**: Enforces strict hexagonal boundaries for external integrations (File Storage, Outbox Queue, AI Services) while maintaining a lightweight domain core using Doctrine ORM entities directly for standard CRUD operations.
