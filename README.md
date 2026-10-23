@@ -37,6 +37,8 @@ It helps job seekers track vacancies, record application audit histories, manage
 - **Messaging & Event Queue**: Symfony Messenger (Outbox Pattern with Doctrine Transport)
 - **State Machine**: Symfony Workflow Component
 
+The pinned PHP 8.5.12 runtime includes upstream fixes for the critical remote code execution vulnerabilities [CVE-2026-109618 and CVE-2026-109619](https://www.php.net/releases/8_5_12.php). Development and production images built from the Dockerfiles use this patched runtime.
+
 ### Architecture Highlights
 - **Pragmatic Clean Architecture**: Enforces strict hexagonal boundaries for external integrations (File Storage, Outbox Queue, AI Services) while maintaining a lightweight domain core using Doctrine ORM entities directly for standard CRUD operations.
 - **CQRS Lite**: Clean separation between application commands (updates, status shifts, file uploads) and optimized repository read queries for dashboard rendering.
