@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Vacancy extraction · Job Application Tracker{% endblock %}
+{% block page_heading %}Vacancy extraction{% endblock %}
+
+{% block content %}
+    <section class="panel" {% if poll %}data-controller="extraction-progress"{% endif %} aria-live="polite">
+        {% if analysis.state.value == 'pending' %}
+            <h2>Extracting vacancy details</h2>
+            <p>Analysis is in progress. This page checks again every five seconds.</p>
+        {% elseif analysis.state.value == 'completed' %}
+            <h2>Extraction ready</h2>
+            <p>Review each proposed value and its source excerpt before prefilling a vacancy.</p>
+            <a class="button" href="{{ path('app_vacancy_extraction_review', {id: analysis.id}) }}">Review proposals</a>
+        {% else %}
+            <h2>Extraction could not be completed</h2>
+            <p>The provider could not process this vacancy text. No vacancy was created.</p>
+            <a class="button" href="{{ path('app_vacancy_extract') }}">Try again</a>
+        {% endif %}
+    </section>
+{% endblock %}

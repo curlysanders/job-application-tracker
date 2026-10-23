@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace CurlySanders\JobApplicationTracker\UI\Controller\Vacancy;
 
+use CurlySanders\JobApplicationTracker\Application\Ai\VacancyAuthoringDraftService;
 use CurlySanders\JobApplicationTracker\Application\Currency\ExchangeRateProvider;
 use CurlySanders\JobApplicationTracker\Application\Shared\Bus\CommandBus;
 use CurlySanders\JobApplicationTracker\Domain\User\User;
@@ -19,6 +20,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Environment;
@@ -30,6 +32,7 @@ final readonly class CreateVacancyController
     public function __construct(
         private Security $security,
         private CommandBus $commandBus,
+        private VacancyAuthoringDraftService $drafts,
         private FormFactoryInterface $forms,
         private VacancyFormDataFactory $dataFactory,
         private ExchangeRateProvider $exchangeRates,
@@ -42,7 +45,9 @@ final readonly class CreateVacancyController
     public function __invoke(Request $request): Response
     {
         $user = $this->requireAuthenticatedUser('Vacancy authoring requires an authenticated user.');
-        $data = new VacancyData();
+        $draftId = $request->request->getString('draft', $request->query->getString('draft'));
+        $draft = '' === $draftId ? null : $this->drafts->dataFor($draftId, $user) ?? throw new NotFoundHttpException('Vacancy authoring draft not found.');
+        $data = null === $draft ? new VacancyData() : $this->dataFactory->fromDraft($draft);
         $form = $this->forms->create(VacancyType::class, $data, ['user_id' => $this->userId($user)]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -50,11 +55,14 @@ final readonly class CreateVacancyController
             if (!$vacancy instanceof Vacancy) {
                 throw new \LogicException('A created vacancy must be persisted.');
             }
+            if ('' !== $draftId) {
+                $this->drafts->consume($draftId, $user);
+            }
 
             return $this->redirect($request, $vacancy->id->toRfc4122(), 'Vacancy created.');
         }
 
-        return $this->response($form->createView(), $user, 'Add vacancy', 'Create vacancy', $form->isSubmitted());
+        return $this->response($form->createView(), $user, 'Add vacancy', 'Create vacancy', $form->isSubmitted(), $draftId);
     }
 
     private function response(
@@ -63,13 +71,14 @@ final readonly class CreateVacancyController
         string $pageTitle,
         string $submitLabel,
         bool $submitted,
+        string $draftId,
     ): Response {
         $rates = $this->exchangeRates->latestRates();
         $rateValues = $rates->ratesPerEuro ?? [];
 
         $preferredSalary = $user->getPreferredSalary();
 
-        return new Response($this->twig->render('vacancy/form.html.twig', ['form' => $form, 'pageTitle' => $pageTitle, 'submitLabel' => $submitLabel, 'minimumPreferredSalary' => $preferredSalary->getMinimumDecimal(), 'minimumPreferredSalaryCurrency' => $preferredSalary->currencyCode, 'exchangeRates' => $rateValues]), $submitted ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK);
+        return new Response($this->twig->render('vacancy/form.html.twig', ['form' => $form, 'pageTitle' => $pageTitle, 'submitLabel' => $submitLabel, 'minimumPreferredSalary' => $preferredSalary->getMinimumDecimal(), 'minimumPreferredSalaryCurrency' => $preferredSalary->currencyCode, 'exchangeRates' => $rateValues, 'draftId' => $draftId]), $submitted ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK);
     }
 
     private function userId(User $user): string

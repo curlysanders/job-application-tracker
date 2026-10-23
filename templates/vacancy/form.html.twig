@@ -6,6 +6,7 @@
 {% block content %}
     <section class="panel vacancy-form-panel">
         {{ form_start(form, {attr: {'data-controller': 'vacancy-authoring', 'data-vacancy-authoring-minimum-preferred-salary-value': minimumPreferredSalary ?? '', 'data-vacancy-authoring-minimum-preferred-salary-currency-value': minimumPreferredSalaryCurrency ?? 'EUR', 'data-vacancy-authoring-rates-value': exchangeRates|json_encode}}) }}
+        {% if draftId is defined and draftId is not empty %}<input type="hidden" name="draft" value="{{ draftId }}">{% endif %}
         <fieldset>
             <legend>Role and employer</legend>
             {{ form_row(form.title) }}

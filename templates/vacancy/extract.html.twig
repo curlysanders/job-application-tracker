@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Extract vacancy details · Job Application Tracker{% endblock %}
+{% block page_heading %}Extract vacancy details{% endblock %}
+
+{% block content %}
+    <section class="panel vacancy-form-panel">
+        <p>Review evidence-backed suggestions before they are copied into a new vacancy. Nothing is saved as a vacancy yet.</p>
+        {{ form_start(form) }}
+        {{ form_row(form.vacancyText) }}
+        <button class="button" type="submit">Extract details</button>
+        {{ form_end(form) }}
+    </section>
+{% endblock %}
