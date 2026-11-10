@@ -49,7 +49,10 @@ final readonly class LocalOllamaInference
                 Message::ofUser($input),
             ), [
                 'response_format' => $responseFormat,
-                'options' => ['num_ctx' => 2048],
+                // Symfony's Ollama bridge places provider-specific options in
+                // Ollama's `options` object. Passing a nested `options` array
+                // would produce `options.options.num_ctx`, which Ollama ignores.
+                'num_ctx' => 2048,
                 'think' => false,
             ])->asObject();
         } finally {

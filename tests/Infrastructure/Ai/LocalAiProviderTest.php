@@ -46,7 +46,7 @@ final class LocalAiProviderTest extends TestCase
             'model' => 'qwen3:0.6b',
             'options' => [
                 'response_format' => VacancyExtractionResult::class,
-                'options' => ['num_ctx' => 2048],
+                'num_ctx' => 2048,
                 'think' => false,
             ],
         ], $platform->invocations[0]);

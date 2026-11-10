@@ -10,6 +10,8 @@
       Infrastructure adapters for Ollama and test fakes.
     - Configure local `qwen3:0.6b` inference with one concurrent request and a
       2,048-token context, with the provider disabled unless explicitly enabled.
+    - Provide an optional resource-bounded CPU-inference Ollama Compose profile for
+      local validation, keeping model traffic inside the Compose network.
     - Build a curated Dutch and English vacancy corpus and NAS benchmark that
       measures model memory, swap activity, app/worker health, latency, and
       structured extraction quality.
