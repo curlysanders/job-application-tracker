@@ -68,8 +68,34 @@ services:
       OLLAMA_KEEP_ALIVE: "30s"
     volumes:
       - ollama_data:/root/.ollama
-    mem_limit: 1400m
+    # `2500m` is 2.441 GiB. Together with the app, worker, and database idle
+    # footprint this preserves at least 1.4 GiB of a 4 GiB NAS for the host.
+    mem_limit: 2500m
     cpus: "1.5"
+
+  gliner:
+    build:
+      context: .
+      dockerfile: .docker/gliner2/Dockerfile
+    profiles: ["gliner"]
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:mode=1777,noexec,nosuid,size=64m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    expose:
+      - "8080"
+    mem_limit: 2500m
+    cpus: "1.5"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/healthz', timeout=2).read()"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 120s
 
   benchmark:
     image: job-application-tracker-app

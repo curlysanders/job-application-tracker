@@ -16,13 +16,13 @@
                 <h2>Company evidence</h2>
                 {% for proposal in review.companyEvidence %}
                     <p><strong>{{ proposal.value }}</strong> <span class="form-help">{{ (proposal.confidence * 100)|round }}% confidence</span></p>
-                    <blockquote>{{ proposal.excerpt }}</blockquote>
+                    <blockquote>{% if proposal.sourceStart is not null %}{{ proposal.evidenceBefore }}<mark>{{ proposal.evidenceText }}</mark>{{ proposal.evidenceAfter }}{% else %}{{ proposal.excerpt }}{% endif %}</blockquote>
                 {% endfor %}
             </section>
         {% endif %}
 
         {% if review.recruiterEvidence is not empty %}
-            <section class="panel"><h2>Recruiter agency evidence</h2>{% for proposal in review.recruiterEvidence %}<p><strong>{{ proposal.value }}</strong> <span class="form-help">{{ (proposal.confidence * 100)|round }}% confidence</span></p><blockquote>{{ proposal.excerpt }}</blockquote>{% endfor %}</section>
+            <section class="panel"><h2>Recruiter agency evidence</h2>{% for proposal in review.recruiterEvidence %}<p><strong>{{ proposal.value }}</strong> <span class="form-help">{{ (proposal.confidence * 100)|round }}% confidence</span></p><blockquote>{% if proposal.sourceStart is not null %}{{ proposal.evidenceBefore }}<mark>{{ proposal.evidenceText }}</mark>{{ proposal.evidenceAfter }}{% else %}{{ proposal.excerpt }}{% endif %}</blockquote>{% endfor %}</section>
         {% endif %}
 
         {% for field, proposals in review.fields %}
@@ -33,7 +33,7 @@
                         <input type="radio" name="field[{{ field }}]" value="{{ proposal.key }}">
                         <strong>{{ proposal.value }}</strong> <span class="form-help">{{ (proposal.confidence * 100)|round }}% confidence</span>
                     </label>
-                    <blockquote>{{ proposal.excerpt }}</blockquote>
+                    <blockquote>{% if proposal.sourceStart is not null %}{{ proposal.evidenceBefore }}<mark>{{ proposal.evidenceText }}</mark>{{ proposal.evidenceAfter }}{% else %}{{ proposal.excerpt }}{% endif %}</blockquote>
                 {% endfor %}
             </fieldset>
         {% endfor %}
@@ -46,7 +46,7 @@
                         <input type="checkbox" name="techStack[]" value="{{ proposal.key }}">
                         <strong>{{ proposal.value }}</strong> <span class="form-help">{{ (proposal.confidence * 100)|round }}% confidence</span>
                     </label>
-                    <blockquote>{{ proposal.excerpt }}</blockquote>
+                    <blockquote>{% if proposal.sourceStart is not null %}{{ proposal.evidenceBefore }}<mark>{{ proposal.evidenceText }}</mark>{{ proposal.evidenceAfter }}{% else %}{{ proposal.excerpt }}{% endif %}</blockquote>
                 {% endfor %}
             </fieldset>
         {% endif %}

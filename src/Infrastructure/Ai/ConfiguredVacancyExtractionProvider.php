@@ -22,6 +22,10 @@ final readonly class ConfiguredVacancyExtractionProvider implements VacancyExtra
 
         #[Autowire('%env(bool:AI_LOCAL_PROVIDER_ENABLED)%')]
         private bool $localEnabled,
+        private ?Gliner2VacancyExtractionProvider $gliner = null,
+
+        #[Autowire('%env(bool:AI_GLINER_PROVIDER_ENABLED)%')]
+        private bool $glinerEnabled = false,
     ) {
     }
 
@@ -30,6 +34,7 @@ final readonly class ConfiguredVacancyExtractionProvider implements VacancyExtra
         return match ($this->provider) {
             'fake' => $this->fake->extract($input),
             'local' => $this->localProvider()->extract($input),
+            'gliner' => $this->glinerProvider()->extract($input),
             default => throw new \LogicException(sprintf('Unsupported AI provider "%s".', $this->provider)),
         };
     }
@@ -41,5 +46,14 @@ final readonly class ConfiguredVacancyExtractionProvider implements VacancyExtra
         }
 
         return $this->local;
+    }
+
+    private function glinerProvider(): Gliner2VacancyExtractionProvider
+    {
+        if (!$this->glinerEnabled) {
+            throw new \LogicException('GLiNER inference is disabled until its benchmark admission gate passes.');
+        }
+
+        return $this->gliner ?? throw new \LogicException('The GLiNER extraction provider is unavailable.');
     }
 }

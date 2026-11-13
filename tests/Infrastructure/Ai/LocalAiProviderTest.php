@@ -32,6 +32,13 @@ use Symfony\Component\Lock\Store\FlockStore;
 
 final class LocalAiProviderTest extends TestCase
 {
+    public function testTheInferenceExposesTheConfiguredModelForAdapterSelection(): void
+    {
+        $inference = new LocalOllamaInference($this->platform(new VacancyExtractionResult()), new LockFactory(new FlockStore(sys_get_temp_dir())), ' hf.co/numind/NuExtract-2.0-2B-GGUF:Q4_K_M ');
+
+        self::assertSame('hf.co/numind/NuExtract-2.0-2B-GGUF:Q4_K_M', $inference->model());
+    }
+
     public function testLocalProvidersUseStructuredResultsWithTheConfiguredModelAndContext(): void
     {
         $extraction = new VacancyExtractionResult();
@@ -47,7 +54,8 @@ final class LocalAiProviderTest extends TestCase
             'options' => [
                 'response_format' => VacancyExtractionResult::class,
                 'num_ctx' => 2048,
-                'think' => false,
+                'num_predict' => 512,
+                'temperature' => 0,
             ],
         ], $platform->invocations[0]);
     }
@@ -71,6 +79,49 @@ final class LocalAiProviderTest extends TestCase
         $disabled = new ConfiguredVacancyExtractionProvider($fakeExtraction, $localExtraction, 'local', false);
         $this->expectException(\LogicException::class);
         $disabled->extract(new VacancyExtractionInput('Vacancy'));
+    }
+
+    public function testConfiguredExtractionFailsClosedForDisabledGlinerInference(): void
+    {
+        $inference = new LocalOllamaInference($this->platform(new VacancyExtractionResult()), new LockFactory(new FlockStore(sys_get_temp_dir())), 'qwen3:0.6b');
+        $provider = new ConfiguredVacancyExtractionProvider(new FakeVacancyExtractionProvider(), new LocalOllamaVacancyExtractionProvider($inference), 'gliner', false);
+
+        $this->expectException(\LogicException::class);
+        $provider->extract(new VacancyExtractionInput('Vacancy'));
+    }
+
+    public function testGraniteUsesOllamasSupportedNoThinkingControl(): void
+    {
+        $platform = $this->platform(new VacancyExtractionResult());
+        $inference = new LocalOllamaInference($platform, new LockFactory(new FlockStore(sys_get_temp_dir())), 'granite4.2:3b');
+
+        new LocalOllamaVacancyExtractionProvider($inference)->extract(new VacancyExtractionInput('Vacancy text'));
+
+        self::assertSame([
+            'model' => 'granite4.2:3b',
+            'options' => [
+                'response_format' => VacancyExtractionResult::class,
+                'num_ctx' => 2048,
+                'num_predict' => 512,
+                'temperature' => 0,
+                'think' => false,
+            ],
+        ], $platform->invocations[0]);
+    }
+
+    public function testLocalExtractionRemovesARecruiterThatDuplicatesTheCompany(): void
+    {
+        $response = new VacancyExtractionResult();
+        $response->proposals = [
+            new \CurlySanders\JobApplicationTracker\Domain\Ai\VacancyFieldProposal('companyName', 'Acme', 'Acme', 1.0),
+            new \CurlySanders\JobApplicationTracker\Domain\Ai\VacancyFieldProposal('recruiterAgencyName', ' acme ', 'acme', 1.0),
+        ];
+        $provider = new LocalOllamaVacancyExtractionProvider(new LocalOllamaInference($this->platform($response), new LockFactory(new FlockStore(sys_get_temp_dir())), 'qwen3:1.7b'));
+
+        $result = $provider->extract(new VacancyExtractionInput('Acme vacancy'));
+
+        self::assertCount(1, $result->proposals);
+        self::assertSame('companyName', $result->proposals[0]->field);
     }
 
     private function platform(object ...$responses): RecordingPlatform

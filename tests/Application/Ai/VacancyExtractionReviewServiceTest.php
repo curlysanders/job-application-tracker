@@ -96,4 +96,67 @@ final class VacancyExtractionReviewServiceTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $service->vacancyData($review, ['title' => 'forged'], []);
     }
+
+    public function testItAcceptsCanonicalEnumsFromDutchEvidenceAndRemovesDuplicateRecruiterEvidence(): void
+    {
+        $request = new AnalysisRequest(new User(), AnalysisKind::VacancyExtraction, 'input', str_repeat('a', 64), 'local', 'qwen3:1.7b', new \DateTimeImmutable('+1 hour'));
+        $request->complete(new AnalysisResult($request, 'result', str_repeat('b', 64)));
+        $cipher = new class implements AnalysisCipher {
+            public function encrypt(string $plaintext): string
+            {
+                return $plaintext;
+            }
+
+            public function decrypt(string $ciphertext): string
+            {
+                return 'input' === $ciphertext
+                    ? '{"vacancyText":"Acme biedt een vast dienstverband met hybride werken."}'
+                    : '{"proposals":[{"field":"companyName","value":"Acme","excerpt":"Acme","confidence":1},{"field":"recruiterAgencyName","value":" acme ","excerpt":"Acme","confidence":1},{"field":"contractType","value":"PERMANENT","excerpt":"vast dienstverband","confidence":1},{"field":"workMode","value":"HYBRID","excerpt":"hybride werken","confidence":1}],"techStacks":[]}';
+            }
+
+            public function fingerprint(string $plaintext): string
+            {
+                return str_repeat('c', 64);
+            }
+        };
+        $service = new VacancyExtractionReviewService($cipher, self::createStub(TechStackRepository::class), self::createStub(CompanyRepository::class), self::createStub(RecruiterRepository::class));
+
+        $review = $service->review($request);
+
+        self::assertCount(1, $review->companyEvidence);
+        self::assertCount(0, $review->recruiterEvidence);
+        self::assertSame('PERMANENT', $review->fields['contractType'][0]->value);
+        self::assertSame('HYBRID', $review->fields['workMode'][0]->value);
+    }
+
+    public function testItKeepsVerifiedUnicodeSourceSpansForHighlightedReviewEvidence(): void
+    {
+        $request = new AnalysisRequest(new User(), AnalysisKind::VacancyExtraction, 'input', str_repeat('a', 64), 'gliner', 'fastino/gliner2.5-multi-v1', new \DateTimeImmutable('+1 hour'));
+        $request->complete(new AnalysisResult($request, 'result', str_repeat('b', 64)));
+        $cipher = new class implements AnalysisCipher {
+            public function encrypt(string $plaintext): string
+            {
+                return $plaintext;
+            }
+
+            public function decrypt(string $ciphertext): string
+            {
+                return 'input' === $ciphertext
+                    ? '{"vacancyText":"München zoekt een PHP developer."}'
+                    : '{"proposals":[{"field":"title","value":"PHP developer","excerpt":"PHP developer","confidence":0.95,"sourceStart":18,"sourceEnd":31}],"techStacks":[]}';
+            }
+
+            public function fingerprint(string $plaintext): string
+            {
+                return str_repeat('c', 64);
+            }
+        };
+        $service = new VacancyExtractionReviewService($cipher, self::createStub(TechStackRepository::class), self::createStub(CompanyRepository::class), self::createStub(RecruiterRepository::class));
+
+        $proposal = $service->review($request)->fields['title'][0];
+
+        self::assertSame(18, $proposal->sourceStart);
+        self::assertSame('München zoekt een ', $proposal->evidenceBefore);
+        self::assertSame('PHP developer', $proposal->evidenceText);
+    }
 }

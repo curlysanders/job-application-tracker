@@ -12,6 +12,11 @@ final readonly class ReviewProposal
         public string $value,
         public string $excerpt,
         public float $confidence,
+        public ?int $sourceStart = null,
+        public ?int $sourceEnd = null,
+        public string $evidenceBefore = '',
+        public string $evidenceText = '',
+        public string $evidenceAfter = '',
     ) {
     }
 }
