@@ -7,6 +7,7 @@ namespace CurlySanders\JobApplicationTracker\Infrastructure\Console;
 use CurlySanders\JobApplicationTracker\Application\Ai\VacancyExtractionProvider;
 use CurlySanders\JobApplicationTracker\Infrastructure\Ai\VacancyCorpusEvaluator;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -27,11 +28,18 @@ final readonly class BenchmarkAiVacancyCorpusCommand
     public function __invoke(
         InputInterface $input,
         OutputInterface $output,
+
+        #[Option(description: 'Run only the first N corpus cases; zero evaluates the full corpus.')]
+        int $limit = 0,
     ): int {
         $content = file_get_contents($this->projectDir.'/resources/ai/vacancy-corpus.json');
         $cases = is_string($content) ? json_decode($content, true, flags: JSON_THROW_ON_ERROR) : throw new \RuntimeException('The vacancy corpus could not be read.');
         if (!is_array($cases)) {
             throw new \RuntimeException('The vacancy corpus has an invalid format.');
+        }
+
+        if (0 < $limit) {
+            $cases = array_slice($cases, 0, $limit);
         }
 
         /** @var list<array{id: string, text: string, expected: array<string, string|list<string>>}> $cases */

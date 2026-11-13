@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Review vacancy extraction · Job Application Tracker{% endblock %}
+{% block page_heading %}Review vacancy extraction{% endblock %}
+
+{% block content %}
+    <form method="post" class="vacancy-extraction-review">
+        <input type="hidden" name="_token" value="{{ csrf_token('vacancy_extraction_review_' ~ analysis.id) }}">
+        <section class="panel">
+            <p>Select the proposals you want to copy into a new, unsaved vacancy. Each selectable value includes its source excerpt. The pasted vacancy text will be included as full vacancy text.</p>
+            <p><strong>Exact matches to your existing company or recruiter records are preselected in the next form. You can explicitly create an unmatched extracted record when you submit that form.</strong></p>
+        </section>
+
+        {% if review.companyEvidence is not empty %}
+            <section class="panel">
+                <h2>Company evidence</h2>
+                {% for proposal in review.companyEvidence %}
+                    <p><strong>{{ proposal.value }}</strong> <span class="form-help">{{ (proposal.confidence * 100)|round }}% confidence</span></p>
+                    <blockquote>{% if proposal.sourceStart is not null %}{{ proposal.evidenceBefore }}<mark>{{ proposal.evidenceText }}</mark>{{ proposal.evidenceAfter }}{% else %}{{ proposal.excerpt }}{% endif %}</blockquote>
+                {% endfor %}
+            </section>
+        {% endif %}
+
+        {% if review.recruiterEvidence is not empty %}
+            <section class="panel"><h2>Recruiter agency evidence</h2>{% for proposal in review.recruiterEvidence %}<p><strong>{{ proposal.value }}</strong> <span class="form-help">{{ (proposal.confidence * 100)|round }}% confidence</span></p><blockquote>{% if proposal.sourceStart is not null %}{{ proposal.evidenceBefore }}<mark>{{ proposal.evidenceText }}</mark>{{ proposal.evidenceAfter }}{% else %}{{ proposal.excerpt }}{% endif %}</blockquote>{% endfor %}</section>
+        {% endif %}
+
+        {% for field, proposals in review.fields %}
+            <fieldset class="panel">
+                <legend>{{ field|replace({'minimumSalary': 'Minimum salary', 'maximumSalary': 'Maximum salary', 'contractType': 'Contract type', 'datePosted': 'Date posted', 'workMode': 'Work mode', 'hybridDetails': 'Hybrid details', 'preferredQualifications': 'Preferred qualifications', 'aboutJob': 'About the job', 'aboutCompany': 'About the company', 'compensationBenefits': 'Compensation and benefits'})|title }}</legend>
+                {% for proposal in proposals %}
+                    <label>
+                        <input type="radio" name="field[{{ field }}]" value="{{ proposal.key }}">
+                        <strong>{{ proposal.value }}</strong> <span class="form-help">{{ (proposal.confidence * 100)|round }}% confidence</span>
+                    </label>
+                    <blockquote>{% if proposal.sourceStart is not null %}{{ proposal.evidenceBefore }}<mark>{{ proposal.evidenceText }}</mark>{{ proposal.evidenceAfter }}{% else %}{{ proposal.excerpt }}{% endif %}</blockquote>
+                {% endfor %}
+            </fieldset>
+        {% endfor %}
+
+        {% if review.techStacks is not empty %}
+            <fieldset class="panel">
+                <legend>Known technologies</legend>
+                {% for proposal in review.techStacks %}
+                    <label>
+                        <input type="checkbox" name="techStack[]" value="{{ proposal.key }}">
+                        <strong>{{ proposal.value }}</strong> <span class="form-help">{{ (proposal.confidence * 100)|round }}% confidence</span>
+                    </label>
+                    <blockquote>{% if proposal.sourceStart is not null %}{{ proposal.evidenceBefore }}<mark>{{ proposal.evidenceText }}</mark>{{ proposal.evidenceAfter }}{% else %}{{ proposal.excerpt }}{% endif %}</blockquote>
+                {% endfor %}
+            </fieldset>
+        {% endif %}
+
+        <button class="button" type="submit">Continue to new vacancy</button>
+    </form>
+{% endblock %}

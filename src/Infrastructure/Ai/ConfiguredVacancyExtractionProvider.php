@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace CurlySanders\JobApplicationTracker\Infrastructure\Ai;
 
+use CurlySanders\JobApplicationTracker\Application\Ai\AnalysisProviderMetadata;
 use CurlySanders\JobApplicationTracker\Application\Ai\VacancyExtractionProvider;
+use CurlySanders\JobApplicationTracker\Domain\Ai\AnalysisKind;
 use CurlySanders\JobApplicationTracker\Domain\Ai\VacancyExtractionInput;
 use CurlySanders\JobApplicationTracker\Domain\Ai\VacancyExtractionResult;
 use Symfony\Component\DependencyInjection\Attribute\AsAlias;
@@ -16,21 +18,26 @@ final readonly class ConfiguredVacancyExtractionProvider implements VacancyExtra
     public function __construct(
         private FakeVacancyExtractionProvider $fake,
         private LocalOllamaVacancyExtractionProvider $local,
-
-        #[Autowire('%env(string:AI_PROVIDER)%')]
-        private string $provider,
+        private AnalysisProviderMetadata $metadata,
 
         #[Autowire('%env(bool:AI_LOCAL_PROVIDER_ENABLED)%')]
         private bool $localEnabled,
+
+        #[Autowire(service: Gliner2VacancyExtractionProvider::class)]
+        private ?Gliner2VacancyExtractionProvider $gliner = null,
+
+        #[Autowire('%env(bool:AI_GLINER_PROVIDER_ENABLED)%')]
+        private bool $glinerEnabled = false,
     ) {
     }
 
     public function extract(VacancyExtractionInput $input): VacancyExtractionResult
     {
-        return match ($this->provider) {
+        return match ($this->metadata->provider(AnalysisKind::VacancyExtraction)) {
             'fake' => $this->fake->extract($input),
             'local' => $this->localProvider()->extract($input),
-            default => throw new \LogicException(sprintf('Unsupported AI provider "%s".', $this->provider)),
+            'gliner' => $this->glinerProvider()->extract($input),
+            default => throw new \LogicException('Unsupported AI provider configuration.'),
         };
     }
 
@@ -41,5 +48,14 @@ final readonly class ConfiguredVacancyExtractionProvider implements VacancyExtra
         }
 
         return $this->local;
+    }
+
+    private function glinerProvider(): Gliner2VacancyExtractionProvider
+    {
+        if (!$this->glinerEnabled) {
+            throw new \LogicException('GLiNER inference is disabled until its benchmark admission gate passes.');
+        }
+
+        return $this->gliner ?? throw new \LogicException('The GLiNER extraction provider is unavailable.');
     }
 }

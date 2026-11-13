@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace CurlySanders\JobApplicationTracker\Infrastructure\Ai;
 
+use CurlySanders\JobApplicationTracker\Application\Ai\AnalysisProviderMetadata;
 use CurlySanders\JobApplicationTracker\Application\Ai\CandidateFitProvider;
+use CurlySanders\JobApplicationTracker\Domain\Ai\AnalysisKind;
 use CurlySanders\JobApplicationTracker\Domain\Ai\CandidateFitInput;
 use CurlySanders\JobApplicationTracker\Domain\Ai\CandidateFitReport;
 use Symfony\Component\DependencyInjection\Attribute\AsAlias;
@@ -16,9 +18,7 @@ final readonly class ConfiguredCandidateFitProvider implements CandidateFitProvi
     public function __construct(
         private FakeCandidateFitProvider $fake,
         private LocalOllamaCandidateFitProvider $local,
-
-        #[Autowire('%env(string:AI_PROVIDER)%')]
-        private string $provider,
+        private AnalysisProviderMetadata $metadata,
 
         #[Autowire('%env(bool:AI_LOCAL_PROVIDER_ENABLED)%')]
         private bool $localEnabled,
@@ -27,10 +27,10 @@ final readonly class ConfiguredCandidateFitProvider implements CandidateFitProvi
 
     public function assess(CandidateFitInput $input): CandidateFitReport
     {
-        return match ($this->provider) {
+        return match ($this->metadata->provider(AnalysisKind::CandidateFit)) {
             'fake' => $this->fake->assess($input),
             'local' => $this->localProvider()->assess($input),
-            default => throw new \LogicException(sprintf('Unsupported AI provider "%s".', $this->provider)),
+            default => throw new \LogicException('Unsupported AI provider configuration.'),
         };
     }
 

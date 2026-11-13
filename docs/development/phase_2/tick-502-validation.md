@@ -14,7 +14,7 @@ Run the following command at least daily from the private deployment scheduler:
 docker compose exec -T app php bin/console app:ai:purge-expired-analysis --env=prod --no-debug
 ```
 
-It deletes request/result pairs whose 24-hour expiry has passed. The command is idempotent and safe to run more often.
+It deletes request/result pairs whose 24-hour expiry has passed and encrypted vacancy authoring drafts after their seven-day expiry. The command is idempotent and safe to run more often.
 
 ## Automated checks
 

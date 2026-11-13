@@ -21,5 +21,9 @@ return static function (ContainerConfigurator $containerConfigurator): void {
         ->factory(HttpClient::create(...))
         ->args([['timeout' => '%env(float:AI_LOCAL_TIMEOUT_SECONDS)%']]);
 
+    $services->set('app.ai.gliner_http_client', HttpClientInterface::class)
+        ->factory(HttpClient::create(...))
+        ->args([['timeout' => '%env(float:AI_GLINER_TIMEOUT_SECONDS)%']]);
+
     $services->load('CurlySanders\\JobApplicationTracker\\', __DIR__.'/../src/');
 };

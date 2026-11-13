@@ -35,8 +35,8 @@ final readonly class QueueAnalysisRequestHandler implements CommandHandler
         $ciphertext = $this->cipher->encrypt($plaintext);
         $fingerprint = $this->cipher->fingerprint($plaintext);
         $expiresAt = new \DateTimeImmutable('+24 hours');
-        $provider = $this->providerMetadata->provider();
-        $model = $this->providerMetadata->model();
+        $provider = $this->providerMetadata->provider($command->kind);
+        $model = $this->providerMetadata->model($command->kind);
 
         if (null === $command->requestId) {
             $request = new AnalysisRequest($user, $command->kind, $ciphertext, $fingerprint, $provider, $model, $expiresAt);

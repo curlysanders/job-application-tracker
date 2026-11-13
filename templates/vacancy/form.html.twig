@@ -6,11 +6,20 @@
 {% block content %}
     <section class="panel vacancy-form-panel">
         {{ form_start(form, {attr: {'data-controller': 'vacancy-authoring', 'data-vacancy-authoring-minimum-preferred-salary-value': minimumPreferredSalary ?? '', 'data-vacancy-authoring-minimum-preferred-salary-currency-value': minimumPreferredSalaryCurrency ?? 'EUR', 'data-vacancy-authoring-rates-value': exchangeRates|json_encode}}) }}
+        {% if draftId is defined and draftId is not empty %}<input type="hidden" name="draft" value="{{ draftId }}">{% endif %}
         <fieldset>
             <legend>Role and employer</legend>
             {{ form_row(form.title) }}
             {{ form_row(form.companyId) }}
             {{ form_row(form.recruiterId) }}
+            {% if form.vars.data.proposedCompanyName %}
+                <p class="form-help">Extracted company: {{ form.vars.data.proposedCompanyName }}</p>
+                {{ form_row(form.createProposedCompany) }}
+            {% else %}{% do form.createProposedCompany.setRendered() %}{% endif %}
+            {% if form.vars.data.proposedRecruiterAgencyName %}
+                <p class="form-help">Extracted recruiter agency: {{ form.vars.data.proposedRecruiterAgencyName }}</p>
+                {{ form_row(form.createProposedRecruiter) }}
+            {% else %}{% do form.createProposedRecruiter.setRendered() %}{% endif %}
             {{ form_row(form.location) }}
             {{ form_row(form.applicationSource) }}
             <div data-controller="source-url-collection">

@@ -22,6 +22,17 @@ final readonly class LocalOllamaInference
     ) {
     }
 
+    /** @return non-empty-string */
+    private function model(): string
+    {
+        $model = trim($this->model);
+        if ('' === $model) {
+            throw new \LogicException('The local AI model must be configured.');
+        }
+
+        return $model;
+    }
+
     /** @template T of object
      * @param class-string<T> $responseFormat
      *
@@ -37,10 +48,7 @@ final readonly class LocalOllamaInference
             throw new \RuntimeException('The local AI inference lock could not be acquired.');
         }
 
-        $model = trim($this->model);
-        if ('' === $model) {
-            throw new \LogicException('The local AI model must be configured.');
-        }
+        $model = $this->model();
         /* @var non-empty-string $model */
 
         try {
@@ -49,9 +57,7 @@ final readonly class LocalOllamaInference
                 Message::ofUser($input),
             ), [
                 'response_format' => $responseFormat,
-                'options' => ['num_ctx' => 2048],
-                'think' => false,
-            ])->asObject();
+            ] + $this->options())->asObject();
         } finally {
             $lock->release();
         }
@@ -61,5 +67,24 @@ final readonly class LocalOllamaInference
         }
 
         return $result;
+    }
+
+    /** @return array<string, int|bool> */
+    private function options(): array
+    {
+        $options = [
+            // Symfony's Ollama bridge places provider-specific options in
+            // Ollama's `options` object. Passing a nested `options` array
+            // would produce `options.options.num_ctx`, which Ollama ignores.
+            'num_ctx' => 2048,
+            // Bound generation so an invalid or repetitive response cannot
+            // consume the CPU budget intended for one vacancy extraction.
+            'num_predict' => 512,
+            // Stable decoding makes benchmark runs comparable and avoids
+            // sampling variation in canonical enum choices.
+            'temperature' => 0,
+        ];
+
+        return $options;
     }
 }

@@ -8,6 +8,7 @@ use CurlySanders\JobApplicationTracker\Domain\User\User;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\Vacancy;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\VacancyStatus;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\VacancyStatusHistory;
+use CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\DomCrawler\Crawler;
@@ -47,7 +48,7 @@ final class VacancyStatusWorkflowTest extends WebTestCase
         $vacancy = new Vacancy($user, 'Senior PHP Developer');
         $this->entityManager()->persist($vacancy);
         $this->entityManager()->flush();
-        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user));
+        $client->loginUser(new SecurityUser($user));
 
         $crawler = $client->request('GET', sprintf('/vacancies/%s/edit', $vacancy->id->toRfc4122()));
         self::assertSelectorTextContains('.vacancy-status-panel', 'Current status: Bookmarked');
@@ -84,7 +85,7 @@ final class VacancyStatusWorkflowTest extends WebTestCase
         $this->entityManager()->persist($ownedVacancy);
         $this->entityManager()->persist($vacancy);
         $this->entityManager()->flush();
-        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user));
+        $client->loginUser(new SecurityUser($user));
 
         $client->request('POST', sprintf('/vacancies/%s/status', $ownedVacancy->id->toRfc4122()), ['_token' => 'invalid', 'transition' => 'start_applying']);
         self::assertResponseStatusCodeSame(403);
@@ -124,7 +125,7 @@ final class VacancyStatusWorkflowTest extends WebTestCase
     private function createUser(string $email): User
     {
         $user = new User()->setEmail($email);
-        $user->setPassword($this->passwordHasher()->hashPassword(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user), 'SecurePassword1!'));
+        $user->setPassword($this->passwordHasher()->hashPassword(new SecurityUser($user), 'SecurePassword1!'));
         $this->entityManager()->persist($user);
         $this->entityManager()->flush();
 

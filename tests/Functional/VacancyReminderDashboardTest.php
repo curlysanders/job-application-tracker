@@ -7,6 +7,7 @@ namespace CurlySanders\JobApplicationTracker\Tests\Functional;
 use CurlySanders\JobApplicationTracker\Domain\User\User;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\Vacancy;
 use CurlySanders\JobApplicationTracker\Infrastructure\Persistence\Doctrine\IdentifierType;
+use CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -29,7 +30,7 @@ final class VacancyReminderDashboardTest extends WebTestCase
         );
         $this->vacancy($this->createUser('other-reminders@example.com'), 'Private vacancy', 'Private', new \DateTimeImmutable('yesterday 09:00'));
         $this->entityManager()->clear();
-        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user));
+        $client->loginUser(new SecurityUser($user));
 
         $client->request('GET', '/');
         self::assertResponseIsSuccessful();
@@ -63,7 +64,7 @@ final class VacancyReminderDashboardTest extends WebTestCase
     private function createUser(string $email): User
     {
         $user = new User()->setEmail($email);
-        $user->setPassword($this->passwordHasher()->hashPassword(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user), 'SecurePassword1!'));
+        $user->setPassword($this->passwordHasher()->hashPassword(new SecurityUser($user), 'SecurePassword1!'));
         $this->entityManager()->persist($user);
         $this->entityManager()->flush();
 

@@ -18,6 +18,10 @@ final class VacancyData
     public ?string $title = null;
     public ?string $companyId = null;
     public ?string $recruiterId = null;
+    public ?string $proposedCompanyName = null;
+    public ?string $proposedRecruiterAgencyName = null;
+    public bool $createProposedCompany = false;
+    public bool $createProposedRecruiter = false;
     #[Assert\Length(max: 255)]
     public ?string $location = null;
     public ?ApplicationSource $applicationSource = null;

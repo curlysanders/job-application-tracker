@@ -14,6 +14,7 @@ use CurlySanders\JobApplicationTracker\Domain\Vacancy\WorkMode;
 use CurlySanders\JobApplicationTracker\UI\Form\Model\VacancyData;
 use CurlySanders\JobApplicationTracker\UI\Form\TechStack\TechStackTagsType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
@@ -45,6 +46,8 @@ final class VacancyType extends AbstractType
             ->add('title', TextType::class, ['label' => 'Job title'])
             ->add('companyId', ChoiceType::class, ['required' => false, 'placeholder' => 'No company selected', 'label' => 'Company', 'choices' => $this->companyChoices($userId)])
             ->add('recruiterId', ChoiceType::class, ['required' => false, 'placeholder' => 'No recruiter selected', 'label' => 'Recruiter', 'choices' => $this->recruiterChoices($userId)])
+            ->add('createProposedCompany', CheckboxType::class, ['required' => false, 'label' => 'Create the extracted company when saving this vacancy'])
+            ->add('createProposedRecruiter', CheckboxType::class, ['required' => false, 'label' => 'Create the extracted recruiter agency when saving this vacancy'])
             ->add('location', TextType::class, ['required' => false, 'label' => 'Location'])
             ->add('applicationSource', EnumType::class, ['required' => false, 'placeholder' => 'Select source', 'label' => 'Application source', 'class' => ApplicationSource::class, 'choice_label' => static fn (ApplicationSource $source): string => str_replace('_', ' ', $source->value)
                     |> strtolower(...)

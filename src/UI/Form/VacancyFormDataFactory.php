@@ -5,11 +5,41 @@ declare(strict_types=1);
 namespace CurlySanders\JobApplicationTracker\UI\Form;
 
 use CurlySanders\JobApplicationTracker\Application\Vacancy\Command\SaveVacancy;
+use CurlySanders\JobApplicationTracker\Application\Vacancy\VacancyDraftData;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\Vacancy;
 use CurlySanders\JobApplicationTracker\UI\Form\Model\VacancyData;
 
 final class VacancyFormDataFactory
 {
+    public function fromDraft(VacancyDraftData $draft): VacancyData
+    {
+        $data = new VacancyData();
+        $data->title = $draft->title;
+        $data->companyId = $draft->companyId;
+        $data->recruiterId = $draft->recruiterId;
+        $data->proposedCompanyName = $draft->proposedCompanyName;
+        $data->proposedRecruiterAgencyName = $draft->proposedRecruiterAgencyName;
+        $data->location = $draft->location;
+        $data->contractType = $draft->contractType;
+        $data->datePosted = $draft->datePosted;
+        $data->deadline = $draft->deadline;
+        $data->fullText = $draft->fullText;
+        $data->requirements = $draft->requirements;
+        $data->responsibilities = $draft->responsibilities;
+        $data->preferredQualifications = $draft->preferredQualifications;
+        $data->aboutJob = $draft->aboutJob;
+        $data->aboutCompany = $draft->aboutCompany;
+        $data->compensationBenefits = $draft->compensationBenefits;
+        $data->minimumSalary = $draft->minimumSalary;
+        $data->maximumSalary = $draft->maximumSalary;
+        $data->currencyCode = $draft->currencyCode;
+        $data->workMode = $draft->workMode;
+        $data->hybridDetails = $draft->hybridDetails;
+        $data->techStacks->existingTags = $draft->existingTags;
+
+        return $data;
+    }
+
     public function fromVacancy(Vacancy $vacancy): VacancyData
     {
         $data = new VacancyData();
@@ -91,6 +121,8 @@ final class VacancyFormDataFactory
             $data->excitement,
             $this->existingSlugs($data),
             $newTechStacks,
+            $data->createProposedCompany ? $data->proposedCompanyName : null,
+            $data->createProposedRecruiter ? $data->proposedRecruiterAgencyName : null,
         );
     }
 

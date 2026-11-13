@@ -13,17 +13,17 @@ use Symfony\Component\Validator\Validation;
 final class VacancyCorpusEvaluator
 {
     /** @param list<array{id: string, text: string, expected: array<string, string|list<string>>}> $cases
-     * @return array{cases: int, valid: int, precision: float, recall: float, f1: float, medianLatencyMs: float, p95LatencyMs: float, maxLatencyMs: float, passed: bool}
+     * @return array{cases: int, valid: int, precision: float, recall: float, f1: float, criticalPrecision: float, criticalRecall: float, criticalF1: float, medianLatencyMs: float, p95LatencyMs: float, maxLatencyMs: float, passed: bool, criticalPassed: bool, errors: list<array{id: string, error: string}>}
      */
     public function evaluate(
         array $cases,
         VacancyExtractionProvider $provider,
     ): array {
-        $truePositives = 0;
-        $falsePositives = 0;
-        $falseNegatives = 0;
+        $score = ['truePositives' => 0, 'falsePositives' => 0, 'falseNegatives' => 0];
+        $criticalScore = ['truePositives' => 0, 'falsePositives' => 0, 'falseNegatives' => 0];
         $valid = 0;
         $latencies = [];
+        $errors = [];
 
         foreach ($cases as $case) {
             $startedAt = hrtime(true);
@@ -31,10 +31,15 @@ final class VacancyCorpusEvaluator
                 $result = $provider->extract(new VacancyExtractionInput($case['text']));
                 $latencies[] = (hrtime(true) - $startedAt) / 1_000_000;
                 if (0 !== Validation::createValidatorBuilder()->enableAttributeMapping()->getValidator()->validate($result)->count()) {
+                    $this->recordMissingExpected($case['expected'], $score);
+                    $this->recordMissingExpected($case['expected'], $criticalScore);
                     continue;
                 }
                 ++$valid;
-            } catch (\Throwable) {
+            } catch (\Throwable $exception) {
+                $errors[] = ['id' => $case['id'], 'error' => $exception->getMessage()];
+                $this->recordMissingExpected($case['expected'], $score);
+                $this->recordMissingExpected($case['expected'], $criticalScore);
                 continue;
             }
 
@@ -44,14 +49,17 @@ final class VacancyCorpusEvaluator
                 $actualValues = $actual[$field] ?? [];
                 foreach ($expectedValues as $value) {
                     if (in_array($this->normalize($value), $actualValues, true)) {
-                        ++$truePositives;
+                        ++$score['truePositives'];
+                        ++$criticalScore['truePositives'];
                     } else {
-                        ++$falseNegatives;
+                        ++$score['falseNegatives'];
+                        ++$criticalScore['falseNegatives'];
                     }
                 }
                 foreach ($actualValues as $value) {
                     if (!in_array($value, array_map($this->normalize(...), $expectedValues), true)) {
-                        ++$falsePositives;
+                        ++$score['falsePositives'];
+                        ++$criticalScore['falsePositives'];
                     }
                 }
             }
@@ -59,20 +67,42 @@ final class VacancyCorpusEvaluator
                 if (array_key_exists($field, $case['expected'])) {
                     continue;
                 }
-                $falsePositives += count($actualValues);
+                $score['falsePositives'] += count($actualValues);
             }
         }
 
-        $precision = 0 === $truePositives + $falsePositives ? 0.0 : (float) ($truePositives / ($truePositives + $falsePositives));
-        $recall = 0 === $truePositives + $falseNegatives ? 0.0 : (float) ($truePositives / ($truePositives + $falseNegatives));
-        $f1 = 0.0 === $precision + $recall ? 0.0 : 2 * $precision * $recall / ($precision + $recall);
+        ['precision' => $precision, 'recall' => $recall, 'f1' => $f1] = $this->metrics($score);
+        ['precision' => $criticalPrecision, 'recall' => $criticalRecall, 'f1' => $criticalF1] = $this->metrics($criticalScore);
         sort($latencies, SORT_NUMERIC);
         $latencyCount = count($latencies);
-        $medianLatencyMs = 0 === $latencyCount ? 0.0 : $latencies[(int) floor(($latencyCount - 1) / 2)];
-        $p95LatencyMs = 0 === $latencyCount ? 0.0 : $latencies[(int) floor(($latencyCount - 1) * 0.95)];
+        $medianLatencyMs = 0 === $latencyCount ? 0.0 : ($latencies[(int) floor(($latencyCount - 1) / 2)] + $latencies[(int) floor($latencyCount / 2)]) / 2;
+        $p95LatencyMs = 0 === $latencyCount ? 0.0 : $latencies[(int) ceil($latencyCount * 0.95) - 1];
         $maxLatencyMs = 0 === $latencyCount ? 0.0 : $latencies[$latencyCount - 1];
 
-        return ['cases' => count($cases), 'valid' => $valid, 'precision' => $precision, 'recall' => $recall, 'f1' => $f1, 'medianLatencyMs' => $medianLatencyMs, 'p95LatencyMs' => $p95LatencyMs, 'maxLatencyMs' => $maxLatencyMs, 'passed' => count($cases) === $valid && $f1 >= 0.90];
+        return ['cases' => count($cases), 'valid' => $valid, 'precision' => $precision, 'recall' => $recall, 'f1' => $f1, 'criticalPrecision' => $criticalPrecision, 'criticalRecall' => $criticalRecall, 'criticalF1' => $criticalF1, 'medianLatencyMs' => $medianLatencyMs, 'p95LatencyMs' => $p95LatencyMs, 'maxLatencyMs' => $maxLatencyMs, 'passed' => count($cases) === $valid && $f1 >= 0.90, 'criticalPassed' => count($cases) === $valid && $criticalF1 >= 0.90, 'errors' => $errors];
+    }
+
+    /** @param array<string, string|list<string>> $expected
+     * @param array{truePositives: int, falsePositives: int, falseNegatives: int} $score
+     */
+    private function recordMissingExpected(
+        array $expected,
+        array &$score,
+    ): void {
+        foreach ($expected as $values) {
+            $score['falseNegatives'] += is_array($values) ? count($values) : 1;
+        }
+    }
+
+    /** @param array{truePositives: int, falsePositives: int, falseNegatives: int} $score
+     * @return array{precision: float, recall: float, f1: float}
+     */
+    private function metrics(array $score): array
+    {
+        $precision = 0 === $score['truePositives'] + $score['falsePositives'] ? 0.0 : (float) ($score['truePositives'] / ($score['truePositives'] + $score['falsePositives']));
+        $recall = 0 === $score['truePositives'] + $score['falseNegatives'] ? 0.0 : (float) ($score['truePositives'] / ($score['truePositives'] + $score['falseNegatives']));
+
+        return ['precision' => $precision, 'recall' => $recall, 'f1' => 0.0 === $precision + $recall ? 0.0 : 2 * $precision * $recall / ($precision + $recall)];
     }
 
     /** @return array<string, list<string>> */
