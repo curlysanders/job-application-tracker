@@ -10,11 +10,16 @@ use CurlySanders\JobApplicationTracker\Domain\Vacancy\ContractType;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\CurrentIsoCurrencies;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\WorkMode;
 use Symfony\AI\Platform\StructuredOutput\ResponseFormatFactoryInterface;
+use Symfony\Component\DependencyInjection\Attribute\AsDecorator;
+use Symfony\Component\DependencyInjection\Attribute\AutowireDecorated;
 
+#[AsDecorator('ai.platform.response_format_factory')]
 final readonly class VacancyExtractionResponseFormatFactory implements ResponseFormatFactoryInterface
 {
-    public function __construct(private ResponseFormatFactoryInterface $inner)
-    {
+    public function __construct(
+        #[AutowireDecorated]
+        private ResponseFormatFactoryInterface $inner,
+    ) {
     }
 
     public function create(string $responseClass): array

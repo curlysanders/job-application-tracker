@@ -6,7 +6,7 @@ namespace CurlySanders\JobApplicationTracker\Domain\Ai;
 
 final class VacancyExtractionResult
 {
-    public const MAX_PROPOSALS = 9;
+    public const int MAX_PROPOSALS = 9;
 
     /** @var list<VacancyFieldProposal> */
     public array $proposals = [];

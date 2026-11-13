@@ -13,6 +13,7 @@ use CurlySanders\JobApplicationTracker\Application\Vacancy\VacancyRepository;
 use CurlySanders\JobApplicationTracker\Domain\Company\Company;
 use CurlySanders\JobApplicationTracker\Domain\Recruiter\Recruiter;
 use CurlySanders\JobApplicationTracker\Domain\TechStack\TechStack;
+use CurlySanders\JobApplicationTracker\Domain\User\User;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\SalaryRange;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\Vacancy;
 
@@ -73,7 +74,7 @@ final readonly class SaveVacancyHandler implements CommandHandler
         ?string $id,
         ?string $createName,
         string $userId,
-        \CurlySanders\JobApplicationTracker\Domain\User\User $user,
+        User $user,
     ): ?Company {
         if (null !== $id) {
             return $this->companies->findOwnedBy($id, $userId) ?? throw new \LogicException('The selected company no longer exists.');
@@ -93,7 +94,7 @@ final readonly class SaveVacancyHandler implements CommandHandler
         ?string $id,
         ?string $createName,
         string $userId,
-        \CurlySanders\JobApplicationTracker\Domain\User\User $user,
+        User $user,
     ): ?Recruiter {
         if (null !== $id) {
             return $this->recruiters->findOwnedBy($id, $userId) ?? throw new \LogicException('The selected recruiter no longer exists.');

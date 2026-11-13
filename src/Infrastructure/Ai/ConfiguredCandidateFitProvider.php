@@ -17,7 +17,7 @@ final readonly class ConfiguredCandidateFitProvider implements CandidateFitProvi
         private FakeCandidateFitProvider $fake,
         private LocalOllamaCandidateFitProvider $local,
 
-        #[Autowire('%env(string:AI_PROVIDER)%')]
+        #[Autowire('%env(string:AI_CANDIDATE_FIT_PROVIDER)%')]
         private string $provider,
 
         #[Autowire('%env(bool:AI_LOCAL_PROVIDER_ENABLED)%')]

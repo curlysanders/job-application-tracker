@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace CurlySanders\JobApplicationTracker\Tests\Functional;
 
 use CurlySanders\JobApplicationTracker\Domain\Company\Company;
+use CurlySanders\JobApplicationTracker\Domain\Contact\DirectContact;
 use CurlySanders\JobApplicationTracker\Domain\Recruiter\Recruiter;
 use CurlySanders\JobApplicationTracker\Domain\User\User;
+use CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 final class CompanyRecruiterManagementTest extends WebTestCase
@@ -26,7 +29,7 @@ final class CompanyRecruiterManagementTest extends WebTestCase
     {
         $client = self::createClient();
         $user = $this->createUser('company@example.com');
-        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user));
+        $client->loginUser(new SecurityUser($user));
         $crawler = $client->request('GET', '/companies/new');
         $client->request('POST', '/companies/new', ['company' => [
             '_token' => $this->csrfToken($crawler), 'name' => 'Acme BV', 'website' => 'https://acme.example', 'industry' => 'Software',
@@ -58,7 +61,7 @@ final class CompanyRecruiterManagementTest extends WebTestCase
     {
         $client = self::createClient();
         $user = $this->createUser('recruiter@example.com');
-        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user));
+        $client->loginUser(new SecurityUser($user));
         $crawler = $client->request('GET', '/recruiters/new');
         $client->request('POST', '/recruiters/new', ['recruiter' => ['_token' => $this->csrfToken($crawler), 'agencyName' => '', 'website' => 'not a url']]);
         self::assertResponseStatusCodeSame(422);
@@ -82,10 +85,10 @@ final class CompanyRecruiterManagementTest extends WebTestCase
     {
         $client = self::createClient();
         $user = $this->createUser('recruiter-edit@example.com');
-        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user));
+        $client->loginUser(new SecurityUser($user));
 
         $recruiter = new Recruiter($user, 'Talent Partners', 'https://talent.example');
-        $recruiter->replaceDirectContacts(new \CurlySanders\JobApplicationTracker\Domain\Contact\DirectContact('Lin Recruiter', 'lin@talent.example', null, null));
+        $recruiter->replaceDirectContacts(new DirectContact('Lin Recruiter', 'lin@talent.example', null, null));
         $this->entityManager()->persist($recruiter);
         $this->entityManager()->flush();
 
@@ -111,14 +114,14 @@ final class CompanyRecruiterManagementTest extends WebTestCase
         self::assertSame('https://talent-europe.example', $savedRecruiter->website);
         self::assertCount(1, $savedRecruiter->directContacts);
         $contact = iterator_to_array($savedRecruiter->directContacts)[0] ?? null;
-        self::assertInstanceOf(\CurlySanders\JobApplicationTracker\Domain\Contact\DirectContact::class, $contact);
+        self::assertInstanceOf(DirectContact::class, $contact);
         self::assertSame('Ada Recruiter', $contact->name);
     }
 
     public function testEditingAnUnknownRecruiterReturnsNotFound(): void
     {
         $client = self::createClient();
-        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($this->createUser('recruiter-not-found@example.com')));
+        $client->loginUser(new SecurityUser($this->createUser('recruiter-not-found@example.com')));
 
         $client->request('GET', '/recruiters/999999/edit');
 
@@ -135,7 +138,7 @@ final class CompanyRecruiterManagementTest extends WebTestCase
         $this->entityManager()->persist($company);
         $this->entityManager()->persist($recruiter);
         $this->entityManager()->flush();
-        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($otherUser));
+        $client->loginUser(new SecurityUser($otherUser));
 
         $client->request('GET', '/companies?q=Owner');
         self::assertResponseIsSuccessful();
@@ -149,7 +152,7 @@ final class CompanyRecruiterManagementTest extends WebTestCase
         self::assertResponseStatusCodeSame(404);
     }
 
-    private function csrfToken(\Symfony\Component\DomCrawler\Crawler $crawler): string
+    private function csrfToken(Crawler $crawler): string
     {
         $token = $crawler->filter('input[name$="[_token]"]')->attr('value');
         self::assertIsString($token);
@@ -160,7 +163,7 @@ final class CompanyRecruiterManagementTest extends WebTestCase
     private function createUser(string $email): User
     {
         $user = new User()->setEmail($email);
-        $user->setPassword($this->passwordHasher()->hashPassword(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user), 'SecurePassword1!'));
+        $user->setPassword($this->passwordHasher()->hashPassword(new SecurityUser($user), 'SecurePassword1!'));
         $this->entityManager()->persist($user);
         $this->entityManager()->flush();
 

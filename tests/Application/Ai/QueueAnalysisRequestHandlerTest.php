@@ -23,19 +23,19 @@ final class QueueAnalysisRequestHandlerTest extends TestCase
     {
         $user = new User();
         $users = $this->createMock(UserRepository::class);
-        $users->expects(self::once())->method('find')->with(self::USER_ID)->willReturn($user);
+        $users->expects($this->once())->method('find')->with(self::USER_ID)->willReturn($user);
         $requests = $this->createMock(AnalysisRequestRepository::class);
-        $requests->expects(self::once())->method('save')->with(self::isInstanceOf(AnalysisRequest::class));
+        $requests->expects($this->once())->method('save')->with(self::isInstanceOf(AnalysisRequest::class));
         $cipher = $this->createMock(AnalysisCipher::class);
-        $cipher->expects(self::once())->method('encrypt')->with(self::callback(static function (string $payload): bool {
+        $cipher->expects($this->once())->method('encrypt')->with(self::callback(static function (string $payload): bool {
             $decoded = json_decode($payload, true, 512, JSON_THROW_ON_ERROR);
 
             return ['vacancyText' => 'Private vacancy', 'resumeText' => 'Private resume'] === $decoded;
         }))->willReturn('encrypted-input');
-        $cipher->expects(self::once())->method('fingerprint')->willReturn(str_repeat('a', 64));
-        $metadata = self::createStub(AnalysisProviderMetadata::class);
-        $metadata->method('provider')->willReturn('fake');
-        $metadata->method('model')->willReturn('fake');
+        $cipher->expects($this->once())->method('fingerprint')->willReturn(str_repeat('a', 64));
+        $metadata = $this->createMock(AnalysisProviderMetadata::class);
+        $metadata->expects($this->once())->method('provider')->with(AnalysisKind::CandidateFit)->willReturn('fake');
+        $metadata->expects($this->once())->method('model')->with(AnalysisKind::CandidateFit)->willReturn('fake');
 
         $request = new QueueAnalysisRequestHandler($users, $requests, $cipher, $metadata)(new QueueAnalysisRequest(
             self::USER_ID,
@@ -53,9 +53,9 @@ final class QueueAnalysisRequestHandlerTest extends TestCase
         $users = self::createStub(UserRepository::class);
         $users->method('find')->willReturn(new User());
         $requests = $this->createMock(AnalysisRequestRepository::class);
-        $requests->expects(self::never())->method('save');
+        $requests->expects($this->never())->method('save');
         $cipher = $this->createMock(AnalysisCipher::class);
-        $cipher->expects(self::never())->method('encrypt');
+        $cipher->expects($this->never())->method('encrypt');
 
         $this->expectException(\InvalidArgumentException::class);
         new QueueAnalysisRequestHandler($users, $requests, $cipher, self::createStub(AnalysisProviderMetadata::class))(new QueueAnalysisRequest(self::USER_ID, AnalysisKind::CandidateFit, 'Private vacancy'));

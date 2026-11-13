@@ -23,7 +23,7 @@ final readonly class LocalOllamaInference
     }
 
     /** @return non-empty-string */
-    public function model(): string
+    private function model(): string
     {
         $model = trim($this->model);
         if ('' === $model) {
@@ -57,7 +57,7 @@ final readonly class LocalOllamaInference
                 Message::ofUser($input),
             ), [
                 'response_format' => $responseFormat,
-            ] + $this->options($model))->asObject();
+            ] + $this->options())->asObject();
         } finally {
             $lock->release();
         }
@@ -69,36 +69,8 @@ final readonly class LocalOllamaInference
         return $result;
     }
 
-    public function invokeText(string $input): string
-    {
-        $lock = $this->locks->createLock('ai.local-inference', 180.0);
-        if (!$lock->acquire(true)) {
-            throw new \RuntimeException('The local AI inference lock could not be acquired.');
-        }
-
-        $model = $this->model();
-        /* @var non-empty-string $model */
-
-        try {
-            $result = $this->platform->invoke($model, new MessageBag(Message::ofUser($input)), $this->options($model));
-
-            try {
-                return $result->asText();
-            } catch (\Throwable $exception) {
-                $response = $result->getRawResult()->getData();
-                if (isset($response['error']) && is_string($response['error'])) {
-                    throw new \RuntimeException(sprintf('Ollama rejected the local inference request: %s', $response['error']), previous: $exception);
-                }
-
-                throw $exception;
-            }
-        } finally {
-            $lock->release();
-        }
-    }
-
     /** @return array<string, int|bool> */
-    private function options(string $model): array
+    private function options(): array
     {
         $options = [
             // Symfony's Ollama bridge places provider-specific options in
@@ -112,13 +84,6 @@ final readonly class LocalOllamaInference
             // sampling variation in canonical enum choices.
             'temperature' => 0,
         ];
-        if (str_starts_with($model, 'granite4.2:')) {
-            // Granite 4.2 calls its template setting `enable_thinking`, but
-            // Ollama exposes the supported runtime control as this top-level
-            // API field. NuExtract rejects this option, so do not apply it to
-            // models that do not implement the thinking control.
-            $options['think'] = false;
-        }
 
         return $options;
     }

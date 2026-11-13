@@ -8,6 +8,7 @@ use CurlySanders\JobApplicationTracker\Application\Authentication\Command\Regist
 use CurlySanders\JobApplicationTracker\Application\Shared\Bus\CommandBus;
 use CurlySanders\JobApplicationTracker\Domain\User\User;
 use CurlySanders\JobApplicationTracker\Domain\User\UserRegistered;
+use CurlySanders\JobApplicationTracker\Infrastructure\Messaging\LingodaDomainEvent;
 use Doctrine\ORM\EntityManagerInterface;
 use Lingoda\DomainEventsBundle\Infra\Doctrine\Entity\OutboxRecord;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -33,7 +34,7 @@ final class AuthenticationBusTest extends KernelTestCase
         ]);
         self::assertInstanceOf(OutboxRecord::class, $outboxRecord);
         $event = $outboxRecord->getDomainEvent();
-        self::assertInstanceOf(\CurlySanders\JobApplicationTracker\Infrastructure\Messaging\LingodaDomainEvent::class, $event);
+        self::assertInstanceOf(LingodaDomainEvent::class, $event);
         $event = $event->event();
         self::assertInstanceOf(UserRegistered::class, $event);
         self::assertSame([], $event->changedProperties);

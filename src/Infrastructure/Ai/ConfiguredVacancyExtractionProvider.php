@@ -22,6 +22,8 @@ final readonly class ConfiguredVacancyExtractionProvider implements VacancyExtra
 
         #[Autowire('%env(bool:AI_LOCAL_PROVIDER_ENABLED)%')]
         private bool $localEnabled,
+
+        #[Autowire(service: Gliner2VacancyExtractionProvider::class)]
         private ?Gliner2VacancyExtractionProvider $gliner = null,
 
         #[Autowire('%env(bool:AI_GLINER_PROVIDER_ENABLED)%')]

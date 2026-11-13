@@ -4,10 +4,10 @@
 
 `VacancyExtractionProvider` and `CandidateFitProvider` are the only AI-facing
 application ports. Their inputs and validated result DTOs contain no Symfony AI,
-Ollama, HTTP, or model details. The default `AI_PROVIDER=fake` resolves both ports
+Ollama, HTTP, or model details. The defaults `AI_PROVIDER=fake` and `AI_CANDIDATE_FIT_PROVIDER=fake` resolve the respective ports
 to deterministic in-process fakes; CI therefore has no route to a real provider.
 
-Set `AI_PROVIDER=local` and `AI_LOCAL_PROVIDER_ENABLED=1` only after the private
+Set `AI_PROVIDER=local` for extraction or `AI_CANDIDATE_FIT_PROVIDER=local` for candidate fit, and set `AI_LOCAL_PROVIDER_ENABLED=1`, only after the private
 runtime admission benchmark has passed. The local adapter serializes both port
 operations through one `ai.local-inference` lock and invokes the selected model
 with `num_ctx=2048` and `num_predict=512`. The output cap prevents an invalid
@@ -41,6 +41,7 @@ because it failed the corpus gate below.
 
 ```dotenv
 AI_PROVIDER=local
+AI_CANDIDATE_FIT_PROVIDER=local
 AI_LOCAL_PROVIDER_ENABLED=1
 OLLAMA_HOST_URL=http://ollama:11434
 AI_LOCAL_TIMEOUT_SECONDS=300
@@ -177,11 +178,11 @@ also excluded: although its typed-extraction design is compelling, it remains
 closed beta and requires a separate source-available native SDK rather than the
 self-hosted Ollama stack.
 
-The dedicated adapter submits NuExtract's JSON template instead of the generic
+The experimental adapter submitted NuExtract's JSON template instead of the generic
 review DTO schema, maps only values that can be grounded in the pasted text,
 derives canonical contract/work-mode values from that evidence, and retains the
 existing duplicate-organization and result-validation guards. `think=false` is
-now restricted to Granite, because NuExtract rejects that Ollama option.
+was restricted to Granite, because NuExtract rejects that Ollama option. The rejected NuExtract adapter has since been removed.
 
 The text-only model load reached 2.332 GiB of the 2.441 GiB Ollama cap. With
 the app, worker, and database observed at 106.4 MiB, 54.66 MiB, and 9.168 MiB,
@@ -273,3 +274,5 @@ docker compose exec -T app composer tests
 docker compose exec -T app composer analyse
 docker compose exec -T app composer ci:php-cs-fixer
 ```
+
+Provider selection is independent: `AI_PROVIDER` selects vacancy extraction, while `AI_CANDIDATE_FIT_PROVIDER` selects candidate fit (`fake` or `local`). Existing installations that previously used `AI_PROVIDER=local` for candidate fit must explicitly set `AI_CANDIDATE_FIT_PROVIDER=local`; the default is `fake`. The local admission gate remains required.

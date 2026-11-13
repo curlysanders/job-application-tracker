@@ -8,6 +8,7 @@ use CurlySanders\JobApplicationTracker\Domain\Ai\CandidateFitInput;
 use CurlySanders\JobApplicationTracker\Domain\Ai\CandidateFitReport;
 use CurlySanders\JobApplicationTracker\Domain\Ai\VacancyExtractionInput;
 use CurlySanders\JobApplicationTracker\Domain\Ai\VacancyExtractionResult;
+use CurlySanders\JobApplicationTracker\Domain\Ai\VacancyFieldProposal;
 use CurlySanders\JobApplicationTracker\Infrastructure\Ai\ConfiguredCandidateFitProvider;
 use CurlySanders\JobApplicationTracker\Infrastructure\Ai\ConfiguredVacancyExtractionProvider;
 use CurlySanders\JobApplicationTracker\Infrastructure\Ai\FakeCandidateFitProvider;
@@ -15,8 +16,6 @@ use CurlySanders\JobApplicationTracker\Infrastructure\Ai\FakeVacancyExtractionPr
 use CurlySanders\JobApplicationTracker\Infrastructure\Ai\LocalOllamaCandidateFitProvider;
 use CurlySanders\JobApplicationTracker\Infrastructure\Ai\LocalOllamaInference;
 use CurlySanders\JobApplicationTracker\Infrastructure\Ai\LocalOllamaVacancyExtractionProvider;
-use CurlySanders\JobApplicationTracker\Infrastructure\Ai\NuExtractVacancyExtractionProvider;
-use CurlySanders\JobApplicationTracker\Infrastructure\Ai\NuExtractVacancyResponseMapper;
 use PHPUnit\Framework\TestCase;
 use Symfony\AI\Platform\Model;
 use Symfony\AI\Platform\ModelCatalog\FallbackModelCatalog;
@@ -27,7 +26,6 @@ use Symfony\AI\Platform\Result\InMemoryRawResult;
 use Symfony\AI\Platform\Result\ObjectResult;
 use Symfony\AI\Platform\Result\RawResultInterface;
 use Symfony\AI\Platform\Result\ResultInterface;
-use Symfony\AI\Platform\Result\TextResult;
 use Symfony\AI\Platform\ResultConverterInterface;
 use Symfony\AI\Platform\TokenUsage\TokenUsageExtractorInterface;
 use Symfony\Component\Lock\LockFactory;
@@ -40,7 +38,7 @@ final class LocalAiProviderTest extends TestCase
         $inference = new LocalOllamaInference($this->platform(new \stdClass()), new LockFactory(new FlockStore(sys_get_temp_dir())), ' ');
 
         $this->expectException(\LogicException::class);
-        $inference->model();
+        $inference->invoke('System', 'Input', VacancyExtractionResult::class);
     }
 
     public function testUnexpectedStructuredInferenceResultsAreRejected(): void
@@ -49,27 +47,6 @@ final class LocalAiProviderTest extends TestCase
 
         $this->expectException(\RuntimeException::class);
         $inference->invoke('System', 'Input', VacancyExtractionResult::class);
-    }
-
-    public function testNuExtractUsesTextInferenceAndGroundsTheResult(): void
-    {
-        $platform = $this->platform(new TextResult('{"title":"PHP developer","techStacks":["PHP"]}'));
-        $inference = new LocalOllamaInference($platform, new LockFactory(new FlockStore(sys_get_temp_dir())), 'hf.co/numind/NuExtract-2.0-2B-GGUF:Q4_K_M');
-        $provider = new NuExtractVacancyExtractionProvider($inference, new NuExtractVacancyResponseMapper());
-
-        self::assertTrue(NuExtractVacancyExtractionProvider::supports($inference->model()));
-        self::assertFalse(NuExtractVacancyExtractionProvider::supports('qwen3:0.6b'));
-        $result = $provider->extract(new VacancyExtractionInput('Acme seeks a PHP developer.'));
-
-        self::assertSame('PHP developer', $result->proposals[0]->value);
-        self::assertSame('PHP', $result->techStacks[0]->name);
-    }
-
-    public function testTheInferenceExposesTheConfiguredModelForAdapterSelection(): void
-    {
-        $inference = new LocalOllamaInference($this->platform(new VacancyExtractionResult()), new LockFactory(new FlockStore(sys_get_temp_dir())), ' hf.co/numind/NuExtract-2.0-2B-GGUF:Q4_K_M ');
-
-        self::assertSame('hf.co/numind/NuExtract-2.0-2B-GGUF:Q4_K_M', $inference->model());
     }
 
     public function testLocalProvidersUseStructuredResultsWithTheConfiguredModelAndContext(): void
@@ -123,31 +100,12 @@ final class LocalAiProviderTest extends TestCase
         $provider->extract(new VacancyExtractionInput('Vacancy'));
     }
 
-    public function testGraniteUsesOllamasSupportedNoThinkingControl(): void
-    {
-        $platform = $this->platform(new VacancyExtractionResult());
-        $inference = new LocalOllamaInference($platform, new LockFactory(new FlockStore(sys_get_temp_dir())), 'granite4.2:3b');
-
-        new LocalOllamaVacancyExtractionProvider($inference)->extract(new VacancyExtractionInput('Vacancy text'));
-
-        self::assertSame([
-            'model' => 'granite4.2:3b',
-            'options' => [
-                'response_format' => VacancyExtractionResult::class,
-                'num_ctx' => 2048,
-                'num_predict' => 512,
-                'temperature' => 0,
-                'think' => false,
-            ],
-        ], $platform->invocations[0]);
-    }
-
     public function testLocalExtractionRemovesARecruiterThatDuplicatesTheCompany(): void
     {
         $response = new VacancyExtractionResult();
         $response->proposals = [
-            new \CurlySanders\JobApplicationTracker\Domain\Ai\VacancyFieldProposal('companyName', 'Acme', 'Acme', 1.0),
-            new \CurlySanders\JobApplicationTracker\Domain\Ai\VacancyFieldProposal('recruiterAgencyName', ' acme ', 'acme', 1.0),
+            new VacancyFieldProposal('companyName', 'Acme', 'Acme', 1.0),
+            new VacancyFieldProposal('recruiterAgencyName', ' acme ', 'acme', 1.0),
         ];
         $provider = new LocalOllamaVacancyExtractionProvider(new LocalOllamaInference($this->platform($response), new LockFactory(new FlockStore(sys_get_temp_dir())), 'qwen3:1.7b'));
 

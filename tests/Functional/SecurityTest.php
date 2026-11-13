@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CurlySanders\JobApplicationTracker\Tests\Functional;
 
 use CurlySanders\JobApplicationTracker\Domain\User\User;
+use CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -82,7 +83,7 @@ final class SecurityTest extends WebTestCase
         self::assertInstanceOf(User::class, $user);
         self::assertSame('sander@example.com', $user->email);
         self::assertNotSame('SecurePassword1!', $user->getPassword());
-        self::assertTrue($this->passwordHasher()->isPasswordValid(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user), 'SecurePassword1!'));
+        self::assertTrue($this->passwordHasher()->isPasswordValid(new SecurityUser($user), 'SecurePassword1!'));
     }
 
     public function testRegistrationRejectsPasswordThatDoesNotMeetPolicy(): void
@@ -169,7 +170,7 @@ final class SecurityTest extends WebTestCase
     public function testAuthenticatedUserIsRedirectedAwayFromLogin(): void
     {
         $client = self::createClient();
-        $client->loginUser(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($this->createUser('already-authenticated@example.com')));
+        $client->loginUser(new SecurityUser($this->createUser('already-authenticated@example.com')));
 
         $client->request('GET', '/login');
 
@@ -180,7 +181,7 @@ final class SecurityTest extends WebTestCase
     {
         $user = new User()->setEmail($email);
         $passwordHasher = $this->passwordHasher();
-        $user->setPassword($passwordHasher->hashPassword(new \CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser($user), 'SecurePassword1!'));
+        $user->setPassword($passwordHasher->hashPassword(new SecurityUser($user), 'SecurePassword1!'));
 
         $entityManager = $this->entityManager();
         $entityManager->persist($user);

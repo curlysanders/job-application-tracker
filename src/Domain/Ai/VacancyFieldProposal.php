@@ -11,7 +11,7 @@ use CurlySanders\JobApplicationTracker\Domain\Vacancy\WorkMode;
 final class VacancyFieldProposal
 {
     /** @var list<string> */
-    public const ALLOWED_FIELDS = ['title', 'companyName', 'recruiterAgencyName', 'location', 'contractType', 'datePosted', 'deadline', 'minimumSalary', 'maximumSalary', 'currencyCode', 'workMode', 'hybridDetails', 'requirements', 'responsibilities', 'preferredQualifications', 'aboutJob', 'aboutCompany', 'compensationBenefits'];
+    public const array ALLOWED_FIELDS = ['title', 'companyName', 'recruiterAgencyName', 'location', 'contractType', 'datePosted', 'deadline', 'minimumSalary', 'maximumSalary', 'currencyCode', 'workMode', 'hybridDetails', 'requirements', 'responsibilities', 'preferredQualifications', 'aboutJob', 'aboutCompany', 'compensationBenefits'];
 
     /** @param scalar|list<scalar> $value */
     public function __construct(
