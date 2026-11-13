@@ -47,10 +47,8 @@ jobs:
           VERSION: ${{ steps.release.outputs.version }}
           REVISION: ${{ github.event.workflow_run.head_sha }}
         run: |
-          docker build --pull --file .docker/php/Dockerfile.prod --tag "$IMAGE:$VERSION" --tag "$IMAGE:sha-$REVISION" .
-          docker push "$IMAGE:$VERSION"
-          docker push "$IMAGE:sha-$REVISION"
-          digest=$(docker buildx imagetools inspect "$IMAGE:$VERSION" --format '{{.Manifest.Digest}}')
+          docker buildx build --pull --label "org.opencontainers.image.revision=$REVISION" --file .docker/php/Dockerfile.prod --tag "$IMAGE:$VERSION" --tag "$IMAGE:sha-$REVISION" --metadata-file "$RUNNER_TEMP/app-metadata.json" --push .
+          digest=$(jq -er '.["containerimage.digest"] | select(test("^sha256:[0-9a-f]{64}$"))' "$RUNNER_TEMP/app-metadata.json")
           printf 'image=%s@%s\n' "$IMAGE" "$digest" >> "$GITHUB_OUTPUT"
           printf 'digest=%s\n' "$digest" >> "$GITHUB_OUTPUT"
           printf 'Published `%s@%s`\n' "$IMAGE" "$digest" >> "$GITHUB_STEP_SUMMARY"
@@ -60,4 +58,25 @@ jobs:
         with:
           subject-name: ghcr.io/${{ github.repository }}
           subject-digest: ${{ steps.image.outputs.digest }}
+          push-to-registry: true
+
+      - name: Build and push GLiNER sidecar
+        id: gliner
+        env:
+          IMAGE: ghcr.io/${{ github.repository }}-gliner
+          VERSION: ${{ steps.release.outputs.version }}
+          REVISION: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          docker buildx build --pull --platform linux/amd64 --build-arg "SOURCE_REVISION=$REVISION" --file .docker/gliner2/Dockerfile --tag "$IMAGE:$VERSION" --tag "$IMAGE:sha-$REVISION" --metadata-file "$RUNNER_TEMP/gliner-metadata.json" --push .
+          digest=$(jq -er '.["containerimage.digest"] | select(test("^sha256:[0-9a-f]{64}$"))' "$RUNNER_TEMP/gliner-metadata.json")
+          model_revision=$(sed -n 's/^ARG GLINER_REVISION=//p' .docker/gliner2/Dockerfile)
+          [[ "$model_revision" =~ ^[0-9a-f]{40}$ ]]
+          printf 'digest=%s\n' "$digest" >> "$GITHUB_OUTPUT"
+          printf 'Published `%s@%s` from `%s`, model revision `%s`\n' "$IMAGE" "$digest" "$REVISION" "$model_revision" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Attest GLiNER sidecar provenance
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-name: ghcr.io/${{ github.repository }}-gliner
+          subject-digest: ${{ steps.gliner.outputs.digest }}
           push-to-registry: true
