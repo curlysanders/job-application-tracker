@@ -12,6 +12,26 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 final class StructuredOutputValidationTest extends KernelTestCase
 {
+    public function testProposalsRejectInvalidCanonicalValuesAndSourceSpans(): void
+    {
+        foreach ([
+            new VacancyFieldProposal('title', '', 'x', 1.0),
+            new VacancyFieldProposal('contractType', 'UNKNOWN', 'x', 1.0),
+            new VacancyFieldProposal('workMode', 'UNKNOWN', 'x', 1.0),
+            new VacancyFieldProposal('currencyCode', 'ZZZ', 'x', 1.0),
+            new VacancyFieldProposal('deadline', '2026-02-30', 'x', 1.0),
+            new VacancyFieldProposal('minimumSalary', '0', 'x', 1.0),
+            new VacancyFieldProposal('title', 'x', 'x', 1.0, 5, 2),
+        ] as $proposal) {
+            try {
+                $proposal->assertValid();
+                self::fail('An invalid extraction proposal was accepted.');
+            } catch (\InvalidArgumentException) {
+                self::addToAssertionCount(1);
+            }
+        }
+    }
+
     protected static function getKernelClass(): string
     {
         return Kernel::class;

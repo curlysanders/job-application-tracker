@@ -15,6 +15,8 @@ use CurlySanders\JobApplicationTracker\Infrastructure\Ai\FakeVacancyExtractionPr
 use CurlySanders\JobApplicationTracker\Infrastructure\Ai\LocalOllamaCandidateFitProvider;
 use CurlySanders\JobApplicationTracker\Infrastructure\Ai\LocalOllamaInference;
 use CurlySanders\JobApplicationTracker\Infrastructure\Ai\LocalOllamaVacancyExtractionProvider;
+use CurlySanders\JobApplicationTracker\Infrastructure\Ai\NuExtractVacancyExtractionProvider;
+use CurlySanders\JobApplicationTracker\Infrastructure\Ai\NuExtractVacancyResponseMapper;
 use PHPUnit\Framework\TestCase;
 use Symfony\AI\Platform\Model;
 use Symfony\AI\Platform\ModelCatalog\FallbackModelCatalog;
@@ -25,6 +27,7 @@ use Symfony\AI\Platform\Result\InMemoryRawResult;
 use Symfony\AI\Platform\Result\ObjectResult;
 use Symfony\AI\Platform\Result\RawResultInterface;
 use Symfony\AI\Platform\Result\ResultInterface;
+use Symfony\AI\Platform\Result\TextResult;
 use Symfony\AI\Platform\ResultConverterInterface;
 use Symfony\AI\Platform\TokenUsage\TokenUsageExtractorInterface;
 use Symfony\Component\Lock\LockFactory;
@@ -32,6 +35,36 @@ use Symfony\Component\Lock\Store\FlockStore;
 
 final class LocalAiProviderTest extends TestCase
 {
+    public function testAnEmptyLocalModelIsRejected(): void
+    {
+        $inference = new LocalOllamaInference($this->platform(new \stdClass()), new LockFactory(new FlockStore(sys_get_temp_dir())), ' ');
+
+        $this->expectException(\LogicException::class);
+        $inference->model();
+    }
+
+    public function testUnexpectedStructuredInferenceResultsAreRejected(): void
+    {
+        $inference = new LocalOllamaInference($this->platform(new \stdClass()), new LockFactory(new FlockStore(sys_get_temp_dir())), 'qwen3:0.6b');
+
+        $this->expectException(\RuntimeException::class);
+        $inference->invoke('System', 'Input', VacancyExtractionResult::class);
+    }
+
+    public function testNuExtractUsesTextInferenceAndGroundsTheResult(): void
+    {
+        $platform = $this->platform(new TextResult('{"title":"PHP developer","techStacks":["PHP"]}'));
+        $inference = new LocalOllamaInference($platform, new LockFactory(new FlockStore(sys_get_temp_dir())), 'hf.co/numind/NuExtract-2.0-2B-GGUF:Q4_K_M');
+        $provider = new NuExtractVacancyExtractionProvider($inference, new NuExtractVacancyResponseMapper());
+
+        self::assertTrue(NuExtractVacancyExtractionProvider::supports($inference->model()));
+        self::assertFalse(NuExtractVacancyExtractionProvider::supports('qwen3:0.6b'));
+        $result = $provider->extract(new VacancyExtractionInput('Acme seeks a PHP developer.'));
+
+        self::assertSame('PHP developer', $result->proposals[0]->value);
+        self::assertSame('PHP', $result->techStacks[0]->name);
+    }
+
     public function testTheInferenceExposesTheConfiguredModelForAdapterSelection(): void
     {
         $inference = new LocalOllamaInference($this->platform(new VacancyExtractionResult()), new LockFactory(new FlockStore(sys_get_temp_dir())), ' hf.co/numind/NuExtract-2.0-2B-GGUF:Q4_K_M ');
@@ -162,7 +195,7 @@ final class RecordingPlatform implements PlatformInterface
                 RawResultInterface $result,
                 array $options = [],
             ): ResultInterface {
-                return new ObjectResult($this->response);
+                return $this->response instanceof ResultInterface ? $this->response : new ObjectResult($this->response);
             }
 
             public function getTokenUsageExtractor(): ?TokenUsageExtractorInterface
