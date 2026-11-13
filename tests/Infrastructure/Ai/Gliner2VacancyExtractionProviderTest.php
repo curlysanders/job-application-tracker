@@ -46,6 +46,29 @@ final class Gliner2VacancyExtractionProviderTest extends TestCase
         self::assertNotNull($result->proposals[0]->sourceStart);
     }
 
+    public function testSalaryEvidenceUsesTheMatchedRangeEvenWhenValuesAppearEarlier(): void
+    {
+        $text = 'München: 4500 applicants and a € benefit. Salary €4500 to €6000.';
+        $result = new Gliner2VacancyResponseMapper()->map([], $text);
+        $byField = [];
+        foreach ($result->proposals as $proposal) {
+            $byField[$proposal->field] = $proposal;
+        }
+
+        $minimumOffset = mb_strpos($text, '€4500');
+        $maximumOffset = mb_strpos($text, '€6000');
+        self::assertNotFalse($minimumOffset);
+        self::assertNotFalse($maximumOffset);
+        self::assertSame($minimumOffset + 1, $byField['minimumSalary']->sourceStart);
+        self::assertSame($maximumOffset + 1, $byField['maximumSalary']->sourceStart);
+        self::assertSame($minimumOffset, $byField['currencyCode']->sourceStart);
+        foreach ($byField as $proposal) {
+            self::assertNotNull($proposal->sourceStart);
+            self::assertNotNull($proposal->sourceEnd);
+            self::assertSame($proposal->excerpt, mb_substr($text, $proposal->sourceStart, $proposal->sourceEnd - $proposal->sourceStart));
+        }
+    }
+
     public function testItRejectsForgedUnicodeCharacterOffsets(): void
     {
         $text = 'München zoekt een developer.';

@@ -17,6 +17,7 @@ final readonly class ProcessAnalysisRequest
         private VacancyExtractionProvider $vacancyExtraction,
         private CandidateFitProvider $candidateFit,
         private LoggerInterface $logger,
+        private AnalysisProviderMetadata $metadata,
     ) {
     }
 
@@ -30,6 +31,9 @@ final readonly class ProcessAnalysisRequest
         }
 
         try {
+            if ($request->provider !== $this->metadata->provider($request->kind) || $request->model !== $this->metadata->model($request->kind)) {
+                throw new \LogicException('The configured AI provider or model changed after this request was queued.');
+            }
             $payload = $this->decodePayload($this->cipher->decrypt($request->inputCiphertext));
             $result = match ($request->kind) {
                 AnalysisKind::VacancyExtraction => $this->vacancyExtraction->extract($this->vacancyExtractionInput($payload)),

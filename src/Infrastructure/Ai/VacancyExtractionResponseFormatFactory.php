@@ -6,6 +6,7 @@ namespace CurlySanders\JobApplicationTracker\Infrastructure\Ai;
 
 use CurlySanders\JobApplicationTracker\Domain\Ai\VacancyExtractionResult;
 use CurlySanders\JobApplicationTracker\Domain\Ai\VacancyFieldProposal;
+use CurlySanders\JobApplicationTracker\Domain\Ai\VacancyFieldValue;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\ContractType;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\CurrentIsoCurrencies;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\WorkMode;
@@ -94,7 +95,7 @@ final readonly class VacancyExtractionResponseFormatFactory implements ResponseF
             'workMode' => ['type' => 'string', 'enum' => array_map(static fn (WorkMode $mode): string => $mode->value, WorkMode::cases())],
             'currencyCode' => ['type' => 'string', 'enum' => array_map(static fn ($currency): string => $currency->code, CurrentIsoCurrencies::all())],
             'datePosted', 'deadline' => ['type' => 'string', 'pattern' => '^\\d{4}-\\d{2}-\\d{2}$'],
-            'minimumSalary', 'maximumSalary' => ['type' => 'string', 'pattern' => '^(?!0+(?:\\.0+)?$)\\d+(?:\\.\\d{1,2})?$'],
+            'minimumSalary', 'maximumSalary' => ['type' => 'string', 'pattern' => substr(VacancyFieldValue::POSITIVE_DECIMAL_PATTERN, 1, -1)],
             'title', 'companyName', 'recruiterAgencyName', 'location' => ['type' => 'string', 'minLength' => 1, 'maxLength' => 255],
             default => ['type' => 'string', 'minLength' => 1, 'maxLength' => 10000],
         };

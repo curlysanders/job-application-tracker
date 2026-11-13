@@ -16,6 +16,8 @@ use CurlySanders\JobApplicationTracker\Domain\Ai\CandidateFitReport;
 use CurlySanders\JobApplicationTracker\Domain\Ai\VacancyExtractionInput;
 use CurlySanders\JobApplicationTracker\Domain\Ai\VacancyExtractionResult;
 use CurlySanders\JobApplicationTracker\Domain\User\User;
+use CurlySanders\JobApplicationTracker\Infrastructure\Ai\ConfiguredAnalysisProviderMetadata;
+use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -92,7 +94,7 @@ final class ProcessAnalysisRequestTest extends TestCase
         $provider = new class implements VacancyExtractionProvider {
             public function extract(VacancyExtractionInput $input): VacancyExtractionResult
             {
-                \PHPUnit\Framework\Assert::assertSame('Private vacancy text', $input->vacancyText);
+                Assert::assertSame('Private vacancy text', $input->vacancyText);
 
                 return new VacancyExtractionResult();
             }
@@ -103,7 +105,7 @@ final class ProcessAnalysisRequestTest extends TestCase
             {
                 throw new \LogicException('Candidate fit must not run.');
             }
-        }, new NullLogger())($request->id->toRfc4122(), self::FINGERPRINT);
+        }, new NullLogger(), new ConfiguredAnalysisProviderMetadata('fake', 'fake', ''))($request->id->toRfc4122(), self::FINGERPRINT);
 
         self::assertTrue($repository->completed);
     }
@@ -112,11 +114,11 @@ final class ProcessAnalysisRequestTest extends TestCase
     {
         $request = new AnalysisRequest(new User(), AnalysisKind::VacancyExtraction, 'ciphertext', self::FINGERPRINT, 'fake', 'fake', new \DateTimeImmutable('+24 hours'));
         $repository = $this->createMock(AnalysisRequestRepository::class);
-        $repository->expects(self::once())->method('find')->willReturn($request);
-        $repository->expects(self::once())->method('fail')->with($request->id->toRfc4122(), self::FINGERPRINT);
-        $repository->expects(self::never())->method('complete');
+        $repository->expects($this->once())->method('find')->willReturn($request);
+        $repository->expects($this->once())->method('fail')->with($request->id->toRfc4122(), self::FINGERPRINT);
+        $repository->expects($this->never())->method('complete');
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('warning')->with('AI analysis provider failed.', [
+        $logger->expects($this->once())->method('warning')->with('AI analysis provider failed.', [
             'analysis_request_id' => $request->id->toRfc4122(),
             'input_fingerprint' => self::FINGERPRINT,
         ]);
@@ -146,21 +148,21 @@ final class ProcessAnalysisRequestTest extends TestCase
             {
                 throw new \LogicException('Candidate fit must not run.');
             }
-        }, $logger)($request->id->toRfc4122(), self::FINGERPRINT);
+        }, $logger, new ConfiguredAnalysisProviderMetadata('fake', 'fake', ''))($request->id->toRfc4122(), self::FINGERPRINT);
     }
 
     public function testProcessesCandidateFitWithBothPrivateInputs(): void
     {
         $request = new AnalysisRequest(new User(), AnalysisKind::CandidateFit, 'ciphertext', self::FINGERPRINT, 'fake', 'fake', new \DateTimeImmutable('+24 hours'));
         $repository = $this->createMock(AnalysisRequestRepository::class);
-        $repository->expects(self::once())->method('find')->with($request->id->toRfc4122())->willReturn($request);
-        $repository->expects(self::once())->method('complete')->with(
+        $repository->expects($this->once())->method('find')->with($request->id->toRfc4122())->willReturn($request);
+        $repository->expects($this->once())->method('complete')->with(
             $request->id->toRfc4122(),
             self::FINGERPRINT,
             'encrypted-result',
             str_repeat('f', 64),
         )->willReturn(true);
-        $repository->expects(self::never())->method('fail');
+        $repository->expects($this->never())->method('fail');
 
         new ProcessAnalysisRequest($repository, new class implements AnalysisCipher {
             public function encrypt(string $plaintext): string
@@ -180,22 +182,37 @@ final class ProcessAnalysisRequestTest extends TestCase
         }, self::createStub(VacancyExtractionProvider::class), new class implements CandidateFitProvider {
             public function assess(CandidateFitInput $input): CandidateFitReport
             {
-                \PHPUnit\Framework\Assert::assertSame('Private vacancy text', $input->vacancyText);
-                \PHPUnit\Framework\Assert::assertSame('Private resume text', $input->resumeText);
+                Assert::assertSame('Private vacancy text', $input->vacancyText);
+                Assert::assertSame('Private resume text', $input->resumeText);
 
                 return new CandidateFitReport();
             }
-        }, new NullLogger())($request->id->toRfc4122(), self::FINGERPRINT);
+        }, new NullLogger(), new ConfiguredAnalysisProviderMetadata('fake', 'fake', ''))($request->id->toRfc4122(), self::FINGERPRINT);
+    }
+
+    public function testFailsWithoutInvokingAProviderWhenTheConfigurationChanged(): void
+    {
+        $request = new AnalysisRequest(new User(), AnalysisKind::VacancyExtraction, 'ciphertext', self::FINGERPRINT, 'gliner', 'fastino/gliner2.5-multi-v1', new \DateTimeImmutable('+24 hours'));
+        $repository = $this->createMock(AnalysisRequestRepository::class);
+        $repository->method('find')->willReturn($request);
+        $repository->expects($this->once())->method('fail')->with($request->id->toRfc4122(), self::FINGERPRINT);
+        $repository->expects($this->never())->method('complete');
+        $cipher = $this->createMock(AnalysisCipher::class);
+        $cipher->expects($this->never())->method('decrypt');
+        $provider = $this->createMock(VacancyExtractionProvider::class);
+        $provider->expects($this->never())->method('extract');
+
+        new ProcessAnalysisRequest($repository, $cipher, $provider, self::createStub(CandidateFitProvider::class), new NullLogger(), new ConfiguredAnalysisProviderMetadata('fake', 'fake', ''))($request->id->toRfc4122(), self::FINGERPRINT);
     }
 
     public function testIgnoresAStaleDeliveryBeforeDecryptingTheInput(): void
     {
         $repository = $this->createMock(AnalysisRequestRepository::class);
-        $repository->expects(self::once())->method('find')->with('missing-request')->willReturn(null);
-        $repository->expects(self::never())->method('fail');
+        $repository->expects($this->once())->method('find')->with('missing-request')->willReturn(null);
+        $repository->expects($this->never())->method('fail');
         $cipher = $this->createMock(AnalysisCipher::class);
-        $cipher->expects(self::never())->method('decrypt');
+        $cipher->expects($this->never())->method('decrypt');
 
-        new ProcessAnalysisRequest($repository, $cipher, self::createStub(VacancyExtractionProvider::class), self::createStub(CandidateFitProvider::class), new NullLogger())('missing-request', self::FINGERPRINT);
+        new ProcessAnalysisRequest($repository, $cipher, self::createStub(VacancyExtractionProvider::class), self::createStub(CandidateFitProvider::class), new NullLogger(), new ConfiguredAnalysisProviderMetadata('fake', 'fake', ''))('missing-request', self::FINGERPRINT);
     }
 }

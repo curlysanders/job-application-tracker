@@ -6,6 +6,9 @@ namespace CurlySanders\JobApplicationTracker\Tests\Application\Ai;
 
 use CurlySanders\JobApplicationTracker\Application\Ai\AnalysisCipher;
 use CurlySanders\JobApplicationTracker\Application\Ai\ReviewProposal;
+use CurlySanders\JobApplicationTracker\Application\Ai\StandardTechnologyResolver;
+use CurlySanders\JobApplicationTracker\Application\Ai\VacancyExtractionDraftBuilder;
+use CurlySanders\JobApplicationTracker\Application\Ai\VacancyExtractionEvidenceValidator;
 use CurlySanders\JobApplicationTracker\Application\Ai\VacancyExtractionReview;
 use CurlySanders\JobApplicationTracker\Application\Ai\VacancyExtractionReviewService;
 use CurlySanders\JobApplicationTracker\Application\Company\CompanyRepository;
@@ -45,7 +48,7 @@ final class VacancyExtractionReviewServiceTest extends TestCase
                     : '{"proposals":[{"field":"datePosted","value":"2026-12-01","excerpt":"2026-12-01","confidence":1},{"field":"deadline","value":"2026-02-30","excerpt":"2026-02-30","confidence":1},{"field":"currencyCode","value":"EUR","excerpt":"€","confidence":1},{"field":"minimumSalary","value":"4500","excerpt":"4500","confidence":1},{"field":"maximumSalary","value":"0","excerpt":"0","confidence":1},{"field":"workMode","value":"HYBRID","excerpt":"hybrid","confidence":1}]}';
             }
         };
-        $service = new VacancyExtractionReviewService($cipher, self::createStub(TechStackRepository::class), self::createStub(CompanyRepository::class), self::createStub(RecruiterRepository::class));
+        $service = new VacancyExtractionReviewService($cipher, new VacancyExtractionEvidenceValidator(), new StandardTechnologyResolver(self::createStub(TechStackRepository::class)));
         $review = $service->review($request);
 
         self::assertArrayHasKey('datePosted', $review->fields);
@@ -65,7 +68,7 @@ final class VacancyExtractionReviewServiceTest extends TestCase
         $companies->expects(self::once())->method('searchOwnedBy')->with($owner->id->toRfc4122(), 'Acme')->willReturn([$company]);
         $recruiters = $this->createMock(RecruiterRepository::class);
         $recruiters->expects(self::once())->method('searchOwnedBy')->with($owner->id->toRfc4122(), 'Talent Partners')->willReturn([$recruiter]);
-        $service = new VacancyExtractionReviewService(self::createStub(AnalysisCipher::class), self::createStub(TechStackRepository::class), $companies, $recruiters);
+        $service = new VacancyExtractionDraftBuilder(new StandardTechnologyResolver(self::createStub(TechStackRepository::class)), $companies, $recruiters);
         $review = new VacancyExtractionReview('Acme Talent Partners', [], [], [new ReviewProposal('a', 'companyName', 'Acme', 'Acme', 1.0)], [new ReviewProposal('b', 'recruiterAgencyName', 'Talent Partners', 'Talent Partners', 1.0)]);
         $draft = $service->vacancyData($review, [], []);
 
@@ -89,7 +92,7 @@ final class VacancyExtractionReviewServiceTest extends TestCase
             $fields[$field] = [new ReviewProposal($field, $field, $value, $value, 1.0)];
             $selected[$field] = $field;
         }
-        $service = new VacancyExtractionReviewService(self::createStub(AnalysisCipher::class), self::createStub(TechStackRepository::class), self::createStub(CompanyRepository::class), self::createStub(RecruiterRepository::class));
+        $service = new VacancyExtractionDraftBuilder(new StandardTechnologyResolver(self::createStub(TechStackRepository::class)), self::createStub(CompanyRepository::class), self::createStub(RecruiterRepository::class));
         $draft = $service->vacancyData(new VacancyExtractionReview('Original text', $fields, [], [], []), $selected, []);
 
         self::assertSame('Original text', $draft->fullText);
@@ -146,7 +149,7 @@ final class VacancyExtractionReviewServiceTest extends TestCase
             }
         };
 
-        $service = new VacancyExtractionReviewService($cipher, $repository, self::createStub(CompanyRepository::class), self::createStub(RecruiterRepository::class));
+        $service = new VacancyExtractionReviewService($cipher, new VacancyExtractionEvidenceValidator(), $technologies = new StandardTechnologyResolver($repository));
         $review = $service->review($request);
 
         self::assertCount(1, $review->fields['title']);
@@ -157,7 +160,8 @@ final class VacancyExtractionReviewServiceTest extends TestCase
         self::assertArrayNotHasKey('requirements', $review->fields);
         self::assertCount(1, $review->techStacks);
 
-        $data = $service->vacancyData($review, [
+        $builder = new VacancyExtractionDraftBuilder($technologies, self::createStub(CompanyRepository::class), self::createStub(RecruiterRepository::class));
+        $data = $builder->vacancyData($review, [
             'title' => $review->fields['title'][0]->key,
             'contractType' => $review->fields['contractType'][0]->key,
         ], [$review->techStacks[0]->key]);
@@ -171,7 +175,7 @@ final class VacancyExtractionReviewServiceTest extends TestCase
     public function testItRejectsForgedProposalSelections(): void
     {
         $review = new VacancyExtractionReview('text', [], [], [], []);
-        $service = new VacancyExtractionReviewService(self::createStub(AnalysisCipher::class), self::createStub(TechStackRepository::class), self::createStub(CompanyRepository::class), self::createStub(RecruiterRepository::class));
+        $service = new VacancyExtractionDraftBuilder(new StandardTechnologyResolver(self::createStub(TechStackRepository::class)), self::createStub(CompanyRepository::class), self::createStub(RecruiterRepository::class));
 
         $this->expectException(\InvalidArgumentException::class);
         $service->vacancyData($review, ['title' => 'forged'], []);
@@ -180,7 +184,7 @@ final class VacancyExtractionReviewServiceTest extends TestCase
     public function testItRejectsForgedTechnologySelections(): void
     {
         $review = new VacancyExtractionReview('text', [], [], [], []);
-        $service = new VacancyExtractionReviewService(self::createStub(AnalysisCipher::class), self::createStub(TechStackRepository::class), self::createStub(CompanyRepository::class), self::createStub(RecruiterRepository::class));
+        $service = new VacancyExtractionDraftBuilder(new StandardTechnologyResolver(self::createStub(TechStackRepository::class)), self::createStub(CompanyRepository::class), self::createStub(RecruiterRepository::class));
 
         $this->expectException(\InvalidArgumentException::class);
         $service->vacancyData($review, [], ['forged']);
@@ -208,7 +212,7 @@ final class VacancyExtractionReviewServiceTest extends TestCase
                 return str_repeat('c', 64);
             }
         };
-        $service = new VacancyExtractionReviewService($cipher, self::createStub(TechStackRepository::class), self::createStub(CompanyRepository::class), self::createStub(RecruiterRepository::class));
+        $service = new VacancyExtractionReviewService($cipher, new VacancyExtractionEvidenceValidator(), new StandardTechnologyResolver(self::createStub(TechStackRepository::class)));
 
         $review = $service->review($request);
 
@@ -240,7 +244,7 @@ final class VacancyExtractionReviewServiceTest extends TestCase
                 return str_repeat('c', 64);
             }
         };
-        $service = new VacancyExtractionReviewService($cipher, self::createStub(TechStackRepository::class), self::createStub(CompanyRepository::class), self::createStub(RecruiterRepository::class));
+        $service = new VacancyExtractionReviewService($cipher, new VacancyExtractionEvidenceValidator(), new StandardTechnologyResolver(self::createStub(TechStackRepository::class)));
 
         $proposal = $service->review($request)->fields['title'][0];
 

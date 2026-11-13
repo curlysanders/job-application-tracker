@@ -6,6 +6,7 @@ namespace CurlySanders\JobApplicationTracker\UI\Controller\Vacancy;
 
 use CurlySanders\JobApplicationTracker\Application\Ai\AnalysisRequestRepository;
 use CurlySanders\JobApplicationTracker\Application\Ai\VacancyAuthoringDraftService;
+use CurlySanders\JobApplicationTracker\Application\Ai\VacancyExtractionDraftBuilder;
 use CurlySanders\JobApplicationTracker\Application\Ai\VacancyExtractionReviewService;
 use CurlySanders\JobApplicationTracker\Domain\Ai\AnalysisKind;
 use CurlySanders\JobApplicationTracker\Domain\Ai\AnalysisState;
@@ -30,6 +31,7 @@ final readonly class ReviewVacancyExtractionController
         private Security $security,
         private AnalysisRequestRepository $requests,
         private VacancyExtractionReviewService $reviews,
+        private VacancyExtractionDraftBuilder $draftBuilder,
         private VacancyAuthoringDraftService $drafts,
         private CsrfTokenManagerInterface $csrf,
         private Environment $twig,
@@ -66,8 +68,8 @@ final readonly class ReviewVacancyExtractionController
                 }
                 $selectedTechStacks[] = $key;
             }
-            $data = $this->reviews->vacancyData($review, $selectedFields, $selectedTechStacks);
-            $this->reviews->applyOrganizationCandidates($data, $review, $user->id->toRfc4122());
+            $data = $this->draftBuilder->vacancyData($review, $selectedFields, $selectedTechStacks);
+            $this->draftBuilder->applyOrganizationCandidates($data, $review, $user->id->toRfc4122());
             $draft = $this->drafts->create($user, $data);
 
             return new RedirectResponse($this->urls->generate('app_vacancy_create', ['draft' => $draft->id->toRfc4122()]));

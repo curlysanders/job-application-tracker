@@ -9,6 +9,7 @@ use CurlySanders\JobApplicationTracker\Domain\Ai\CandidateFitReport;
 use CurlySanders\JobApplicationTracker\Domain\Ai\VacancyExtractionInput;
 use CurlySanders\JobApplicationTracker\Domain\Ai\VacancyExtractionResult;
 use CurlySanders\JobApplicationTracker\Domain\Ai\VacancyFieldProposal;
+use CurlySanders\JobApplicationTracker\Infrastructure\Ai\ConfiguredAnalysisProviderMetadata;
 use CurlySanders\JobApplicationTracker\Infrastructure\Ai\ConfiguredCandidateFitProvider;
 use CurlySanders\JobApplicationTracker\Infrastructure\Ai\ConfiguredVacancyExtractionProvider;
 use CurlySanders\JobApplicationTracker\Infrastructure\Ai\FakeCandidateFitProvider;
@@ -79,14 +80,14 @@ final class LocalAiProviderTest extends TestCase
         $localExtraction = new LocalOllamaVacancyExtractionProvider($inference);
         $localFit = new LocalOllamaCandidateFitProvider($inference);
 
-        $extractionProvider = new ConfiguredVacancyExtractionProvider($fakeExtraction, $localExtraction, 'fake', false);
-        $fitProvider = new ConfiguredCandidateFitProvider($fakeFit, $localFit, 'fake', false);
+        $extractionProvider = new ConfiguredVacancyExtractionProvider($fakeExtraction, $localExtraction, new ConfiguredAnalysisProviderMetadata('fake', 'fake', ''), false);
+        $fitProvider = new ConfiguredCandidateFitProvider($fakeFit, $localFit, new ConfiguredAnalysisProviderMetadata('fake', 'fake', ''), false);
         $extractionProvider->extract(new VacancyExtractionInput('Vacancy'));
         $fitProvider->assess(new CandidateFitInput('Vacancy', 'Resume'));
         self::assertSame(1, $fakeExtraction->invocations());
         self::assertSame(1, $fakeFit->invocations());
 
-        $disabled = new ConfiguredVacancyExtractionProvider($fakeExtraction, $localExtraction, 'local', false);
+        $disabled = new ConfiguredVacancyExtractionProvider($fakeExtraction, $localExtraction, new ConfiguredAnalysisProviderMetadata('local', 'fake', 'model'), false);
         $this->expectException(\LogicException::class);
         $disabled->extract(new VacancyExtractionInput('Vacancy'));
     }
@@ -94,7 +95,7 @@ final class LocalAiProviderTest extends TestCase
     public function testConfiguredExtractionFailsClosedForDisabledGlinerInference(): void
     {
         $inference = new LocalOllamaInference($this->platform(new VacancyExtractionResult()), new LockFactory(new FlockStore(sys_get_temp_dir())), 'qwen3:0.6b');
-        $provider = new ConfiguredVacancyExtractionProvider(new FakeVacancyExtractionProvider(), new LocalOllamaVacancyExtractionProvider($inference), 'gliner', false);
+        $provider = new ConfiguredVacancyExtractionProvider(new FakeVacancyExtractionProvider(), new LocalOllamaVacancyExtractionProvider($inference), new ConfiguredAnalysisProviderMetadata('gliner', 'fake', ''), false);
 
         $this->expectException(\LogicException::class);
         $provider->extract(new VacancyExtractionInput('Vacancy'));

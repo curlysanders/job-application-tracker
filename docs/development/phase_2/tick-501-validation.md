@@ -276,3 +276,5 @@ docker compose exec -T app composer ci:php-cs-fixer
 ```
 
 Provider selection is independent: `AI_PROVIDER` selects vacancy extraction, while `AI_CANDIDATE_FIT_PROVIDER` selects candidate fit (`fake` or `local`). Existing installations that previously used `AI_PROVIDER=local` for candidate fit must explicitly set `AI_CANDIDATE_FIT_PROVIDER=local`; the default is `fake`. The local admission gate remains required.
+
+Queued analysis requests retain their provider and model metadata. If configuration changes before processing, the request fails without invoking another provider; submit it again under the new configuration.

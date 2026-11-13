@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CurlySanders\JobApplicationTracker\Infrastructure\Ai;
 
 use CurlySanders\JobApplicationTracker\Application\Ai\VacancyExtractionProvider;
+use CurlySanders\JobApplicationTracker\Domain\Ai\OrganizationName;
 use CurlySanders\JobApplicationTracker\Domain\Ai\VacancyExtractionInput;
 use CurlySanders\JobApplicationTracker\Domain\Ai\VacancyExtractionResult;
 use CurlySanders\JobApplicationTracker\Domain\Ai\VacancyFieldProposal;
@@ -43,7 +44,7 @@ final readonly class LocalOllamaVacancyExtractionProvider implements VacancyExtr
         $companyName = null;
         foreach ($result->proposals as $proposal) {
             if ('companyName' === $proposal->field && is_string($proposal->value)) {
-                $companyName = self::normalizeOrganizationName($proposal->value);
+                $companyName = OrganizationName::normalize($proposal->value);
                 break;
             }
         }
@@ -53,12 +54,7 @@ final readonly class LocalOllamaVacancyExtractionProvider implements VacancyExtr
 
         $result->proposals = array_values(array_filter(
             $result->proposals,
-            static fn (VacancyFieldProposal $proposal): bool => 'recruiterAgencyName' !== $proposal->field || !is_string($proposal->value) || self::normalizeOrganizationName($proposal->value) !== $companyName,
+            static fn (VacancyFieldProposal $proposal): bool => 'recruiterAgencyName' !== $proposal->field || !is_string($proposal->value) || OrganizationName::normalize($proposal->value) !== $companyName,
         ));
-    }
-
-    private static function normalizeOrganizationName(string $name): string
-    {
-        return mb_strtolower(preg_replace('/\s+/', ' ', trim($name)) ?? '');
     }
 }

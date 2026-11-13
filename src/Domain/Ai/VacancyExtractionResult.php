@@ -33,7 +33,7 @@ final class VacancyExtractionResult
                 if (!is_string($proposal->value)) {
                     throw new \LogicException('Organization proposal values must be strings.');
                 }
-                $organizationNames[$proposal->field] = self::normalizeOrganizationName($proposal->value);
+                $organizationNames[$proposal->field] = OrganizationName::normalize($proposal->value);
             }
         }
         if (isset($organizationNames['companyName'], $organizationNames['recruiterAgencyName']) && $organizationNames['companyName'] === $organizationNames['recruiterAgencyName']) {
@@ -42,10 +42,5 @@ final class VacancyExtractionResult
         foreach ($this->techStacks as $suggestion) {
             $suggestion->assertValid();
         }
-    }
-
-    private static function normalizeOrganizationName(string $name): string
-    {
-        return mb_strtolower(preg_replace('/\\s+/', ' ', trim($name)) ?? '');
     }
 }
