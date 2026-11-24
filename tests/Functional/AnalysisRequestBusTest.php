@@ -37,11 +37,14 @@ final class AnalysisRequestBusTest extends KernelTestCase
         self::assertInstanceOf(AnalysisRequest::class, $request);
 
         $entityManager->clear();
-        $outbox = $entityManager->getRepository(OutboxRecord::class)->findOneBy([
-            'entityId' => $request->id->toRfc4122(),
-            'eventType' => AnalysisRequested::class,
-        ]);
-        self::assertInstanceOf(OutboxRecord::class, $outbox);
+        $records = $entityManager->getRepository(OutboxRecord::class)->findBy(['entityId' => $request->id->toRfc4122()]);
+        $matchingRecords = array_values(array_filter(
+            $records,
+            static fn (OutboxRecord $record): bool => $record->getDomainEvent() instanceof LingodaDomainEvent
+                && $record->getDomainEvent()->event() instanceof AnalysisRequested,
+        ));
+        self::assertCount(1, $matchingRecords);
+        $outbox = $matchingRecords[0];
         $event = $outbox->getDomainEvent();
         self::assertInstanceOf(LingodaDomainEvent::class, $event);
         $event = $event->event();
