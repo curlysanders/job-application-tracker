@@ -20,8 +20,11 @@ It helps job seekers track vacancies, record application audit histories, manage
 - **Flysystem Resume Storage**: Local file abstraction layer for single active resume management (PDF/DOCX).
 - **Interview Scratchpad & Reminders**: Markdown rich text notes per vacancy and target `next_action_at` reminder dates.
 
+### Phase 2 (AI Foundation)
+- **Vacancy Extraction Review**: Submit pasted vacancy text for asynchronous extraction, review proposals with source excerpts, and choose which values pre-fill the vacancy form. The GLiNER provider is opt-in and has passed development-host corpus validation; NAS admission and an end-to-end NAS review are still pending. See [validation details](./docs/development/phase_2/tick-501-validation.md).
+
 ### Future Roadmap
-- **Phase 2 (Symfony AI)**: Automated vacancy text parsing, resume skills extraction, and AI-driven match scoring.
+- **Phase 2 (Symfony AI)**: Resume skills extraction and AI-driven match scoring.
 - **Phase 3 (Integrations & Cloud)**: Distance matrix commute calculation, OpenGraph URL scraping, Google OAuth SSO, and AWS S3 storage adapters.
 
 ---

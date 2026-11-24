@@ -7,22 +7,25 @@
     - Add Symfony AI Platform, Bundle, and provider configuration using the
       project's PHP configuration convention.
     - Define application ports for vacancy extraction and candidate fit; add
-      Infrastructure adapters for Ollama and test fakes.
-    - Configure local `qwen3:0.6b` inference with one concurrent request and a
-      2,048-token context, with the provider disabled unless explicitly enabled.
+      Infrastructure adapters for Ollama, GLiNER extraction, and test fakes.
+    - Configure opt-in local inference, including an Ollama adapter limited to
+      one concurrent request and a 2,048-token context.
     - Provide an optional resource-bounded CPU-inference Ollama Compose profile for
       local validation, keeping model traffic inside the Compose network.
     - Build a curated Dutch and English vacancy corpus and NAS benchmark that
       measures model memory, swap activity, app/worker health, latency, and
       structured extraction quality.
 - **Acceptance Criteria**:
-    - [ ] The app can select fake or local providers without leaking provider
+    - [x] The app can select fake or local providers without leaking provider
       details into domain code.
-    - [ ] Local inference is enabled only after the NAS benchmark shows no OOM
-      or swap pressure and keeps the application and worker healthy.
-    - [ ] All corpus responses validate against the extraction schema; the
-      documented accuracy threshold is met before local extraction is enabled.
-    - [ ] CI uses fakes or recorded responses and makes no real provider calls.
+    - [x] A development-host GLiNER run validates all 24 corpus responses and
+      meets the documented extraction accuracy thresholds.
+    - [x] CI uses fakes or recorded responses and makes no real provider calls.
+    - [ ] Before enabling GLiNER on the NAS, validate all corpus responses and
+      meet the accuracy thresholds in two runs with the exact deployment images.
+    - [ ] Before enabling GLiNER on the NAS, verify host memory headroom, swap,
+      OOM and restart behavior, and gateway, application, and worker health
+      throughout the admission benchmark.
 - **Validation**: [Provider boundary, corpus gate, and check commands](tick-501-validation.md).
 
 ---
@@ -60,11 +63,14 @@
       existing unsaved vacancy form. Company and recruiter records remain
       explicitly user-controlled.
 - **Acceptance Criteria**:
-    - [ ] Analysis never creates or changes a vacancy before the user submits
+    - [x] Analysis never creates or changes a vacancy before the user submits
       the existing vacancy form.
-    - [ ] Unsupported enum values, ungrounded values, and uncertain fields are
+    - [x] Unsupported enum values, ungrounded values, and uncertain fields are
       rejected or left empty.
-    - [ ] Users can see the source excerpt for every accepted proposal.
+    - [x] Users can see the source excerpt for every accepted proposal.
+    - [ ] After NAS admission and activation, exercise an authenticated
+      synthetic extraction through review and verify the review response.
+- **Validation**: [Vacancy extraction review and check commands](tick-601-validation.md).
 
 ---
 
