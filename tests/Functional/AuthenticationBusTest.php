@@ -28,11 +28,15 @@ final class AuthenticationBusTest extends KernelTestCase
 
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
         self::assertInstanceOf(EntityManagerInterface::class, $entityManager);
-        $outboxRecord = $entityManager->getRepository(OutboxRecord::class)->findOneBy([
-            'entityId' => $user->id->toRfc4122(),
-            'eventType' => UserRegistered::class,
-        ]);
-        self::assertInstanceOf(OutboxRecord::class, $outboxRecord);
+        $entityManager->clear();
+        $records = $entityManager->getRepository(OutboxRecord::class)->findBy(['entityId' => $user->id->toRfc4122()]);
+        $matchingRecords = array_values(array_filter(
+            $records,
+            static fn (OutboxRecord $record): bool => $record->getDomainEvent() instanceof LingodaDomainEvent
+                && $record->getDomainEvent()->event() instanceof UserRegistered,
+        ));
+        self::assertCount(1, $matchingRecords);
+        $outboxRecord = $matchingRecords[0];
         $event = $outboxRecord->getDomainEvent();
         self::assertInstanceOf(LingodaDomainEvent::class, $event);
         $event = $event->event();

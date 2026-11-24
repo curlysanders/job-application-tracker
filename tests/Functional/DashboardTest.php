@@ -11,6 +11,7 @@ use CurlySanders\JobApplicationTracker\Domain\Vacancy\SalaryRange;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\Vacancy;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\VacancyArchived;
 use CurlySanders\JobApplicationTracker\Domain\Vacancy\VacancyStatus;
+use CurlySanders\JobApplicationTracker\Infrastructure\Messaging\LingodaDomainEvent;
 use CurlySanders\JobApplicationTracker\Infrastructure\Persistence\Doctrine\IdentifierType;
 use CurlySanders\JobApplicationTracker\Infrastructure\Security\SecurityUser;
 use Doctrine\ORM\EntityManagerInterface;
@@ -173,11 +174,13 @@ final class DashboardTest extends WebTestCase
         $archivedVacancy = $this->entityManager()->find(Vacancy::class, $vacancy->id);
         self::assertInstanceOf(Vacancy::class, $archivedVacancy);
         self::assertTrue($archivedVacancy->archived);
-        $outboxRecord = $this->entityManager()->getRepository(OutboxRecord::class)->findOneBy([
-            'entityId' => $vacancy->id->toRfc4122(),
-            'eventType' => VacancyArchived::class,
-        ]);
-        self::assertInstanceOf(OutboxRecord::class, $outboxRecord);
+        $records = $this->entityManager()->getRepository(OutboxRecord::class)->findBy(['entityId' => $vacancy->id->toRfc4122()]);
+        $matchingRecords = array_values(array_filter(
+            $records,
+            static fn (OutboxRecord $record): bool => $record->getDomainEvent() instanceof LingodaDomainEvent
+                && $record->getDomainEvent()->event() instanceof VacancyArchived,
+        ));
+        self::assertCount(1, $matchingRecords);
 
         $crawler = $client->request('GET', '/?archived=1');
         $restoreToken = $crawler->filter('form[action$="/archive"] input[name="_token"]')->attr('value');
