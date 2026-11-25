@@ -6,12 +6,11 @@ namespace CurlySanders\JobApplicationTracker\Infrastructure\Http;
 
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
-final readonly class RequestTimingSubscriber implements EventSubscriberInterface
+final readonly class RequestTimingSubscriber
 {
     private const string START_ATTRIBUTE = '_app_request_started_at';
 
@@ -24,14 +23,7 @@ final readonly class RequestTimingSubscriber implements EventSubscriberInterface
     ) {
     }
 
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            KernelEvents::REQUEST => ['onRequest', 4096],
-            KernelEvents::RESPONSE => ['onResponse', -4096],
-        ];
-    }
-
+    #[\Symfony\Component\EventDispatcher\Attribute\AsEventListener(event: KernelEvents::REQUEST, priority: 4096)]
     public function onRequest(RequestEvent $event): void
     {
         if ($this->enabled && $event->isMainRequest()) {
@@ -39,6 +31,7 @@ final readonly class RequestTimingSubscriber implements EventSubscriberInterface
         }
     }
 
+    #[\Symfony\Component\EventDispatcher\Attribute\AsEventListener(event: KernelEvents::RESPONSE, priority: -4096)]
     public function onResponse(ResponseEvent $event): void
     {
         if (!$this->enabled || !$event->isMainRequest()) {
