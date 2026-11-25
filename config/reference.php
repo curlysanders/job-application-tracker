@@ -259,7 +259,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         gc_divisor?: scalar|Param|null,
  *         gc_probability?: scalar|Param|null,
  *         gc_maxlifetime?: scalar|Param|null,
- *         save_path?: scalar|Param|null, // Defaults to "%kernel.cache_dir%/sessions" if the "handler_id" option is not null.
+ *         save_path?: scalar|Param|null, // Defaults to "%kernel.share_dir%/sessions" if the "handler_id" option is not null.
  *         metadata_update_threshold?: int|Param, // Seconds to wait between 2 session metadata updates. // Default: 0
  *     },
  *     request?: bool|array{ // Request configuration
@@ -522,7 +522,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         },
  *         mock_response_factory?: scalar|Param|null, // `true` to always return empty 200 responses, or the id of the service to use to generate mock responses - which should be either an invokable or an iterable.
  *         scoped_clients?: array<string, Param|string|array{ // Default: []
- *             scope?: scalar|Param|null, // The regular expression that the request URL must match before adding the other options. When none is provided, the base URI is used instead.
+ *             scope?: scalar|Param|null, // The regular expression that the request URL must match before adding the other options. When none is provided, the base URI is used instead. The regular expression should end with a "/", for example "https://api\.github\.com/", so that it doesn't match other hosts.
  *             base_uri?: scalar|Param|null, // The URI to resolve relative URLs, following rules in RFC 3985, section 2.
  *             auth_basic?: scalar|Param|null, // An HTTP Basic authentication "username:password".
  *             auth_bearer?: scalar|Param|null, // A token enabling HTTP Bearer authorization.
@@ -1110,11 +1110,13 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *             class_metadata_factory_name?: scalar|Param|null, // Default: "Doctrine\\ORM\\Mapping\\ClassMetadataFactory"
  *             default_repository_class?: scalar|Param|null, // Default: "Doctrine\\ORM\\EntityRepository"
  *             auto_mapping?: scalar|Param|null, // Default: false
+ *             auto_discover_entities?: bool|Param|null, // Registers all entity classes discovered by the container scan, removing the need for explicit "mappings". When not set, enabled if neither "mappings" nor "auto_mapping" is configured and Symfony 8.2 and doctrine/orm 3.6 are available. // Default: null
  *             naming_strategy?: scalar|Param|null, // Default: "doctrine.orm.naming_strategy.default"
  *             quote_strategy?: scalar|Param|null, // Default: "doctrine.orm.quote_strategy.default"
  *             typed_field_mapper?: scalar|Param|null, // Default: "doctrine.orm.typed_field_mapper.default"
  *             entity_listener_resolver?: scalar|Param|null, // Default: null
  *             fetch_mode_subselect_batch_size?: scalar|Param|null,
+ *             use_schema_editor_api?: bool|Param|null, // Set to "true" or "false" to explicitly opt in or out of the schema editor API for schema generation. Requires doctrine/dbal 4.5 or higher and doctrine/orm 3.8 or higher. // Default: null
  *             repository_factory?: scalar|Param|null, // Default: "doctrine.orm.container_repository_factory"
  *             schema_ignore_classes?: list<scalar|Param|null>,
  *             validate_xml_mapping?: bool|Param, // Set to "true" to opt-in to the new mapping driver mode that was added in Doctrine ORM 2.14 and will be mandatory in ORM 3.0. See https://github.com/doctrine/orm/pull/6728. // Default: false
@@ -1152,7 +1154,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *                 mapping?: scalar|Param|null, // Default: true
  *                 type?: scalar|Param|null,
  *                 dir?: scalar|Param|null,
- *                 alias?: scalar|Param|null,
+ *                 alias?: scalar|Param|null, // Deprecated: The "doctrine.orm.entity_managers..mappings..alias.alias" option is deprecated and will be removed in DoctrineBundle 4.0, as Doctrine ORM no longer supports entity namespace aliases.
  *                 prefix?: scalar|Param|null,
  *                 is_bundle?: bool|Param,
  *             }>,
@@ -1884,7 +1886,8 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         },
  *         huggingface?: array{
  *             api_key?: string|Param,
- *             provider?: string|Param, // Default: "hf-inference"
+ *             provider?: string|Param, // Inference provider for chat completion, Hugging Face picks one when null // Default: null
+ *             api_catalog?: bool|Param, // Resolve models through the Hugging Face Hub API instead of the static model catalog // Default: false
  *             http_client?: string|Param, // Service ID of the HTTP client to use // Default: "http_client"
  *         },
  *         lmstudio?: array{
@@ -2098,6 +2101,8 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *             index_name?: string|Param,
  *             vector_field?: string|Param, // Default: "vector"
  *             bulk_write?: bool|Param, // Default: false
+ *             dimensions?: int|Param, // Number of dimensions of the vector index created by "ai:store:setup"
+ *             similarity?: "euclidean"|"cosine"|"dotProduct"|Param, // Similarity function of the vector index created by "ai:store:setup"
  *             setup_options?: array{
  *                 fields?: mixed, // Default: []
  *             },
@@ -2129,6 +2134,12 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *             namespace?: string|Param,
  *             filter?: list<scalar|Param|null>,
  *             top_k?: int|Param,
+ *             setup_options?: array{
+ *                 dimension?: int|Param,
+ *                 metric?: "cosine"|"euclidean"|"dotproduct"|Param,
+ *                 cloud?: string|Param,
+ *                 region?: string|Param,
+ *             },
  *         }>,
  *         postgres?: array<string, array{ // Default: []
  *             dsn?: string|Param,
@@ -2142,8 +2153,8 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *             setup_options?: array{
  *                 vector_type?: string|Param, // Default: "vector"
  *                 vector_size?: int|Param, // Default: 1536
- *                 index_method?: string|Param, // Default: "ivfflat"
- *                 index_opclass?: string|Param, // Default: "vector_cosine_ops"
+ *                 index_method?: string|Param, // The pgvector index method, "hnsw" by default.
+ *                 index_opclass?: string|Param, // The operator class of the index, the one of the distance by default (e.g. "vector_l2_ops").
  *             },
  *         }>,
  *         qdrant?: array<string, array{ // Default: []
@@ -2161,6 +2172,9 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *             index_name?: string|Param,
  *             key_prefix?: string|Param, // Default: "vector:"
  *             distance?: "COSINE"|"L2"|"IP"|Param, // Distance metric to use for vector similarity search // Default: "COSINE"
+ *             setup_options?: array{
+ *                 vector_size?: int|Param,
+ *             },
  *         }>,
  *         s3vectors?: array<string, array{ // Default: []
  *             client?: string|Param, // Service reference to an existing S3VectorsClient
@@ -2168,6 +2182,10 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *             vector_bucket_name?: string|Param,
  *             index_name?: string|Param,
  *             filter?: list<mixed>,
+ *             setup_options?: array{
+ *                 dimension?: int|Param,
+ *                 distance_metric?: "cosine"|"euclidean"|Param,
+ *             },
  *             top_k?: int|Param, // Default number of results to return // Default: 3
  *         }>,
  *         sqlite?: array<string, array{ // Default: []
@@ -2200,6 +2218,9 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *             strategy?: string|Param, // Default: "cosine"
  *             dimensions?: int|Param, // Default: 1536
  *             namespaced_user?: bool|Param,
+ *             setup_options?: array{
+ *                 force_database_creation?: bool|Param, // Create the namespace and database as well, SurrealDB 3 no longer creates them on first use.
+ *             },
  *         }>,
  *         typesense?: array<string, array{ // Default: []
  *             endpoint?: string|Param,

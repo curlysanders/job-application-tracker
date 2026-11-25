@@ -6,7 +6,7 @@ namespace CurlySanders\JobApplicationTracker\Infrastructure\Http;
 
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\Attribute\Target;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
@@ -14,7 +14,7 @@ use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 
-final readonly class CrawlerProtectionSubscriber implements EventSubscriberInterface
+final readonly class CrawlerProtectionSubscriber
 {
     private const string ROBOTS_DIRECTIVE = 'noindex, nofollow, noarchive, nosnippet';
 
@@ -33,14 +33,7 @@ final readonly class CrawlerProtectionSubscriber implements EventSubscriberInter
     ) {
     }
 
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            KernelEvents::REQUEST => ['limitAnonymousPublicNavigation', 0],
-            KernelEvents::RESPONSE => 'addRobotsDirective',
-        ];
-    }
-
+    #[AsEventListener(event: KernelEvents::REQUEST)]
     public function limitAnonymousPublicNavigation(RequestEvent $event): void
     {
         if (!$event->isMainRequest() || Request::METHOD_GET !== $event->getRequest()->getMethod() || null !== $this->security->getUser()) {
@@ -61,6 +54,7 @@ final readonly class CrawlerProtectionSubscriber implements EventSubscriberInter
         throw new TooManyRequestsHttpException(max(1, $limit->getRetryAfter()->getTimestamp() - time()), 'Too many requests. Please try again shortly.');
     }
 
+    #[AsEventListener(event: KernelEvents::RESPONSE)]
     public function addRobotsDirective(ResponseEvent $event): void
     {
         if ($event->isMainRequest()) {
