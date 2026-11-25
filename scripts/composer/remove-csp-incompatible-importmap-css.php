@@ -1,12 +1,12 @@
 <?php
 
 /**
- * Keep Tom Select's styles as same-origin stylesheet links.
+ * Keep Flowbite and Tom Select styles as same-origin stylesheet links.
  *
- * Symfony Flex adds these CSS modules from UX Autocomplete's package metadata
- * during Composer installs. AssetMapper would then expose them as data URLs in
+ * Package metadata may add these CSS modules during dependency updates.
+ * AssetMapper would then expose them as data URLs in
  * the import map, which conflicts with this application's strict CSP. The
- * active stylesheet is linked from templates/base.html.twig instead.
+ * stylesheets are linked from templates/base.html.twig instead.
  */
 $path = __DIR__.'/../../importmap.php';
 $contents = file_get_contents($path);
@@ -16,6 +16,7 @@ if (false === $contents) {
 }
 
 foreach ([
+    'flowbite/dist/flowbite.min.css',
     'tom-select/dist/css/tom-select.default.css',
     'tom-select/dist/css/tom-select.default.min.css',
     'tom-select/dist/css/tom-select.bootstrap4.css',
