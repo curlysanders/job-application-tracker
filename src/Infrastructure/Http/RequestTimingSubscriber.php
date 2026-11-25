@@ -6,6 +6,7 @@ namespace CurlySanders\JobApplicationTracker\Infrastructure\Http;
 
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -23,7 +24,7 @@ final readonly class RequestTimingSubscriber
     ) {
     }
 
-    #[\Symfony\Component\EventDispatcher\Attribute\AsEventListener(event: KernelEvents::REQUEST, priority: 4096)]
+    #[AsEventListener(event: KernelEvents::REQUEST, priority: 4096)]
     public function onRequest(RequestEvent $event): void
     {
         if ($this->enabled && $event->isMainRequest()) {
@@ -31,7 +32,7 @@ final readonly class RequestTimingSubscriber
         }
     }
 
-    #[\Symfony\Component\EventDispatcher\Attribute\AsEventListener(event: KernelEvents::RESPONSE, priority: -4096)]
+    #[AsEventListener(event: KernelEvents::RESPONSE, priority: -4096)]
     public function onResponse(ResponseEvent $event): void
     {
         if (!$this->enabled || !$event->isMainRequest()) {
