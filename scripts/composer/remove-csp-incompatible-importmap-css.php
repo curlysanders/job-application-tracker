@@ -17,6 +17,7 @@ if (false === $contents) {
 
 foreach ([
     'tom-select/dist/css/tom-select.default.css',
+    'tom-select/dist/css/tom-select.default.min.css',
     'tom-select/dist/css/tom-select.bootstrap4.css',
     'tom-select/dist/css/tom-select.bootstrap5.css',
 ] as $package) {

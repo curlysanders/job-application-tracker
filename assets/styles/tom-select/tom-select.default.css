@@ -1,5 +1,5 @@
 /**
- * tom-select.css (v2.6.2)
+ * tom-select.css (v2.7.0)
  * Copyright (c) contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
@@ -215,6 +215,7 @@
 }
 .plugin-clear_button .clear-button {
   opacity: 0;
+  pointer-events: none;
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
@@ -229,6 +230,7 @@
 }
 .plugin-clear_button.focus.has-items .clear-button, .plugin-clear_button:not(.disabled):hover.has-items .clear-button {
   opacity: 1;
+  pointer-events: auto;
 }
 
 .ts-wrapper .dropdown-header {
